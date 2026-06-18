@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           closeMobileMenu();
         }
       } catch (err) {
-        console.warn('Invalid scroll target:', href);
+        // scroll target not found
       }
     });
   });

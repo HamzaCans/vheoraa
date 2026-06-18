@@ -175,6 +175,17 @@ app.get('*.html', (req, res, next) => {
   }
 });
 
+app.use((req, res) => {
+  const filePath = path.join(__dirname, '..', req.path);
+  if (req.path.endsWith('.html') && !require('fs').existsSync(filePath)) {
+    res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+  } else if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: 'API endpoint bulunamadı' });
+  } else {
+    res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+  }
+});
+
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Geçersiz JSON verisi' });
