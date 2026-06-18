@@ -1,0 +1,11 @@
+const D = require('better-sqlite3');
+const d = new D(__dirname + '/vheora.db');
+const tables = d.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all();
+console.log('Tables:', tables.map(t => t.name));
+const cols = d.prepare("PRAGMA table_info(products)").all();
+console.log('Products columns:', cols.map(c => c.name));
+const orderCols = d.prepare("PRAGMA table_info(orders)").all();
+console.log('Orders columns:', orderCols.map(c => c.name));
+const stockMovCols = d.prepare("PRAGMA table_info(stock_movements)").all();
+console.log('Stock movements columns:', stockMovCols.map(c => c.name));
+d.close();

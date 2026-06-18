@@ -1,0 +1,105 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "vheora.co@gmail.com",
+      "password": "$2a$10$m4in5ZhWAdAEndCYrp48kOupQ/8Rjuk/OVoled9cp5wqtYwVPCswm",
+      "created_at": "2026-06-17T12:06:35.532Z"
+    }
+  ],
+  "products": [],
+  "messages": [
+    {
+      "id": 1,
+      "first_name": "Test",
+      "last_name": "User",
+      "email": "test@test.com",
+      "subject": "",
+      "message": "Test mesaj",
+      "type": "contact",
+      "product_name": "",
+      "phone": "",
+      "is_read": 0,
+      "created_at": "2026-06-17T12:09:08.175Z"
+    },
+    {
+      "id": 2,
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "subject": "Teklif Talebi: Test �r�n",
+      "message": "Telefon: 05551234567",
+      "type": "quote",
+      "product_name": "Test �r�n",
+      "phone": "05551234567",
+      "is_read": 0,
+      "created_at": "2026-06-17T12:09:08.180Z"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": 1,
+      "name": "Elif Yılmaz",
+      "location": "İstanbul, Nişantaşı",
+      "text": "Nişan yüzüğümüzü buradan aldık, parmağımdaki ışıltısı her gün beni mutlu ediyor. İşçilik gerçekten çok ince, beklediğimize değdi.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-06-15T12:06:35.532Z"
+    },
+    {
+      "id": 2,
+      "name": "Sarah Anderson",
+      "location": "London, Chelsea",
+      "text": "The craftsmanship is simply breathtaking. My engagement ring is a true masterpiece.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-06-12T12:06:35.532Z"
+    },
+    {
+      "id": 3,
+      "name": "Mehmet Çelik",
+      "location": "Antalya, Lara",
+      "text": "Annem için özel bir hediye yaptırdık, kutusunu açtığı anki mutluluğu paha biçilemezdi. Gerçekten işinin ehli bir ekip.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-06-09T12:06:35.532Z"
+    },
+    {
+      "id": 4,
+      "name": "Sophie Müller",
+      "location": "Munich, Schwabing",
+      "text": "Die Handwerkskunst ist einfach atemberaubend. Ein wahres Meisterwerk.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-06-05T12:06:35.532Z"
+    },
+    {
+      "id": 5,
+      "name": "Zeynep Demir",
+      "location": "Ankara, Çankaya",
+      "text": "Eşim için yaptırdığım bileklik tam zamanında yetişti. Zarif ve modern duruşuyla her kıyafete uyum sağlıyor.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-06-02T12:06:35.532Z"
+    },
+    {
+      "id": 6,
+      "name": "James Wilson",
+      "location": "New York, Manhattan",
+      "text": "Exceptional quality and fast global shipping. Highly recommend VHEORA.",
+      "rating": 5,
+      "is_approved": 1,
+      "created_at": "2026-05-28T12:06:35.532Z"
+    },
+    {
+      "id": 7,
+      "name": "Test User",
+      "location": "Istanbul",
+      "text": "Harika bir deneyim!",
+      "rating": 5,
+      "is_approved": 0,
+      "created_at": "2026-06-17T12:09:08.187Z"
+    }
+  ]
+}

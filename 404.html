@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sayfa bulunamadı | VHEORA">
+  <meta name="robots" content="noindex, nofollow">
+  <title>404 - Sayfa Bulunamadı | VHEORA</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    body {
+      background: var(--color-dark);
+      color: var(--color-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+
+    }
+    .error-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .error-content {
+      position: relative;
+      z-index: 1;
+    }
+    .error-bg-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 600px;
+      height: 600px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(212, 168, 83, 0.05), transparent 70%);
+      pointer-events: none;
+      animation: error-pulse 4s ease-in-out infinite;
+    }
+    @keyframes error-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    }
+    .error-code {
+      font-family: var(--font-display);
+      font-size: clamp(6rem, 15vw, 12rem);
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 16px;
+      position: relative;
+      animation: fadeInUp 0.8s 0.2s both;
+      letter-spacing: clamp(0.5rem, 3vw, 2rem);
+    }
+    .error-code span {
+      display: inline-block;
+      animation: error-char-float 2s ease-in-out infinite;
+      animation-delay: calc(var(--i, 0) * 0.15s);
+    }
+    @keyframes error-char-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .error-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 600;
+      margin-bottom: 16px;
+      animation: fadeInUp 0.8s 0.4s both;
+    }
+    .error-text {
+      color: var(--color-gray);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin-bottom: 40px;
+      line-height: 1.8;
+      animation: fadeInUp 0.8s 0.6s both;
+    }
+    .error-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.8s 0.8s both;
+    }
+    .error-diamond {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 24px;
+      position: relative;
+      animation: fadeInUp 0.8s 0.1s both;
+    }
+    .error-diamond::before {
+      content: '◆';
+      font-size: 2rem;
+      color: var(--color-gold);
+      opacity: 0.3;
+    }
+    .error-diamond::after {
+      content: '◇';
+      font-size: 2rem;
+      color: var(--color-gold-light);
+      position: absolute;
+      top: 0;
+      left: 0;
+      animation: diamond-spin 6s linear infinite;
+    }
+    @keyframes diamond-spin {
+      0% { transform: rotate(0deg) scale(0.8); opacity: 0.5; }
+      50% { transform: rotate(180deg) scale(1); opacity: 1; }
+      100% { transform: rotate(360deg) scale(0.8); opacity: 0.5; }
+    }
+    @media (max-width: 480px) {
+      .error-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+      }
+      .error-actions .btn-primary,
+      .error-actions .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="error-canvas" id="errorCanvas"></canvas>
+  <div class="error-content">
+    <div class="error-bg-glow"></div>
+    <div class="error-diamond"></div>
+    <div class="error-code">
+      <span style="--i:0">4</span>
+      <span style="--i:1">0</span>
+      <span style="--i:2">4</span>
+    </div>
+    <h1 class="error-title">Sayfa Bulunamadı</h1>
+    <p class="error-text">
+      Aradığınız sayfa kaldırılmış, adı değiştirilmiş veya geçici olarak kullanıma kapalı olabilir.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn-primary">Ana Sayfaya Dön</a>
+      <a href="collection.html" class="btn-secondary">Koleksiyonu Keşfet</a>
+    </div>
+  </div>
+
+  <script>
+    // Particles
+    const c = document.getElementById('errorCanvas');
+    if (c) {
+      const ctx = c.getContext('2d');
+      const p = [];
+      const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight; };
+      resize(); window.addEventListener('resize', resize);
+      class P {
+        constructor() {
+          this.x = Math.random() * c.width;
+          this.y = Math.random() * c.height;
+          this.s = Math.random() * 2 + 0.5;
+          this.sx = (Math.random() - 0.5) * 0.2;
+          this.sy = (Math.random() - 0.5) * 0.2 - 0.1;
+          this.o = Math.random() * 0.4 + 0.05;
+          this.cs = [{ r: 212, g: 168, b: 83 }, { r: 240, g: 194, b: 127 }, { r: 255, g: 255, b: 255 }];
+          this.c = this.cs[Math.floor(Math.random() * this.cs.length)];
+        }
+        u() {
+          this.x += this.sx; this.y += this.sy;
+          if (this.x < -10) this.x = c.width + 10;
+          if (this.x > c.width + 10) this.x = -10;
+          if (this.y < -10) this.y = c.height + 10;
+          if (this.y > c.height + 10) this.y = -10;
+        }
+        d() {
+          ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${this.o})`; ctx.fill();
+        }
+      }
+      for (let i = 0; i < 30; i++) p.push(new P());
+      const loop = () => { ctx.clearRect(0, 0, c.width, c.height); p.forEach(pp => { pp.u(); pp.d(); }); requestAnimationFrame(loop); };
+      loop();
+    }
+  </script>
+</body>
+</html>

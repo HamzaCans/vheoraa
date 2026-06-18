@@ -1,0 +1,1448 @@
+/* ========================================
+   VHEORA.CO — Interactive JavaScript
+   Animations, Particles & Interactivity
+   ======================================== */
+
+const isFile = window.location.protocol === 'file:';const isLocal = ['localhost','127.0.0.1','::1'].includes(window.location.hostname);const API_URL = (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : '';
+
+// ========== SERVICE WORKER REGISTRATION ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ========== CONFETTI EFFECT ==========
+function createConfetti(anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const colors = ['#d4a853', '#f0c27f', '#b8912e', '#ffffff', '#e8b94a'];
+  for (let i = 0; i < 12; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.cssText = `
+      position: fixed;
+      width: ${Math.random() * 6 + 3}px;
+      height: ${Math.random() * 6 + 3}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '1px'};
+      pointer-events: none;
+      z-index: 99999;
+      left: ${rect.left + rect.width / 2}px;
+      top: ${rect.top + rect.height / 2}px;
+    `;
+    document.body.appendChild(confetti);
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = Math.random() * 100 + 50;
+    const x = Math.cos(angle) * velocity;
+    const y = Math.sin(angle) * velocity - 80;
+    confetti.animate([
+      { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
+      { transform: `translate(${x}px, ${y}px) scale(0.5) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+    ], {
+      duration: 800 + Math.random() * 400,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    }).onfinish = () => confetti.remove();
+  }
+}
+
+// ========== LOADING SCREEN (immediate) ==========
+(function() {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+
+  const statusEl = document.getElementById('loaderStatus');
+  const statusTexts = [
+    'Crafting elegance...',
+    'Polishing diamonds...',
+    'Setting gemstones...',
+    'Forging gold...',
+    'Preparing your experience...',
+  ];
+
+  if (statusEl) {
+    let si = 0;
+    const cycleStatus = () => {
+      if (si < statusTexts.length) {
+        statusEl.textContent = statusTexts[si];
+        statusEl.style.opacity = '0';
+        requestAnimationFrame(() => { statusEl.style.opacity = '1'; });
+        si++;
+      }
+    };
+    cycleStatus();
+    const statusInterval = setInterval(() => {
+      if (loader.classList.contains('hidden')) {
+        clearInterval(statusInterval);
+        return;
+      }
+      cycleStatus();
+    }, 600);
+    setTimeout(() => { clearInterval(statusInterval); }, 2800);
+  }
+
+  // Loader Canvas Particles
+  const canvas = document.getElementById('loaderCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let lParticles = [];
+
+    function resizeLoaderCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeLoaderCanvas();
+    window.addEventListener('resize', resizeLoaderCanvas);
+
+    class LPart {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.speedY = (Math.random() - 0.5) * 0.2 - 0.1;
+        this.opacity = Math.random() * 0.6 + 0.1;
+        this.life = 0;
+        this.maxLife = Math.random() * 200 + 100;
+        const cs = [
+          { r: 212, g: 168, b: 83 },
+          { r: 240, g: 194, b: 127 },
+          { r: 255, g: 255, b: 255 },
+        ];
+        this.color = cs[Math.floor(Math.random() * cs.length)];
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.life++;
+        this.opacity = Math.max(0, this.opacity - 0.002);
+        if (this.life > this.maxLife || this.opacity <= 0) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+        ctx.fill();
+        if (this.size > 1) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.1})`;
+          ctx.fill();
+        }
+      }
+    }
+
+    const count = Math.min(40, Math.floor((canvas.width * canvas.height) / 15000) || 20);
+    for (let i = 0; i < count; i++) lParticles.push(new LPart());
+
+    function animateLoader() {
+      if (loader.classList.contains('hidden')) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      lParticles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateLoader);
+    }
+    animateLoader();
+  }
+
+  const hideLoader = () => {
+    if (!loader.classList.contains('hidden')) {
+      loader.classList.add('hidden');
+      setTimeout(() => { loader.style.display = 'none'; }, 800);
+    }
+  };
+
+  window.addEventListener('load', () => {
+    const delay = window.innerWidth <= 768 ? 1000 : 1500;
+    setTimeout(hideLoader, delay);
+  });
+
+  setTimeout(hideLoader, 3500);
+})();
+
+// ========== TOAST NOTIFICATION SYSTEM ==========
+function showToast(title, message, type = 'success', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const icons = { success: '✓', error: '✗', info: 'ℹ' };
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div class="toast-icon ${type}">${icons[type] || 'ℹ'}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+    <button class="toast-close" onclick="(function(b){b.parentElement.classList.add('toast-out');setTimeout(()=>b.parentElement.remove(),300)})(this)">✕</button>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+  // ========== LOAD DYNAMIC SITE SETTINGS ==========
+  try {
+    const res = await fetch(`${API_URL}/api/settings/public`);
+    const siteSettings = await res.json();
+    if (siteSettings.site_hero_title) {
+      const heroTitle = document.querySelector('.hero-title');
+      if (heroTitle) heroTitle.innerHTML = siteSettings.site_hero_title;
+    }
+    if (siteSettings.site_hero_desc) {
+      const heroDesc = document.querySelector('.hero-description');
+      if (heroDesc) heroDesc.textContent = siteSettings.site_hero_desc;
+    }
+    if (siteSettings.site_about_text_1) {
+      const aboutTexts = document.querySelectorAll('.about-text');
+      if (aboutTexts[0]) aboutTexts[0].textContent = siteSettings.site_about_text_1;
+    }
+    if (siteSettings.site_about_text_2) {
+      const aboutTexts = document.querySelectorAll('.about-text');
+      if (aboutTexts[1]) aboutTexts[1].textContent = siteSettings.site_about_text_2;
+    }
+    if (siteSettings.site_stat_country) {
+      const statEl = document.querySelector('.stat-item:nth-child(1) .stat-number');
+      if (statEl) { statEl.setAttribute('data-count', siteSettings.site_stat_country); statEl.textContent = '0'; }
+    }
+    if (siteSettings.site_stat_customer) {
+      const statEl = document.querySelector('.stat-item:nth-child(2) .stat-number');
+      if (statEl) { statEl.setAttribute('data-count', siteSettings.site_stat_customer); statEl.textContent = '0'; }
+    }
+    if (siteSettings.site_stat_collection) {
+      const statEl = document.querySelector('.stat-item:nth-child(3) .stat-number');
+      if (statEl) { statEl.setAttribute('data-count', siteSettings.site_stat_collection); statEl.textContent = '0'; }
+    }
+    if (siteSettings.site_contact_address) {
+      const els = document.querySelectorAll('.contact-item-value');
+      if (els[0]) els[0].textContent = siteSettings.site_contact_address;
+    }
+    if (siteSettings.site_contact_email) {
+      const els = document.querySelectorAll('.contact-item-value');
+      if (els[1]) els[1].textContent = siteSettings.site_contact_email;
+    }
+    if (siteSettings.site_contact_phone) {
+      const els = document.querySelectorAll('.contact-item-value');
+      if (els[2]) els[2].textContent = siteSettings.site_contact_phone;
+    }
+    if (siteSettings.site_contact_hours) {
+      const els = document.querySelectorAll('.contact-item-value');
+      if (els[3]) els[3].innerHTML = siteSettings.site_contact_hours.replace(/\n/g, '<br>');
+    }
+    if (siteSettings.site_badge_text) {
+      const badge = document.querySelector('.hero-badge');
+      if (badge) badge.innerHTML = '<span class="dot"></span> ' + siteSettings.site_badge_text;
+    }
+  } catch (_) {}
+
+  // ========== NAVBAR SCROLL EFFECT & SCROLL SPY ==========
+  const navbar = document.getElementById('navbar');
+  const navLinks = document.getElementById('navLinks');
+  const mainNavLinks = navLinks
+    ? navLinks.querySelectorAll('a:not(.nav-cta):not(.lang-dropdown a)')
+    : [];
+  const navSectionIds = ['hero', 'about', 'services', 'collection', 'testimonials', 'contact'];
+
+  function getNavOffset() {
+    return navbar ? navbar.offsetHeight + 16 : 88;
+  }
+
+  function syncNavOffset() {
+    const offset = getNavOffset();
+    document.documentElement.style.setProperty('--nav-offset', `${offset}px`);
+    return offset;
+  }
+
+  function updateActiveNavLink() {
+    const offset = syncNavOffset();
+    const scrollPos = window.pageYOffset + offset + 4;
+    let activeId = navSectionIds[0];
+
+    navSectionIds.forEach(id => {
+      const section = document.getElementById(id);
+      if (section && section.offsetTop <= scrollPos) {
+        activeId = id;
+      }
+    });
+
+    mainNavLinks.forEach(link => {
+      link.classList.toggle('active-link', link.getAttribute('href') === `#${activeId}`);
+    });
+  }
+
+  let scrollTicking = false;
+
+  const navProgress = document.getElementById('navProgress');
+
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+
+    if (currentScroll > 40) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+
+    // Scroll progress bar
+    if (navProgress) {
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = scrollHeight > 0 ? (currentScroll / scrollHeight) * 100 : 0;
+      navProgress.style.width = `${Math.min(progress, 100)}%`;
+    }
+
+    if (!scrollTicking) {
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        updateActiveNavLink();
+        scrollTicking = false;
+      });
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    syncNavOffset();
+    updateActiveNavLink();
+  });
+
+  syncNavOffset();
+  updateActiveNavLink();
+
+  // ========== MOBILE MENU ==========
+  const menuToggle = document.getElementById('menuToggle');
+  const navOverlay = document.getElementById('navOverlay');
+
+  function setMobileMenu(open) {
+    menuToggle.classList.toggle('active', open);
+    navLinks.classList.toggle('active', open);
+    if (navOverlay) navOverlay.classList.toggle('active', open);
+    document.body.classList.toggle('menu-open', open);
+    menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (navOverlay) navOverlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+  }
+
+  function closeMobileMenu() {
+    setMobileMenu(false);
+  }
+
+  menuToggle.addEventListener('click', () => {
+    setMobileMenu(!navLinks.classList.contains('active'));
+  });
+
+  if (navOverlay) {
+    navOverlay.addEventListener('click', closeMobileMenu);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+      closeMobileMenu();
+    }
+  });
+
+  // Close mobile menu on main link click (but not on language selector)
+  navLinks.querySelectorAll('a:not(.lang-dropdown a)').forEach(link => {
+    link.addEventListener('click', closeMobileMenu);
+  });
+
+  // ========== SMOOTH SCROLL ==========
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      
+      // Ignore if href is just "#" or empty
+      if (href === '#' || href === '') return;
+
+      e.preventDefault();
+      try {
+        const target = document.querySelector(href);
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.pageYOffset - getNavOffset();
+          window.scrollTo({ top, behavior: 'smooth' });
+          closeMobileMenu();
+        }
+      } catch (err) {
+        console.warn('Invalid scroll target:', href);
+      }
+    });
+  });
+
+  // ========== SCROLL REVEAL ANIMATIONS ==========
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+
+  // ========== SHARE EXPERIENCE FORM ==========
+  const shareForm = document.getElementById('shareForm');
+  if (shareForm) {
+    shareForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = shareForm.querySelector('.form-submit');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<span>⌛ Yorumunuz Gönderiliyor...</span>';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_URL}/api/testimonial`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${document.getElementById('revFirstName').value} ${document.getElementById('revLastName').value}`,
+            location: `${document.getElementById('revCountry').value}, ${document.getElementById('revCity').value}`,
+            text: document.getElementById('revComment').value
+          })
+        });
+
+        if (res.ok) {
+          submitBtn.innerHTML = '<span>✓ Teşekkürler! Yorumunuz onaydan sonra yayınlanacak.</span>';
+          submitBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+          shareForm.reset();
+          showToast('Teşekkürler!', 'Yorumunuz onaydan sonra yayınlanacak.', 'success');
+        } else {
+          const data = await res.json();
+          showToast('Hata', data.error || 'Bir hata oluştu', 'error');
+          submitBtn.innerHTML = originalText;
+          submitBtn.style.background = '';
+          submitBtn.disabled = false;
+          return;
+        }
+      } catch (err) {
+        showToast('Bağlantı Hatası', 'Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.style.background = '';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.style.background = '';
+        submitBtn.disabled = false;
+      }, 3000);
+    });
+  }
+
+
+  // Staggered reveal for grid children
+  document.querySelectorAll('.services-grid, .featured-grid, .about-stats').forEach(grid => {
+    const items = grid.querySelectorAll('.reveal');
+    items.forEach((item, i) => {
+      item.style.setProperty('--reveal-delay', `${i * 0.1}s`);
+    });
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.12,
+    rootMargin: '0px 0px -60px 0px'
+  });
+
+  revealElements.forEach(el => revealObserver.observe(el));
+
+  // ========== PARALLAX SCROLL EFFECTS ==========
+  const parallaxElements = document.querySelectorAll('.about-visual, .hero-visual, .about-image-accent');
+  let parallaxTicking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!parallaxTicking) {
+      requestAnimationFrame(() => {
+        const scrollY = window.pageYOffset;
+        parallaxElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            const speed = parseFloat(el.getAttribute('data-parallax-speed') || '0.08');
+            const yOffset = (rect.top - window.innerHeight / 2) * speed;
+            el.style.transform = el.classList.contains('revealed') 
+              ? `translateY(${yOffset}px)` 
+              : '';
+          }
+        });
+        parallaxTicking = false;
+      });
+      parallaxTicking = true;
+    }
+  }, { passive: true });
+
+  // ========== COUNTER ANIMATION ==========
+  const statNumbers = document.querySelectorAll('.stat-number[data-count]');
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.getAttribute('data-count'));
+        if (!isNaN(target)) {
+          animateCounter(el, target);
+        }
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statNumbers.forEach(el => counterObserver.observe(el));
+
+  function animateCounter(el, target) {
+    if (target <= 0) {
+      el.textContent = '0+';
+      return;
+    }
+
+    const duration = 2000;
+    const step = target / (duration / 16);
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        current = target;
+        clearInterval(timer);
+      }
+
+      if (target >= 1000) {
+        el.textContent = Math.floor(current).toLocaleString() + '+';
+      } else {
+        el.textContent = Math.floor(current) + '+';
+      }
+    }, 16);
+  }
+
+  // ========== 3D TILT ON PRODUCT CARDS ==========
+  const tiltCards = document.querySelectorAll('.product-card');
+  const isTouchDevice3 = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+  if (!isTouchDevice3) {
+    tiltCards.forEach(card => {
+      const inner = card.querySelector('.product-card-inner');
+      if (!inner) return;
+
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        inner.style.transform = `translateY(-8px) perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+        card.style.setProperty('--mouse-x', `${(e.clientX - rect.left) / rect.width * 100}%`);
+        card.style.setProperty('--mouse-y', `${(e.clientY - rect.top) / rect.height * 100}%`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        inner.style.transform = '';
+      });
+    });
+  }
+
+  // ========== HERO PARTICLE CANVAS (Enhanced) ==========
+  const canvas = document.getElementById('heroCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrame;
+    let mouseXP = -1000, mouseYP = -1000;
+    let mouseActive = false;
+
+    function resizeCanvas() {
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        canvas.width = hero.offsetWidth;
+        canvas.height = hero.offsetHeight;
+      }
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initParticles();
+    });
+
+    // Track mouse for interaction
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseXP = e.clientX - rect.left;
+      mouseYP = e.clientY - rect.top;
+      mouseActive = true;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      mouseActive = false;
+    });
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * (canvas.width || 800);
+        this.y = Math.random() * (canvas.height || 600);
+        this.size = Math.random() * 2.5 + 0.5;
+        this.baseSize = this.size;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.fadeDirection = Math.random() > 0.5 ? 1 : -1;
+        this.fadeSpeed = Math.random() * 0.005 + 0.002;
+
+        const colors = [
+          { r: 212, g: 168, b: 83 },
+          { r: 240, g: 194, b: 127 },
+          { r: 255, g: 255, b: 255 },
+          { r: 184, g: 145, b: 46 },
+        ];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.isStar = Math.random() < 0.08;
+        this.angle = Math.random() * Math.PI * 2;
+        this.sparklePhase = Math.random() * Math.PI * 2;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.opacity += this.fadeDirection * this.fadeSpeed;
+
+        if (this.opacity >= 0.6) this.fadeDirection = -1;
+        if (this.opacity <= 0.05) this.fadeDirection = 1;
+
+        // Mouse interaction: gentle attraction/repulsion
+        if (mouseActive) {
+          const dx = this.x - mouseXP;
+          const dy = this.y - mouseYP;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 200 && dist > 0) {
+            const force = (200 - dist) / 200 * 0.02;
+            this.x += dx / dist * force;
+            this.y += dy / dist * force;
+            this.size = this.baseSize + (200 - dist) / 200 * 1.5;
+          } else {
+            this.size += (this.baseSize - this.size) * 0.05;
+          }
+        } else {
+          this.size += (this.baseSize - this.size) * 0.05;
+        }
+
+        this.angle += 0.005;
+        this.sparklePhase += 0.03;
+
+        if (this.x < -20) this.x = canvas.width + 20;
+        if (this.x > canvas.width + 20) this.x = -20;
+        if (this.y < -20) this.y = canvas.height + 20;
+        if (this.y > canvas.height + 20) this.y = -20;
+      }
+
+      draw() {
+        const sparkle = 0.7 + 0.3 * Math.sin(this.sparklePhase);
+        const drawOpacity = this.opacity * sparkle;
+
+        if (this.isStar && this.size > 1.5) {
+          this.drawStar(drawOpacity);
+        } else {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${drawOpacity})`;
+          ctx.fill();
+
+          if (this.size > 1) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${drawOpacity * 0.12})`;
+            ctx.fill();
+          }
+        }
+      }
+
+      drawStar(opacity) {
+        const spikes = 4;
+        const outerR = this.size * 2.5;
+        const innerR = this.size * 0.8;
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          const r = i % 2 === 0 ? outerR : innerR;
+          const angle = (i * Math.PI) / spikes - Math.PI / 2 + this.angle;
+          const x = this.x + Math.cos(angle) * r;
+          const y = this.y + Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${opacity})`;
+        ctx.fill();
+        ctx.shadowColor = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${opacity * 0.5})`;
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const isMobile = window.innerWidth <= 768;
+      const density = isMobile ? 25000 : 12000;
+      const maxCount = isMobile ? 35 : 80;
+      const particleCount = Math.min(maxCount, Math.floor((canvas.width * canvas.height) / density) || (isMobile ? 20 : 40));
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+    
+    initParticles();
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw subtle connections between nearby particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(212, 168, 83, ${(1 - dist / 120) * 0.06})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      animationFrame = requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+
+    const heroObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (!animationFrame) animateParticles();
+        } else {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = null;
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const heroSec = document.querySelector('.hero');
+    if (heroSec) heroObserver.observe(heroSec);
+  }
+
+  // ========== CONTACT FORM ==========
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = contactForm.querySelector('.form-submit');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<span>⌛ Gönderiliyor...</span>';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_URL}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            subject: document.getElementById('subject').value || 'Genel İletişim',
+            message: document.getElementById('message').value
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          submitBtn.classList.add('success');
+          submitBtn.innerHTML = '<span>✓ Mesajınız alındı!</span>';
+          submitBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+          contactForm.reset();
+          showToast('Mesajınız Alındı', 'Size en kısa sürede dönüş yapacağız.', 'success');
+          // Confetti effect
+          createConfetti(submitBtn);
+        } else {
+          showToast('Hata', data.error || 'Bir hata oluştu', 'error');
+          submitBtn.innerHTML = originalText;
+          submitBtn.style.background = '';
+          submitBtn.disabled = false;
+          return;
+        }
+      } catch (err) {
+        showToast('Bağlantı Hatası', 'Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.style.background = '';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.style.background = '';
+        submitBtn.disabled = false;
+      }, 3000);
+    });
+  }
+
+  // ========== TESTIMONIALS SLIDER (Random realistic generation) ==========
+  const testimonialGrid = document.getElementById('testimonialGrid');
+  if (testimonialGrid) {
+    const maleNames = ['Ahmet', 'Mehmet', 'Ali', 'Can', 'Emre', 'Burak', 'Kerem', 'Ozan', 'Deniz', 'Mert', 'Efe', 'Onur', 'Serkan', 'Kaan', 'Tolga', 'Fatih', 'Murat', 'Hakan', 'Cem', 'Barış', 'Utku', 'Alp', 'Eren', 'Yiğit', 'Arda'];
+    const femaleNames = ['Zeynep', 'Elif', 'Ayşe', 'Fatma', 'Merve', 'Derya', 'Sibel', 'Gizem', 'İrem', 'Buse', 'Ebru', 'Aslı', 'Cansu', 'Nazlı', 'Sena', 'Defne', 'Lale', 'Pınar', 'Özge', 'Burcu', 'Aylin', 'Ece', 'Deniz', 'Yasemin', 'Seda'];
+    const internationalMale = ['James', 'Michael', 'David', 'Daniel', 'Alexander', 'Lukas', 'Marco', 'Pierre', 'Hugo', 'Thomas', 'William', 'Oliver', 'Felix', 'Noah', 'Leon', 'Maximilian'];
+    const internationalFemale = ['Sarah', 'Emily', 'Sophie', 'Emma', 'Olivia', 'Anna', 'Marie', 'Laura', 'Julia', 'Isabella', 'Charlotte', 'Amelia', 'Mia', 'Lea', 'Hannah', 'Johanna'];
+    const internationalLast = ['Anderson', 'Smith', 'Wilson', 'Taylor', 'Brown', 'Miller', 'Jones', 'Davis', 'García', 'Martínez', 'Müller', 'Schmidt', 'Fischer', 'Weber', 'Wagner', 'Becker', 'Rossi', 'Russo', 'Ferrari', 'Bianchi'];
+
+    const trCities = [
+      'İstanbul, Nişantaşı', 'İstanbul, Bebek', 'İstanbul, Kadıköy', 'İstanbul, Etiler', 'İstanbul, Bağdat Caddesi',
+      'Ankara, Çankaya', 'Ankara, Kızılay', 'Ankara, Bilkent', 'İzmir, Alsancak', 'İzmir, Karşıyaka',
+      'Antalya, Lara', 'Antalya, Konyaaltı', 'Bodrum, Yalıkavak', 'Bodrum, Türkbükü', 'Çeşme, Alaçatı',
+      'Muğla, Fethiye', 'Bursa, Nilüfer', 'Eskişehir, Tepebaşı', 'Trabzon, Ortahisar', 'Gaziantep, Şahinbey'
+    ];
+    const intCities = [
+      'London, Chelsea', 'London, Mayfair', 'Paris, Champs-Élysées', 'Paris, Le Marais',
+      'New York, Manhattan', 'New York, Brooklyn', 'Milan, Brera', 'Milan, Montenapoleone',
+      'Dubai, Downtown', 'Dubai, Marina', 'Berlin, Mitte', 'Munich, Schwabing',
+      'Zurich, Bahnhofstrasse', 'Geneva, Eaux-Vives', 'Vienna, Innere Stadt', 'Rome, Trastevere',
+      'Barcelona, Eixample', 'Madrid, Salamanca', 'Amsterdam, Jordaan', 'Stockholm, Östermalm',
+      'Oslo, Frogner', 'Copenhagen, Frederiksberg', 'Helsinki, Eira', 'Tokyo, Ginza',
+      'Seoul, Gangnam', 'Singapore, Orchard', 'Sydney, Darlinghurst', 'Los Angeles, Beverly Hills'
+    ];
+
+    const commentTemplates = [
+      { tr: 'Nişan yüzüğümüzü buradan aldık, parmağımdaki ışıltısı her gün beni mutlu ediyor. İşçilik gerçekten çok ince.', en: 'We bought our engagement ring here, the sparkle on my finger makes me happy every day.' },
+      { tr: 'Eşim için özel bir hediye yaptırdık, kutusunu açtığı anki mutluluğu paha biçilemezdi.', en: 'We had a special gift made for my spouse, the joy when opening the box was priceless.' },
+      { tr: 'Bileklik tam zamanında yetişti. Zarif ve modern duruşuyla her kıyafete uyum sağlıyor.', en: 'The bracelet arrived just in time. Its elegant and modern look complements every outfit.' },
+      { tr: 'Kolyedeki detaylar harika, her gün kullanıyorum ve ilk günkü gibi parlak.', en: 'The details on the necklace are amazing, I wear it every day and it shines like the first day.' },
+      { tr: 'İşçilik gerçekten büyüleyici. Daha önce hiç bu kadar kaliteli bir takı görmemiştim.', en: 'The craftsmanship is truly mesmerizing. I have never seen such high quality jewelry before.' },
+      { tr: 'Yıldönümü hediyesi olarak aldık, eşim çok mutlu oldu. Teşekkürler VHEORA!', en: 'We got it as an anniversary gift, my spouse was overjoyed. Thank you VHEORA!' },
+      { tr: 'Siparişim çok hızlı geldi ve paketleme mükemmeldi. Kesinlikle tavsiye ederim.', en: 'My order arrived very fast and the packaging was perfect. I highly recommend it.' },
+      { tr: 'Küpeleri anneme hediye ettim, çok beğendi. Zarif tasarımlarınızı çok seviyorum.', en: 'I gifted the earrings to my mother, she loved them. I adore your elegant designs.' },
+      { tr: 'Özel tasarım yüzük hayalimdeki gibi oldu. İlginiz ve profesyonelliğiniz için teşekkürler.', en: 'The custom-designed ring turned out exactly as I dreamed. Thanks for your interest and professionalism.' },
+      { tr: 'Uzun zamandır bu kadar kaliteli bir takı görmemiştim. Herkese gönül rahatlığıyla öneriyorum.', en: 'I haven\'t seen such quality jewelry in a long time. I confidently recommend it to everyone.' },
+      { tr: 'Doğum günümde kendime hediye ettim, kesinlikle değdi. Her bakışta içim açılıyor.', en: 'I treated myself for my birthday, it was totally worth it. It brightens my mood every time I look at it.' },
+      { tr: 'Düğün setimizi VHEORA\'dan aldık, herkes çok beğendi. Kaliteniz daim olsun.', en: 'We got our wedding set from VHEORA, everyone loved it. May your quality always remain.' },
+      { tr: 'İnternetten takı almakta tereddüt etmiştim ama bu deneyim beklentimin çok üstündeydi.', en: 'I was hesitant about buying jewelry online, but this experience exceeded my expectations.' },
+      { tr: 'Sevgilime aldığım hediye sayenizde unutulmaz oldu. Tasarımlarınız gerçekten özel.', en: 'The gift I got for my significant other became unforgettable thanks to you. Your designs are truly special.' },
+      { tr: 'Sağlam ve şık bir ürün. Her gün kullanıyorum, hiçbir kararma olmadı.', en: 'Durable and stylish product. I use it every day, no tarnishing at all.' },
+      { tr: 'Müşteri hizmetleriniz çok ilgiliydi, tüm sorularımı cevapladılar. Güvenilir bir marka.', en: 'Your customer service was very attentive, they answered all my questions. A trustworthy brand.' },
+      { tr: 'Yurt dışına sipariş verdim, vergi ve kargo süreci hakkında çok yardımcı oldular.', en: 'I ordered from abroad, they were very helpful about taxes and shipping.' },
+      { tr: 'Kolyeyi ilk taktığımda herkes nereden aldığımı sordu. Kesinlikle farklı bir kalite.', en: 'When I first wore the necklace, everyone asked where I got it. Definitely a different level of quality.' },
+      { tr: 'Ürün görsellerdeki gibi çıktı, hatta daha güzeldi. Çok memnun kaldım.', en: 'The product looked just like the photos, even more beautiful. I am very satisfied.' },
+      { tr: 'Annem için özel bir hediye yaptırdık, kutusunu açtığı anki mutluluğu paha biçilemezdi. Gerçekten işinin ehli bir ekip.', en: 'We had a special gift made for my mother, the joy when she opened the box was priceless. A truly skilled team.' }
+    ];
+
+    function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function generateTestimonials(count = 6) {
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const isTurkish = Math.random() < 0.55;
+        const isMale = Math.random() < 0.5;
+        let name, location;
+        if (isTurkish) {
+          name = isMale ? randomItem(maleNames) : randomItem(femaleNames);
+          location = randomItem(trCities);
+        } else {
+          const first = isMale ? randomItem(internationalMale) : randomItem(internationalFemale);
+          const last = randomItem(internationalLast);
+          name = `${first} ${last}`;
+          location = randomItem(intCities);
+        }
+        const template = randomItem(commentTemplates);
+        const text = isTurkish ? template.tr : template.en;
+        const rating = 5;
+        result.push({ name, location, text, rating });
+      }
+      return result;
+    }
+
+    async function loadTestimonials() {
+      try {
+        const res = await fetch(`${API_URL}/api/testimonials`);
+        const data = await res.json();
+        let items = Array.isArray(data) ? data : [];
+        if (items.length < 3) {
+          items = [...items, ...generateTestimonials(6 - items.length)];
+        }
+        items = items.slice(0, 6);
+
+        testimonialGrid.innerHTML = items.map(t => `
+          <div class="testimonial-card">
+            <div class="testimonial-stars">${'★'.repeat(t.rating || 5)}${'☆'.repeat(5 - (t.rating || 5))}</div>
+            <p class="testimonial-text">${t.text}</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">${t.name.charAt(0)}</div>
+              <div>
+                <div class="testimonial-name">${t.name}</div>
+                <div class="testimonial-location">${t.location || ''}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        initSlider();
+      } catch (err) {
+        const fallback = generateTestimonials(6);
+        testimonialGrid.innerHTML = fallback.map(t => `
+          <div class="testimonial-card">
+            <div class="testimonial-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
+            <p class="testimonial-text">${t.text}</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">${t.name.charAt(0)}</div>
+              <div>
+                <div class="testimonial-name">${t.name}</div>
+                <div class="testimonial-location">${t.location}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        initSlider();
+      }
+    }
+
+    loadTestimonials();
+
+    function initSlider() {
+      const prevBtn = document.getElementById('prevTestimonial');
+      const nextBtn = document.getElementById('nextTestimonial');
+      let currentIndex = 0;
+
+      function getItemsVisible() {
+        if (window.innerWidth <= 768) return 1;
+        if (window.innerWidth <= 1024) return 2;
+        return 3;
+      }
+
+      function updateSlider() {
+        const card = testimonialGrid.querySelector('.testimonial-card');
+        if (!card) return;
+        const gap = window.innerWidth <= 768 ? 24 : 32;
+        const itemWidth = card.offsetWidth + gap;
+        testimonialGrid.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+      }
+
+      nextBtn.addEventListener('click', () => {
+        const visible = getItemsVisible();
+        if (currentIndex < 6 - visible) {
+          currentIndex++;
+        } else {
+          currentIndex = 0;
+        }
+        updateSlider();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+        } else {
+          const visible = getItemsVisible();
+          currentIndex = 6 - visible;
+        }
+        updateSlider();
+      });
+
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      testimonialGrid.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      testimonialGrid.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) < 50) return;
+        if (diff > 0) nextBtn.click();
+        else prevBtn.click();
+      }, { passive: true });
+
+      window.addEventListener('resize', () => {
+        currentIndex = 0;
+        updateSlider();
+      });
+    }
+  }
+
+  // ========== PARALLAX ON MOUSE MOVE (Hero) ==========
+  const heroVisual = document.querySelector('.hero-visual');
+  const heroSection = document.querySelector('.hero');
+
+  // Skip heavy hero parallax on touch devices
+  const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+  if (heroSection && heroVisual && !isTouchDevice) {
+    heroSection.addEventListener('mousemove', (e) => {
+      if (window.innerWidth < 768) return;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+      heroVisual.style.transition = 'none'; // Remove transition during move for performance
+      heroVisual.style.transform = `translate(${x * 20}px, ${y * 20}px)`;
+    });
+
+    heroSection.addEventListener('mouseleave', () => {
+      heroVisual.style.transition = 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      heroVisual.style.transform = 'translate(0, 0)';
+    });
+  }
+
+  // ========== IMAGE LAZY LOADING WITH BLUR-UP ==========
+  const images = document.querySelectorAll('img[loading="lazy"]');
+  images.forEach(img => {
+    if (img.complete) {
+      img.classList.add('loaded');
+    } else {
+      img.addEventListener('load', () => {
+        img.classList.add('loaded');
+      });
+      img.addEventListener('error', () => {
+        img.classList.add('loaded');
+      });
+    }
+  });
+
+  // Eager images too
+  document.querySelectorAll('img[loading="eager"]').forEach(img => {
+    if (img.complete) img.classList.add('loaded');
+    else img.addEventListener('load', () => img.classList.add('loaded'));
+  });
+
+  // ========== LANGUAGE SWITCHER LOGIC ==========
+  const langBtn = document.getElementById('langBtn');
+  const langDropdown = document.getElementById('langDropdown');
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function clearGoogleTranslateCookies() {
+    const expire = 'expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    document.cookie = `googtrans=; ${expire}; path=/`;
+    const host = window.location.hostname;
+    if (host && !host.startsWith('localhost') && !host.startsWith('127.')) {
+      document.cookie = `googtrans=; ${expire}; path=/; domain=${host}`;
+      document.cookie = `googtrans=; ${expire}; path=/; domain=.${host}`;
+    }
+  }
+
+  function setGoogleTranslateCookie(langCode) {
+    const value = `/tr/${langCode}`;
+    document.cookie = `googtrans=${value}; path=/`;
+    const host = window.location.hostname;
+    if (host && !host.startsWith('localhost') && !host.startsWith('127.')) {
+      document.cookie = `googtrans=${value}; path=/; domain=${host}`;
+    }
+  }
+
+  function triggerGoogleCombo(langCode, attempt = 0) {
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      combo.value = langCode;
+      combo.dispatchEvent(new Event('change'));
+      return true;
+    }
+    if (attempt < 25) {
+      setTimeout(() => triggerGoogleCombo(langCode, attempt + 1), 250);
+    }
+    return false;
+  }
+
+  function changeGoogleTranslateLanguage(langCode) {
+    if (langCode === 'tr') {
+      clearGoogleTranslateCookies();
+      const combo = document.querySelector('.goog-te-combo');
+      if (combo) {
+        combo.value = 'tr';
+        combo.dispatchEvent(new Event('change'));
+      }
+      window.location.reload();
+      return;
+    }
+
+    setGoogleTranslateCookie(langCode);
+    triggerGoogleTranslate(langCode);
+  }
+
+  function triggerGoogleTranslate(langCode) {
+    if (!triggerGoogleCombo(langCode)) {
+      // Widget not ready yet; cookie will apply on next load
+      window.location.reload();
+    }
+  }
+
+  function applySavedLanguage() {
+    const savedLangCookie = getCookie('googtrans');
+    if (!savedLangCookie) return;
+
+    const langCode = savedLangCookie.split('/').pop();
+    if (!langCode || langCode === 'tr') return;
+
+    const activeLangLink = document.querySelector(`.lang-dropdown a[data-lang="${langCode}"]`);
+    if (activeLangLink && langBtn) {
+      langBtn.innerHTML = `🌐 ${activeLangLink.textContent.split(' - ')[0]}`;
+    }
+
+    triggerGoogleCombo(langCode);
+  }
+
+  if (langBtn && langDropdown) {
+    langBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => {
+      langDropdown.classList.remove('active');
+    });
+
+    langDropdown.querySelectorAll('a').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const selectedLang = item.getAttribute('data-lang');
+        const selectedLangText = item.textContent.split(' - ')[0];
+
+        langBtn.innerHTML = `🌐 ${selectedLangText}`;
+        langDropdown.classList.remove('active');
+        changeGoogleTranslateLanguage(selectedLang);
+      });
+    });
+  }
+
+  document.addEventListener('googleTranslateReady', applySavedLanguage);
+
+  const savedLangCookie = getCookie('googtrans');
+  if (savedLangCookie) {
+    const langCode = savedLangCookie.split('/').pop();
+    const activeLangLink = document.querySelector(`.lang-dropdown a[data-lang="${langCode}"]`);
+    if (activeLangLink && langBtn) {
+      langBtn.innerHTML = `🌐 ${activeLangLink.textContent.split(' - ')[0]}`;
+    }
+  }
+
+  // ========== BUTTON RIPPLE EFFECT ==========
+  document.querySelectorAll('.btn-primary, .btn-secondary, .form-submit, .btn-quote-wa, .btn-quote-mail').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.className = 'btn-ripple';
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+      ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+
+  // ========== SUPPORT MODAL ==========
+  const supportContent = {
+    sss: {
+      title: 'Sıkça Sorulan Sorular',
+      icon: `<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="rgb(212,168,83)" stroke-width="2.5" opacity="0.3"/><circle cx="32" cy="32" r="18" stroke="rgb(212,168,83)" stroke-width="2" opacity="0.5"/><circle cx="32" cy="22" r="2" fill="rgb(212,168,83)"/><path d="M32 28v14" stroke="rgb(212,168,83)" stroke-width="3" stroke-linecap="round"/></svg>`,
+      html: `<div class="sss-list">
+        <div class="sss-item"><button class="sss-question">Siparişimi nasıl takip edebilirim?<span class="sss-icon">▼</span></button><div class="sss-answer">Siparişiniz kargoya verildikten sonra e-posta ve SMS ile bir takip numarası alırsınız. Bu numara ile kargo firmasının web sitesinden siparişinizi anlık olarak takip edebilirsiniz.</div></div>
+        <div class="sss-item"><button class="sss-question">Hangi ödeme yöntemlerini kabul ediyorsunuz?<span class="sss-icon">▼</span></button><div class="sss-answer">Kredi kartı (Visa, Mastercard), banka havalesi ve EFT kabul ediyoruz. Tüm kredi kartı işlemleriniz 256-bit SSL sertifikası ile korunmaktadır.</div></div>
+        <div class="sss-item"><button class="sss-question">Uluslararası sipariş veriyorum, gümrük vergisi var mı?<span class="sss-icon">▼</span></button><div class="sss-answer">Evet, uluslararası siparişlerde alıcının bulunduğu ülkenin gümrük politikasına bağlı olarak ek vergiler uygulanabilir. Bu vergiler sipariş tutarına dahil değildir ve alıcıya aittir. Sipariş öncesi ülkenizin gümrük koşullarını kontrol etmenizi öneririz.</div></div>
+        <div class="sss-item"><button class="sss-question">Hediye paketi seçeneğiniz var mı?<span class="sss-icon">▼</span></button><div class="sss-answer">Evet, tüm siparişleriniz VHEORA imzalı lüks hediye kutusu, kesecik ve sertifika ile gönderilir. Özel gün kartı eklenmesini isterseniz sipariş notunda belirtebilirsiniz.</div></div>
+        <div class="sss-item"><button class="sss-question">Teslimat süresi ne kadar?<span class="sss-icon">▼</span></button><div class="sss-answer">Türkiye içi siparişlerde teslimat 3-7 iş günü, uluslararası siparişlerde ise 7-14 iş günü arasındadır. Özel tasarım siparişlerde bu süre değişiklik gösterebilir.</div></div>
+        <div class="sss-item"><button class="sss-question">Ürünlerinizin garantisi var mı?<span class="sss-icon">▼</span></button><div class="sss-answer">Tüm ürünlerimiz 2 yıl işçilik garantisi ile gelmektedir. Garanti belgeniz ürününüzle birlikte gönderilir. Üretim hatası durumunda ürününüzü ücretsiz olarak onarıyoruz.</div></div>
+        <div class="sss-item"><button class="sss-question">Özel tasarım yaptırmak istiyorum, nasıl iletişime geçebilirim?<span class="sss-icon">▼</span></button><div class="sss-answer">Koleksiyon sayfamızdaki herhangi bir üründe "Teklif Al" butonuna tıklayarak WhatsApp veya e-posta yoluyla bize ulaşabilirsiniz. Tasarım ekibimiz size en kısa sürede dönüş yapacaktır.</div></div>
+      </div>`
+    },
+    kargo: {
+      title: 'Kargo & İade',
+      icon: `<svg viewBox="0 0 64 64" fill="none"><rect x="6" y="24" width="40" height="26" rx="3" stroke="rgb(212,168,83)" stroke-width="2" fill="rgba(212,168,83,0.06)"/><path d="M46 30h10l-4 10h-6" stroke="rgb(212,168,83)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="44" r="4" stroke="rgb(212,168,83)" stroke-width="2" fill="rgba(212,168,83,0.1)"/><circle cx="38" cy="44" r="4" stroke="rgb(212,168,83)" stroke-width="2" fill="rgba(212,168,83,0.1)"/><path d="M16 24V14h12l4 10" stroke="rgb(212,168,83)" stroke-width="2" stroke-linecap="round"/></svg>`,
+      html: `<div class="kargo-grid">
+        <div class="kargo-card"><h4>🚚 Türkiye İçi Kargo</h4><p>3-7 iş günü içinde teslimat. 5.000 TL ve üzeri alışverişlerde kargo ücretsizdir.</p></div>
+        <div class="kargo-card"><h4>✈️ Uluslararası Kargo</h4><p>DHL/FedEx ile 7-14 iş günü. Global gönderimlerde takip numarası e-posta ile paylaşılır.</p></div>
+        <div class="kargo-card"><h4>📦 Paketleme</h4><p>Takı kutunuz çift katlı korumalı ambalajda, sertifikası ile birlikte gönderilir.</p></div>
+        <div class="kargo-card"><h4>📋 Sigorta</h4><p>Tüm gönderilerimiz sigortalıdır. Size ulaşana kadar her adımda güvendesiniz.</p></div>
+      </div>
+      <h3>İade Koşulları</h3>
+      <ul class="iade-list">
+        <li>Ürün teslim tarihinden itibaren 30 gün içinde iade yapabilirsiniz.</li>
+        <li>İade edilecek ürünün orijinal kutusu, sertifikası ve tüm aksesuarları eksiksiz olmalıdır.</li>
+        <li>Özel tasarım ve kişiye özel ürünlerde iade kabul edilmemektedir.</li>
+        <li>İade sürecini başlatmak için bizimle iletişime geçmeniz yeterlidir, size iade talimatlarını göndeririz.</li>
+        <li>İade kargo ücreti alıcıya aittir. Ürün bize ulaştıktan sonra 5 iş günü içinde iadeniz gerçekleştirilir.</li>
+      </ul>`
+    },
+    bakim: {
+      title: 'Bakım Rehberi',
+      icon: `<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="14" stroke="rgb(212,168,83)" stroke-width="2.5" fill="rgba(212,168,83,0.06)"/><circle cx="32" cy="32" r="8" stroke="rgb(212,168,83)" stroke-width="1.5" fill="rgba(212,168,83,0.05)"/><path d="M32 12v-4M32 56v-4M52 32h4M8 32h4M46.6 17.4l2.8-2.8M14.6 49.4l2.8-2.8M17.4 17.4l-2.8-2.8M49.4 49.4l-2.8-2.8" stroke="rgb(212,168,83)" stroke-width="1.5" opacity="0.5"/></svg>`,
+      html: `<p style="margin-bottom:18px;">Takılarınızın ilk günkü parlaklığını korumak için aşağıdaki bakım önerilerine göz atın.</p>
+      <div class="bakim-grid">
+        <div class="bakim-card do">
+          <h4>✓  Ilık Su & Sabun</h4>
+          <p>Ilık su ve bir damla sabunla yumuşak bir fırça ile nazikçe temizleyin. Durulayıp yumuşak bezle kurulayın.</p>
+        </div>
+        <div class="bakim-card dont">
+          <h4>✗  Kimyasal Temas</h4>
+          <p>Parfüm, krem, klorlu su ve ağır temizlik ürünleri takılarınıza zarar verir. Temas ettirmeyin.</p>
+        </div>
+        <div class="bakim-card do">
+          <h4>✓  Ayrı Saklama</h4>
+          <p>Her takıyı ayrı kesede veya bölmeli kutuda saklayın. Çizilmeleri önlemek için temas ettirmeyin.</p>
+        </div>
+        <div class="bakim-card dont">
+          <h4>✗  Spor & Havuz</h4>
+          <p>Spor yaparken, yüzerken veya duş alırken takılarınızı çıkartın. Ter ve klor kaplamaya zarar verir.</p>
+        </div>
+        <div class="bakim-card do">
+          <h4>✓  Profesyonel Bakım</h4>
+          <p>Yılda bir kez profesyonel temizlik ve kontrol önerilir. Taş düşmesi ve kaplama aşınması kontrol edilir.</p>
+        </div>
+        <div class="bakim-card dont">
+          <h4>✗  Ultrasonik Temizlik</h4>
+          <p>Zümrüt, opal, inci gibi yumuşak taşlarda ultrasonik temizleyici kullanmayın. Çatlamaya neden olabilir.</p>
+        </div>
+      </div>
+      <div class="bakim-extra">
+        <h4>Özel İpuçları</h4>
+        <p>Takılarınızı makyaj yapmadan ve saç spreyi sıkmadan önce takın gün sonunda çıkartırken yumuşak bir bezle hafifçe silin. Gece yatarken takılarınızı çıkartmanız ömrünü uzatır. Altın takılarınızı zaman zaman sirke ve karbonat karışımına batırılmış yumuşak bezle parlatarak oksitlenmeyi önleyebilirsiniz.</p>
+      </div>`
+    },
+    beden: {
+      title: 'Beden Rehberi',
+      icon: `<svg viewBox="0 0 64 64" fill="none"><path d="M20 56V16c0-2 1-4 3-4h18c2 0 3 2 3 4v40" stroke="rgb(212,168,83)" stroke-width="2.5" stroke-linecap="round"/><path d="M20 28h24" stroke="rgb(212,168,83)" stroke-width="1.5" opacity="0.4"/><path d="M20 38h24" stroke="rgb(212,168,83)" stroke-width="1.5" opacity="0.4"/><rect x="44" y="34" width="16" height="4" rx="2" stroke="rgb(212,168,83)" stroke-width="1.5" opacity="0.5"/></svg>`,
+      html: `<div class="beden-intro">
+        <p>Parmak ölçünüzü evde kendiniz kolayca alabilirsiniz. Bir ip veya kağıt şerit ile parmak çevrenizi ölçüp aşağıdaki tablodan numaranızı bulun.</p>
+      </div>
+      <table class="beden-table">
+        <tr><th>Numara (TR)</th><th>Çap (mm)</th><th>Çevre (mm)</th><th>ABD/İngiltere</th></tr>
+        <tr><td>12</td><td>15.7</td><td>49.3</td><td>4.5</td></tr>
+        <tr><td>13</td><td>16.0</td><td>50.3</td><td>5</td></tr>
+        <tr><td>14</td><td>16.5</td><td>51.8</td><td>5.5</td></tr>
+        <tr><td>15</td><td>17.0</td><td>53.4</td><td>6</td></tr>
+        <tr><td>16</td><td>17.5</td><td>55.0</td><td>7</td></tr>
+        <tr><td>17</td><td>18.0</td><td>56.5</td><td>7.5</td></tr>
+        <tr><td>18</td><td>18.5</td><td>58.1</td><td>8</td></tr>
+        <tr><td>19</td><td>19.0</td><td>59.7</td><td>8.5</td></tr>
+        <tr><td>20</td><td>19.5</td><td>61.3</td><td>9</td></tr>
+        <tr><td>21</td><td>20.2</td><td>63.5</td><td>10</td></tr>
+        <tr><td>22</td><td>20.8</td><td>65.3</td><td>10.5</td></tr>
+        <tr><td>23</td><td>21.4</td><td>67.2</td><td>11</td></tr>
+      </table>
+      <div class="beden-ek">
+        <h4>Diğer Ölçüler</h4>
+        <div class="beden-ek-item">
+          <div class="beden-ek-item-content"><strong>📿 Bileklik</strong><span>Standart: 16-18 cm, Uzun: 19-21 cm</span></div>
+        </div>
+        <div class="beden-ek-item">
+          <div class="beden-ek-item-content"><strong>📿 Zincir Kolye</strong><span>Kısa: 40-42 cm, Orta: 45-50 cm, Uzun: 55-60 cm</span></div>
+        </div>
+        <div class="beden-ek-item">
+          <div class="beden-ek-item-content"><strong>💍 Ölçü İpucu</strong><span>Parmağınızın en geniş kısmından ölçü alın, sıkı olmayan rahat bir ölçü tercih edin. Sabah ve akşam parmak ölçüleri farklı olabilir.</span></div>
+        </div>
+      </div>`
+    }
+  };
+
+  const supportModal = document.getElementById('supportModal');
+  const supportOverlay = document.getElementById('supportOverlay');
+  const supportClose = document.getElementById('supportClose');
+  const supportTitle = document.getElementById('supportModalTitle');
+  const supportBody = document.getElementById('supportModalBody');
+  const supportLinks = document.querySelectorAll('a[data-support]');
+
+  function openSupport(type) {
+    const content = supportContent[type];
+    if (!content) return;
+    supportTitle.textContent = content.title;
+    supportBody.innerHTML = `<div class="support-section">${content.icon}${content.html}</div>`;
+    supportModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (type === 'sss') {
+      supportBody.querySelectorAll('.sss-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.sss-item');
+          item.classList.toggle('open');
+        });
+      });
+    }
+  }
+
+  function closeSupport() {
+    supportModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  supportLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const type = link.getAttribute('data-support');
+      openSupport(type);
+    });
+  });
+
+  supportOverlay.addEventListener('click', closeSupport);
+  supportClose.addEventListener('click', closeSupport);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && supportModal.classList.contains('active')) {
+      closeSupport();
+    }
+  });
+
+  // ========== VISITOR LOG (all pages) ==========
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/api/visit', JSON.stringify({ page: location.pathname, referrer: document.referrer }));
+  }
+
+  // ========== ADMIN TOOLBAR ==========
+  const adminToken = localStorage.getItem('vheora_token');
+  const adminToolbarBtn = document.getElementById('adminToolbarBtn');
+  const adminToolbarPanel = document.getElementById('adminToolbarPanel');
+
+  (async () => {
+    if (!adminToken || !adminToolbarBtn || !adminToolbarPanel) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/settings`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      if (!res.ok) return;
+    } catch { return; }
+
+    adminToolbarBtn.classList.add('active');
+    adminToolbarBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      adminToolbarPanel.classList.toggle('active');
+    });
+    document.addEventListener('click', (e) => {
+      if (!adminToolbarPanel.contains(e.target) && e.target !== adminToolbarBtn) {
+        adminToolbarPanel.classList.remove('active');
+      }
+    });
+
+    try {
+      const res = await fetch(`${API_URL}/api/settings/public`);
+      const settings = await res.json();
+      const toggle = document.getElementById('adminMaintenanceToggle');
+      if (toggle) toggle.checked = settings.maintenance_mode === '1';
+    } catch {}
+
+    const maintToggle = document.getElementById('adminMaintenanceToggle');
+    if (maintToggle) {
+      maintToggle.addEventListener('change', async () => {
+        try {
+          await fetch(`${API_URL}/api/admin/settings`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+            body: JSON.stringify({ maintenance_mode: maintToggle.checked ? '1' : '0' })
+          });
+          showToast('Bakım Modu', maintToggle.checked ? 'Açıldı' : 'Kapatıldı', 'info');
+        } catch {
+          showToast('Hata', 'Bakım modu değiştirilemedi', 'error');
+          maintToggle.checked = !maintToggle.checked;
+        }
+      });
+    }
+
+    const addBtn = document.getElementById('adminAddProductBtn');
+    const productModal = document.getElementById('adminProductModal');
+    const productOverlay = document.getElementById('adminProductOverlay');
+    const productClose = document.getElementById('adminProductClose');
+    const productForm = document.getElementById('adminProductForm');
+
+    if (addBtn && productModal) {
+      addBtn.addEventListener('click', () => {
+        productModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+      function closeProductModal() {
+        productModal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      productOverlay.addEventListener('click', closeProductModal);
+      productClose.addEventListener('click', closeProductModal);
+      productForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('apName').value.trim();
+        const category = document.getElementById('apCategory').value;
+        const description = document.getElementById('apDescription').value.trim();
+        const price = document.getElementById('apPrice').value.trim();
+        const image = document.getElementById('apImage').value.trim();
+        const stock = parseInt(document.getElementById('apStock').value) || 0;
+        const badge = document.getElementById('apBadge').value.trim();
+        const errorEl = document.getElementById('apError');
+        if (!name) { errorEl.textContent = 'Ürün adı gerekli'; return; }
+        errorEl.textContent = '';
+        const btn = document.getElementById('apSubmitBtn');
+        btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+        try {
+          const res = await fetch(`${API_URL}/api/admin/products`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+            body: JSON.stringify({ name, category, description, price, image, stock, badge, is_featured: 0 })
+          });
+          if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Kayıt başarısız'); }
+          showToast('Başarılı', 'Ürün eklendi', 'success');
+          closeProductModal();
+          productForm.reset();
+          if (window.location.pathname.includes('collection')) window.location.reload();
+        } catch (err) { errorEl.textContent = err.message; }
+        btn.disabled = false; btn.textContent = 'Ürünü Kaydet';
+      });
+    }
+
+    document.addEventListener('click', async (e) => {
+      const delBtn = e.target.closest('.admin-delete-btn');
+      if (!delBtn) return;
+      e.preventDefault();
+      const productId = delBtn.getAttribute('data-id');
+      const productName = delBtn.getAttribute('data-name') || 'bu ürün';
+      if (!confirm(`${productName} silinecek?`)) return;
+      try {
+        const res = await fetch(`${API_URL}/api/admin/products/${productId}`, {
+          method: 'DELETE', headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        if (!res.ok) throw new Error('Silme başarısız');
+        delBtn.closest('.product-item').remove();
+        showToast('Silindi', `${productName} kaldırıldı`, 'info');
+      } catch (err) { showToast('Hata', err.message, 'error'); }
+    });
+
+    function showAdminDeleteBtns() {
+      document.querySelectorAll('.product-item').forEach(item => {
+        let btn = item.querySelector('.admin-delete-btn');
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.className = 'admin-delete-btn';
+          btn.innerHTML = '×';
+          btn.setAttribute('data-id', item.getAttribute('data-product-id') || '');
+          btn.setAttribute('data-name', item.querySelector('.product-title')?.textContent || '');
+          item.appendChild(btn);
+        }
+        btn.classList.add('active');
+      });
+    }
+    showAdminDeleteBtns();
+    const productGrid = document.getElementById('productGrid');
+    if (productGrid) {
+      const observer = new MutationObserver(showAdminDeleteBtns);
+      observer.observe(productGrid, { childList: true, subtree: true });
+    }
+  })();
+
+  // ========== CUSTOM CURSOR ==========
+  // Removed - using native cursor
+
+});

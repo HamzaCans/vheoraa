@@ -1,0 +1,8 @@
+# VHEORA.CO
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /server/
+Disallow: /uploads/
+
+Sitemap: https://vheora.co/sitemap.xml

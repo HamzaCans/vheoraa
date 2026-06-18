@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET:-vheora-jwt-secret-2026}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-vheora.co@gmail.com}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-vheora.co@gmail.com}
+    volumes:
+      - ./server/vheora.db:/app/server/vheora.db
+      - ./uploads:/app/uploads
+    restart: unless-stopped

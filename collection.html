@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="VHEORA'nın eşsiz koleksiyonunu keşfedin. Pırlanta yüzükler, altın bileklikler, kolyeler, küpeler ve set takılar.">
+    <meta property="og:title" content="Koleksiyon | VHEORA — Luxury Jewelry">
+    <meta property="og:description" content="GIA sertifikalı pırlanta ve 14K altın koleksiyonumuzu keşfedin.">
+    <meta property="og:url" content="https://vheora.co/collection.html">
+    <meta property="og:image" content="https://vheora.co/images/hero_collection.png">
+    <link rel="canonical" href="https://vheora.co/collection.html">
+  <title>Koleksiyon | VHEORA — Pırlanta Yüzük & Altın Takı Koleksiyonu</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://translate.google.com">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <style>
+        body {
+            background-color: var(--color-dark);
+            color: var(--color-white);
+            padding-top: 100px;
+        }
+        .collection-header {
+            text-align: center;
+            padding: 60px 0;
+            background: var(--gradient-dark);
+        }
+        .collection-header h1 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            color: var(--color-gold);
+            margin-bottom: 20px;
+        }
+        
+        /* Filter Controls */
+        .product-img { position: relative; }
+        .stock-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; z-index: 2; }
+        .stock-badge.low { background: rgba(212,168,83,0.15); color: var(--color-gold); border: 1px solid rgba(212,168,83,0.3); }
+        .stock-badge.out { background: rgba(255,68,68,0.15); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+
+        .filter-container {
+            position: sticky;
+            top: 88px;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px 0;
+            border-bottom: var(--border-subtle);
+            margin-bottom: 40px;
+        }
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 10px 25px;
+            background: transparent;
+            border: 1px solid rgba(212, 168, 83, 0.3);
+            color: var(--color-white-soft);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-dark);
+            border-color: var(--color-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding-bottom: 100px;
+        }
+        .product-item {
+            background: linear-gradient(145deg, #111118 0%, #0a0a0f 100%);
+            border: 1px solid rgba(212, 168, 83, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .product-item.hidden {
+            display: none;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .product-item:hover {
+            transform: translateY(-8px);
+            border-color: rgba(212, 168, 83, 0.4);
+            box-shadow: 0 20px 40px rgba(212, 168, 83, 0.15);
+        }
+        .product-img {
+            height: 350px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 30px;
+            transition: transform 0.6s ease;
+        }
+        .product-item:hover .product-img img {
+            transform: scale(1.1);
+        }
+        .product-content {
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(to bottom, transparent, rgba(212, 168, 83, 0.03));
+            border-top: 1px solid rgba(212, 168, 83, 0.08);
+        }
+        .product-cat {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--color-gold);
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        .product-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--color-white);
+        }
+        .product-cta {
+            display: inline-block;
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid var(--color-gold);
+            color: var(--color-gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .product-item:hover .product-cta {
+            background: var(--color-gold);
+            color: var(--color-dark);
+        }
+
+        @media (max-width: 768px) {
+            .filter-container { top: 76px; }
+            .product-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar scrolled">
+        <div class="container">
+            <a href="index.html" class="nav-logo notranslate">
+                VHEORA
+                <span>FINE JEWELRY</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="index.html" class="nav-cta">Geri Dön</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="collection-header">
+        <div class="container">
+            <h1>Koleksiyonumuz</h1>
+            <p class="section-subtitle" style="margin: 0 auto;">Aradığınız zarafeti kategorilere göre filtreleyin.</p>
+        </div>
+    </header>
+
+    <div class="filter-container">
+        <div class="container">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Tümü</button>
+                <button class="filter-btn" data-filter="yuzuk">Yüzükler</button>
+                <button class="filter-btn" data-filter="bileklik">Bileklikler</button>
+                <button class="filter-btn" data-filter="kolye">Kolyeler</button>
+                <button class="filter-btn" data-filter="kupe">Küpeler</button>
+                <button class="filter-btn" data-filter="set">Set Takılar</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="product-grid" id="productGrid">
+            <p style="text-align:center;color:var(--gray);grid-column:1/-1;padding:60px;">Ürünler yükleniyor...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="text-align: center; padding: 40px 0;">
+            <p>© 2026 VHEORA. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- ========== TOAST CONTAINER ========== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== QUOTE MODAL ========== -->
+    <div class="quote-modal" id="quoteModal">
+        <div class="quote-overlay" id="quoteOverlay"></div>
+        <div class="quote-container">
+            <button class="quote-close" id="quoteClose">&times;</button>
+            <div class="quote-header">
+                <h2>Teklif Al</h2>
+                <p class="quote-product-name" id="modalProductName">Ürün Adı</p>
+            </div>
+            <div class="quote-form">
+                <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (Örn: 05xx...)" required>
+                <div class="quote-actions">
+                    <button id="sendWhatsApp" class="btn-quote-wa">
+                        <span>WhatsApp</span>
+                    </button>
+                    <button id="sendEmail" class="btn-quote-mail">
+                        <span>E-Posta</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load products from API
+            const productGrid = document.getElementById('productGrid');
+            let allProducts = [];
+
+            try {
+                const res = await fetch(`${API_URL}/api/products`);
+                allProducts = await res.json();
+            } catch(e) {
+                // Fallback to static images if API not available
+            }
+
+            // Map categories
+            const categoryMap = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+            const categoryLabelMap = { yuzuk: 'Pırlanta Yüzük', bileklik: 'Altın Bileklik', kolye: 'Pırlanta Kolye', kupe: 'Altın Küpe', set: 'Set Takı' };
+
+            if (allProducts.length === 0) {
+                // Default products if API empty
+                allProducts = [
+                    { id: 1, name: 'Sonsuzluk Tektaş', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
+                    { id: 2, name: 'Prenses Kesim', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
+                    { id: 3, name: 'İtalyan Zincir', category: 'bileklik', image: 'images/gold_bracelet.png' },
+                    { id: 4, name: 'Pırlanta Su Yolu', category: 'bileklik', image: 'images/gold_bracelet.png' },
+                    { id: 5, name: 'Göksel Damla', category: 'kolye', image: 'images/diamond_necklace.png' },
+                    { id: 6, name: 'Şafak Damlaları', category: 'kupe', image: 'images/gold_earrings.png' },
+                    { id: 7, name: 'Düğün Koleksiyonu', category: 'set', image: 'images/hero_collection.png' },
+                ];
+            }
+
+            function stockBadge(status) {
+                if (!status || status === 'in_stock') return '';
+                if (status === 'low_stock') return '<span class="stock-badge low">Az Stok</span>';
+                return '<span class="stock-badge out">Tükendi</span>';
+            }
+
+            function renderProducts(filter) {
+                const filtered = filter === 'all' ? allProducts : allProducts.filter(p => p.category === filter);
+                productGrid.innerHTML = filtered.map(p => `
+                    <div class="product-item" data-category="${p.category}" data-product-id="${p.id || ''}">
+                        <div class="product-img">${stockBadge(p.stock_status)}<img src="${p.image ? (p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
+                        <div class="product-content">
+                            <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
+                            <h3 class="product-title">${p.name}</h3>
+                            <button class="product-cta open-quote" data-product="${p.name}">Teklif Al</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Filter Logic
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderProducts(btn.getAttribute('data-filter'));
+                });
+            });
+
+            renderProducts('all');
+
+            // Modal Logic
+            const modal = document.getElementById('quoteModal');
+            const overlay = document.getElementById('quoteOverlay');
+            const closeBtn = document.getElementById('quoteClose');
+            const productNameEl = document.getElementById('modalProductName');
+            const phoneInput = document.getElementById('quotePhone');
+            const openBtns = document.querySelectorAll('.open-quote');
+            
+            let currentProduct = '';
+
+            openBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentProduct = btn.getAttribute('data-product');
+                    productNameEl.textContent = currentProduct;
+                    modal.classList.add('active');
+                });
+            });
+
+            const closeModal = () => {
+                modal.classList.remove('active');
+                phoneInput.value = '';
+            };
+
+            overlay.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', closeModal);
+
+            document.getElementById('sendWhatsApp').addEventListener('click', async () => {
+                const phone = phoneInput.value.trim();
+                if(!phone) { showToast('Eksik Bilgi', 'Lütfen telefon numaranızı girin.', 'error'); return; }
+                try { await fetch(`${API_URL}/api/quote`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone, product_name: currentProduct}) }); } catch(e) {}
+                const message = `*YENİ TEKLİF TALEBİ*\n\n*Ürün:* ${currentProduct}\n*Müşteri Telefon:* ${phone}\n\nBu talep web siteniz üzerinden oluşturulmuştur.`;
+                const waUrl = `https://wa.me/905510207299?text=${encodeURIComponent(message)}`;
+                window.open(waUrl, '_blank');
+                closeModal();
+            });
+
+            document.getElementById('sendEmail').addEventListener('click', async () => {
+                const phone = phoneInput.value.trim();
+                if(!phone) { showToast('Eksik Bilgi', 'Lütfen telefon numaranızı girin.', 'error'); return; }
+                try { await fetch(`${API_URL}/api/quote`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone, product_name: currentProduct}) }); } catch(e) {}
+                const subject = `VHEORA - Yeni Teklif Talebi: ${currentProduct}`;
+                const body = `Sayın VHEORA Ekibi,\n\nWeb siteniz üzerinden yeni bir teklif talebi alınmıştır:\n\nÜrün Adı: ${currentProduct}\nMüşteri İletişim Numarası: ${phone}\n\nLütfen en kısa sürede dönüş sağlayınız.`;
+                const mailUrl = `mailto:vheora.co@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.open(mailUrl, '_blank');
+                closeModal();
+            });
+        });
+    </script>
+</body>
+</html>
