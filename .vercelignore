@@ -1,0 +1,9 @@
+node_modules
+.git
+.env
+*.db
+server/vheora.db
+server/vheora.db-shm
+server/vheora.db-wal
+server/server.log
+server/server-test.log

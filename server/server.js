@@ -192,11 +192,17 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: 'Bir hata oluştu' });
 });
 
+module.exports = app;
+
 async function start() {
   await getDb();
-  app.listen(PORT, () => {
-    console.log(`[VHEORA] Server running on http://localhost:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+      console.log(`[VHEORA] Server running on http://localhost:${PORT}`);
+    });
+  }
 }
 
-start();
+if (!process.env.VERCEL) {
+  start();
+}

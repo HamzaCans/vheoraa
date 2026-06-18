@@ -240,7 +240,12 @@ async function seedIfEmpty(driver) {
 }
 
 function createSQLiteDriver(dbPath) {
-  const Database = require('better-sqlite3');
+  let Database;
+  try {
+    Database = require('better-sqlite3');
+  } catch (e) {
+    throw new Error('SQLite (better-sqlite3) not available. Set DATABASE_URL for PostgreSQL.');
+  }
   const sqlite = new Database(dbPath);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
