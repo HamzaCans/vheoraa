@@ -98,6 +98,8 @@
   <div id="maintenanceOverlay" style="position:fixed;inset:0;z-index:99999;background:#050505;display:none;"></div>
   <script>
     (function() {
+      document.getElementById('maintenanceOverlay').style.display='none';
+
       function getCookieVal(name) {
         var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
         return m ? m[1] : null;
@@ -133,6 +135,11 @@
           });
         }
         caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+        if (!sessionStorage.getItem('vheora_sw_cleared')) {
+          sessionStorage.setItem('vheora_sw_cleared', '1');
+          window.location.reload();
+          return;
+        }
         return;
       }
 
