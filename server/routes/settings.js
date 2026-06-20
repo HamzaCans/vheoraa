@@ -80,7 +80,7 @@ router.post('/settings/bypass-token', authenticateToken, async (req, res) => {
       [token, token]
     );
     safeLog(req, 'generated_bypass_token');
-    res.setHeader('Set-Cookie', 'vheora_bypass=' + token + ';path=/;max-age=604800;SameSite=None;Secure');
+    res.setHeader('Set-Cookie', 'vheora_bypass=aktif;path=/;max-age=86400;SameSite=Lax;Secure');
     res.json({ token });
   } catch (err) {
     console.error('[Bypass Token Error]', err);
@@ -93,7 +93,7 @@ router.delete('/settings/bypass-token', authenticateToken, async (req, res) => {
     const db = await getDb();
     await db.run("DELETE FROM settings WHERE key = 'maintenance_bypass_token'");
     safeLog(req, 'cleared_bypass_token');
-    res.setHeader('Set-Cookie', 'vheora_bypass=;path=/;max-age=0;SameSite=None;Secure');
+    res.setHeader('Set-Cookie', 'vheora_bypass=;path=/;max-age=0;SameSite=Lax;Secure');
     res.json({ message: 'Bypass token silindi' });
   } catch (err) {
     res.status(500).json({ error: 'Token silinemedi' });

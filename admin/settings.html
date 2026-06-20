@@ -229,17 +229,12 @@
         document.getElementById('siteContactHours').value = data.site_contact_hours || '';
         updateTimezonePreview();
         var serverToken = data.maintenance_bypass_token;
-        var localToken = localStorage.getItem('vheora_bypass_token');
-        if (serverToken && localToken !== serverToken) {
-          localStorage.setItem('vheora_bypass', '1');
-          localStorage.setItem('vheora_bypass_token', serverToken);
+        if (serverToken) {
           if (currentBypassToken !== serverToken) {
             currentBypassToken = serverToken;
-            document.getElementById('bypassSiteLink').href = '/?bypass=' + serverToken;
+            document.getElementById('bypassSiteLink').href = '/?token=' + serverToken;
           }
-        } else if (!serverToken && localToken) {
-          localStorage.removeItem('vheora_bypass');
-          localStorage.removeItem('vheora_bypass_token');
+        } else {
           currentBypassToken = null;
           document.getElementById('bypassSiteLink').href = '/';
         }
@@ -287,7 +282,7 @@
       }
     }
     function updateBypassStatus() {
-      var hasBypass = localStorage.getItem('vheora_bypass') === '1';
+      var hasBypass = currentBypassToken !== null;
       document.getElementById('bypassStatus').textContent = hasBypass ? 'Durum: Aktif - Siteyi normal gibi g\u00F6r\u00FCnt\u00FCleyebilirsin.' : 'Durum: Pasif';
     }
 
@@ -298,11 +293,9 @@
         var data = await fetchJSON(API + '/api/settings/bypass-token', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() } });
         if (!data || !data.token) { adminToast('Hata', 'Token olu\u015Fturulamad\u0131', 'error'); return; }
         currentBypassToken = data.token;
-        document.cookie = 'vheora_bypass=' + data.token + ';path=/;max-age=604800;SameSite=None;Secure';
-        localStorage.setItem('vheora_bypass', '1');
-        localStorage.setItem('vheora_bypass_token', data.token);
+        document.cookie = 'vheora_bypass=aktif;path=/;max-age=86400;SameSite=Lax;Secure';
         var link = document.getElementById('bypassSiteLink');
-        link.href = '/?bypass=' + data.token;
+        link.href = '/?token=' + data.token;
         link.textContent = '\uD83D\uDF0E Siteyi G\u00F6r\u00FCnt\u00FCle (\u2713)';
         link.style.background = 'rgba(40,180,80,.15)';
         link.style.color = '#4ade80';
@@ -316,9 +309,7 @@
     async function clearBypass() {
       try {
         await fetchJSON(API + '/api/settings/bypass-token', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
-        document.cookie = 'vheora_bypass=;path=/;max-age=0;SameSite=None;Secure';
-        localStorage.removeItem('vheora_bypass');
-        localStorage.removeItem('vheora_bypass_token');
+        document.cookie = 'vheora_bypass=;path=/;max-age=0;SameSite=Lax;Secure';
         currentBypassToken = null;
         document.getElementById('bypassSiteLink').href = '/';
         updateBypassStatus();
@@ -329,10 +320,8 @@
     }
 
     function loadBypassLink() {
-      var savedToken = localStorage.getItem('vheora_bypass_token');
-      if (savedToken) {
-        currentBypassToken = savedToken;
-        document.getElementById('bypassSiteLink').href = '/?bypass=' + savedToken;
+      if (currentBypassToken) {
+        document.getElementById('bypassSiteLink').href = '/?token=' + currentBypassToken;
       }
     }
 

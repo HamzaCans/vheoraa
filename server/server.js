@@ -196,22 +196,22 @@ const maintenanceCheck = async (req, res, next) => {
     const bypassRow = await db.get("SELECT value FROM settings WHERE key = 'maintenance_bypass_token'");
 
     if (bypassRow && bypassRow.value) {
-      if (cookies['vheora_bypass'] === bypassRow.value) {
+      if (cookies['vheora_bypass'] === 'aktif') {
         return next();
       }
       var rawUrl = req.originalUrl || req.url || '';
       var qIdx = rawUrl.indexOf('?');
-      var urlBypass = '';
+      var urlToken = '';
       if (qIdx !== -1) {
         var params = rawUrl.substring(qIdx + 1).split('&');
         for (var p = 0; p < params.length; p++) {
           var kv = params[p].split('=');
-          if (kv[0] === 'bypass') { urlBypass = decodeURIComponent(kv[1] || ''); break; }
+          if (kv[0] === 'token') { urlToken = decodeURIComponent(kv[1] || ''); break; }
         }
       }
-      if (!urlBypass && req.query && req.query.bypass) urlBypass = req.query.bypass;
-      if (urlBypass && urlBypass === bypassRow.value) {
-        res.setHeader('Set-Cookie', 'vheora_bypass=' + bypassRow.value + ';Path=/;Max-Age=604800;SameSite=Lax;Secure');
+      if (!urlToken && req.query && req.query.token) urlToken = req.query.token;
+      if (urlToken && urlToken === bypassRow.value) {
+        res.setHeader('Set-Cookie', 'vheora_bypass=aktif;Path=/;Max-Age=86400;SameSite=Lax;Secure');
         return res.redirect(302, '/');
       }
     }

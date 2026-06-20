@@ -30,7 +30,7 @@ document.addEventListener('touchmove', function(e) {
 // ========== SERVICE WORKER REGISTRATION ==========
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=5', { updateViaCache: 'none' }).then(reg => {
+      navigator.serviceWorker.register('/sw.js?v=6', { updateViaCache: 'none' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {

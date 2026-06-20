@@ -1,6 +1,6 @@
-const CACHE_NAME = 'vheora-v5';
-const STATIC_CACHE = 'vheora-static-v5';
-const DYNAMIC_CACHE = 'vheora-dynamic-v5';
+const CACHE_NAME = 'vheora-v6';
+const STATIC_CACHE = 'vheora-static-v6';
+const DYNAMIC_CACHE = 'vheora-dynamic-v6';
 
 const STATIC_ASSETS = [
   '/style.css',
@@ -47,7 +47,7 @@ self.addEventListener('fetch', event => {
   if (!url.protocol.startsWith('http')) return;
 
   if (url.pathname.endsWith('.html') || url.pathname === '/') {
-    var isBypass = url.searchParams.has('bypass');
+    var isBypass = url.searchParams.has('token');
     if (isBypass) {
       event.respondWith(fetch(request));
       return;
