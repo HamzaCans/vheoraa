@@ -1463,10 +1463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navigator.sendBeacon) {
     var _ua = navigator.userAgent || '';
     var _model = '';
-    if (/iphone/i.test(_ua)) {
-      var _m = _ua.match(/iPhone[^;)]*?(?=;|\))/i);
-      _model = _m ? _m[0].trim() : 'iPhone';
-    } else if (/android/i.test(_ua)) {
+    if (/android/i.test(_ua)) {
       var _m2 = _ua.match(/;\s*([^;)]+?)\s*Build/i);
       _model = _m2 ? _m2[1].trim() : '';
       if (!_model) { var _m3 = _ua.match(/Android[^;]*;\s*([^;)]+)/i); _model = _m3 ? _m3[1].trim() : ''; }
