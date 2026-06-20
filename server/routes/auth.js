@@ -36,8 +36,8 @@ router.post('/login', limiter, async (req, res) => {
     const ip = getClientIp(req);
     const info = parseDeviceInfo(ua);
     await db.run(
-      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [admin.id, admin.username, 'login', ip, ua, info.display, info.model || '']
+      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [admin.id, admin.username, 'login', ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
     );
     return res.json({ token, role: 'admin', username: admin.username });
   } catch (err) {

@@ -262,8 +262,8 @@ app.use('/admin', async (req, res, next) => {
       const info = parseDeviceInfo(ua);
       const page = req.path === '/' ? '/admin/' : `/admin${req.path}`;
       await db.run(
-        'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [0, 'anonymous', `page_visit: ${page}`, ip, ua, info.display, info.model || '']
+        'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [0, 'anonymous', `page_visit: ${page}`, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
       );
     } catch (_) {}
   }

@@ -60,13 +60,14 @@
           <thead>
             <tr>
               <th>Tarih</th>
+              <th>Saat</th>
               <th>Sayfa</th>
               <th>IP Adresi</th>
+              <th>Konum</th>
+              <th>Cihaz Türü</th>
               <th>Tarayıcı</th>
               <th>İşletim Sistemi</th>
-              <th>Cihaz</th>
               <th>Cihaz Modeli</th>
-              <th>Saat Dilimi</th>
               <th>Referrer</th>
             </tr>
           </thead>
@@ -236,11 +237,8 @@
         return;
       }
       body.innerHTML = filtered.map(function(l) {
-        var parts = (l.device_info || '').split('\u00B7');
-        var deviceType = (parts[0] || '-').trim();
-        var browser = (parts[1] || '').trim();
-        var os = (parts[2] || '').trim();
-        var cihaz = [browser, os].filter(Boolean).join(' \u00B7 ') || '-';
+        var deviceType = l.device_type || '-';
+        var cihaz = [l.browser, l.os].filter(Boolean).join(' \u00B7 ') || '-';
         return '<tr>' +
           '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDateOnly(l.created_at) + '</td>' +
           '<td style="white-space:nowrap;font-size:0.82rem;font-family:JetBrains Mono,monospace;color:var(--text-muted)">' + formatTimeOnly(l.created_at) + '</td>' +
@@ -267,30 +265,32 @@
     }
 
     async function loadVisitorLogs() {
-      document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="9" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
+      document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="10" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
       try {
         var logs = await fetchJSON(API + '/api/admin/visitor-logs?limit=200', { headers: { 'Authorization': 'Bearer ' + token } });
         if (logs == null) return;
         var body = document.getElementById('visitorLogBody');
         if (!logs.length) {
-          body.innerHTML = '<tr><td colspan="9" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
+          body.innerHTML = '<tr><td colspan="10" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
           return;
         }
         body.innerHTML = logs.map(function(l) {
+          var loc = [l.country, l.city].filter(Boolean).join(', ') || '-';
           return '<tr>' +
-            '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDate(l.created_at) + '</td>' +
+            '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDateOnly(l.created_at) + '</td>' +
+            '<td style="white-space:nowrap;font-size:0.82rem;font-family:JetBrains Mono,monospace;color:var(--text-muted)">' + formatTimeOnly(l.created_at) + '</td>' +
             '<td><span class="badge badge-gold">' + (l.page_visited || '-') + '</span></td>' +
             '<td><span class="ip-address">' + (l.ip_address || '-') + '</span></td>' +
+            '<td style="font-size:0.82rem;color:var(--text-muted)">' + loc + '</td>' +
+            '<td><span class="device-chip">' + (l.device_type || '-') + '</span></td>' +
             '<td><span class="device-chip">' + (l.browser || '-') + '</span></td>' +
             '<td><span class="device-chip">' + (l.os || '-') + '</span></td>' +
-            '<td><span class="device-chip">' + (l.device_info || '-') + '</span></td>' +
             '<td><span class="device-chip">' + (l.device_model || '-') + '</span></td>' +
-            '<td><span class="device-chip">' + (l.timezone || '-') + '</span></td>' +
             '<td style="font-size:0.8rem;color:var(--text-muted)">' + (l.referrer ? l.referrer.replace(/https?:\/\//,'').split('/')[0] : '-') + '</td>' +
             '</tr>';
         }).join('');
       } catch (err) {
-        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="8" class="empty-state"><p>Y\u00FCklenemedi.</p></td></tr>';
+        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="10" class="empty-state"><p>Y\u00FCklenemedi.</p></td></tr>';
       }
     }
 

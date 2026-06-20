@@ -203,8 +203,8 @@ async function logAdminAction(req, action) {
     const ip = getClientIp(req);
     const info = parseDeviceInfo(ua);
     await db.run(
-      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [req.user?.id || 0, req.user?.username || 'admin', action, ip, ua, info.display, info.model || '']
+      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [req.user?.id || 0, req.user?.username || 'admin', action, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
     );
   } catch (err) {
     console.error('[AdminLogger]', err);

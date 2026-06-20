@@ -190,7 +190,11 @@ async function runMigrations(driver) {
     `ALTER TABLE visitor_logs ADD COLUMN country TEXT DEFAULT ''`,
     `ALTER TABLE visitor_logs ADD COLUMN city TEXT DEFAULT ''`,
     `ALTER TABLE admin_logs ADD COLUMN device_model TEXT DEFAULT ''`,
-    `ALTER TABLE visitor_logs ADD COLUMN device_model TEXT DEFAULT ''`
+    `ALTER TABLE visitor_logs ADD COLUMN device_model TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN device_type TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN browser TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN os TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN device_type TEXT DEFAULT ''`
   ];
   for (const sql of migrations) {
     try {
