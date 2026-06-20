@@ -52,10 +52,11 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/((?!admin/|images/|fonts/).*)", "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" }
   ],
   "routes": [
+    { "src": "/((?!admin/|api/|images/|fonts/).*)", "dest": "/api/index.js" },
+    { "handle": "filesystem" },
     { "src": "^/admin$", "dest": "/admin/index.html" },
     { "src": "^/admin/([^\\.]+)$", "dest": "/admin/$1.html" }
   ]
