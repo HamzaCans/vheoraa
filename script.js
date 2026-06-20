@@ -37,7 +37,7 @@ if ('serviceWorker' in navigator) {
   var bypassActive = localStorage.getItem('vheora_bypass') === '1' || new URLSearchParams(window.location.search).get('bypass');
   if (!bypassActive) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(reg => {
+      navigator.serviceWorker.register('/sw.js?v=5', { updateViaCache: 'none' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {

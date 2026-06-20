@@ -98,20 +98,35 @@
   <div id="maintenanceOverlay" style="position:fixed;inset:0;z-index:99999;background:#050505;display:none;"></div>
   <script>
     (function() {
-      if (localStorage.getItem('vheora_bypass') === '1') {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          });
-        }
-        caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
-        return;
+      function getCookieVal(name) {
+        var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+        return m ? m[1] : null;
       }
+
+      var isBypass = localStorage.getItem('vheora_bypass') === '1';
       var urlParams = new URLSearchParams(window.location.search);
       var bypassToken = urlParams.get('bypass');
-      if (bypassToken && bypassToken.length > 20) {
+
+      if (!isBypass && bypassToken && bypassToken.length > 20) {
         localStorage.setItem('vheora_bypass', '1');
         localStorage.setItem('vheora_bypass_token', bypassToken);
+        isBypass = true;
+      }
+
+      if (!isBypass) {
+        var cookieToken = getCookieVal('vheora_bypass');
+        if (cookieToken && cookieToken.length > 20) {
+          localStorage.setItem('vheora_bypass', '1');
+          localStorage.setItem('vheora_bypass_token', cookieToken);
+          isBypass = true;
+        }
+      }
+
+      if (isBypass) {
+        var token = bypassToken || localStorage.getItem('vheora_bypass_token') || getCookieVal('vheora_bypass') || '';
+        if (token) {
+          document.cookie = 'vheora_bypass=' + token + ';path=/;max-age=604800;SameSite=Lax;Secure';
+        }
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(regs) {
             regs.forEach(function(r) { r.unregister(); });
@@ -120,6 +135,7 @@
         caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
         return;
       }
+
       document.getElementById('maintenanceOverlay').style.display='block';
       fetch('/api/settings/public').then(function(r){return r.json()}).then(function(d){
         if(d.maintenance_mode==='1'){
