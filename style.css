@@ -3785,21 +3785,25 @@ font {
   font-size: 0.95rem;
   letter-spacing: 1px;
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   border: none;
   cursor: pointer;
   width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
 }
 
 .btn-quote-submit:hover {
-  transform: translateY(-3px);
   box-shadow: 0 8px 30px rgba(212, 168, 83, 0.3);
+}
+
+.btn-quote-submit:active {
+  transform: scale(0.98);
 }
 
 .btn-quote-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
 .quote-success {
