@@ -1,21 +1,344 @@
-﻿<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Ayarlar | VHEORA Admin</title>  <link rel="stylesheet" href="admin.css?v=6">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></head><body>  <aside class="sidebar" id="sidebar"></aside>  <main class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Ayarlar</h1>        <p class="page-subtitle">Bakım modu ve site ayarları.</p>      </div>    </div>    <div class="alert alert-success" id="successAlert" style="display:none;"></div>    <div class="alert alert-error" id="errorAlert" style="display:none;"></div>    <div class="settings-section">      <h3 class="section-heading">🛠 Bakım Modu</h3>      <p class="section-desc">Siteyi ziyaretçilere kapatıp "Yakında Hizmetinizdeyiz" sayfasına yönlendirir. Yönetici paneli ve API erişime açık kalır.</p>      <div class="maintenance-toggle-row">        <div class="toggle-wrap">          <label class="toggle-label">            <span class="toggle-text" id="maintenanceStatus">Bakım Modu Kapalı</span>            <input type="checkbox" id="maintenanceToggle">            <span class="toggle-slider"></span>          </label>        </div>      </div>      <div class="form-row" style="margin-top:20px;">        <div class="form-group">          <label for="maintenanceTitle">Başlık</label>          <input type="text" id="maintenanceTitle" placeholder="Yakında Hizmetinizdeyiz">        </div>        <div class="form-group">          <label for="maintenanceMessage">Mesaj</label>          <input type="text" id="maintenanceMessage" placeholder="Sizler için çalışıyoruz...">        </div>      </div>    </div>    <div class="settings-section">      <h3 class="section-heading">🌐 Site İçeriği</h3>      <p class="section-desc">Ana sayfada görünen dinamik metinleri yönetin. Boş bırakılan alanlar varsayılan metinleri kullanır.</p>      <div class="form-row">        <div class="form-group">          <label for="siteHeroTitle">Hero Başlık (HTML)</label>          <input type="text" id="siteHeroTitle" placeholder='<span class="line">Zamansız</span>...'>        </div>        <div class="form-group">          <label for="siteHeroDesc">Hero Açıklama</label>          <input type="text" id="siteHeroDesc" placeholder="Her bir parça, yüzyıllık kuyumculuk...">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label for="siteBadgeText">Hero Rozet Metni</label>          <input type="text" id="siteBadgeText" placeholder="Yeni Koleksiyon 2026">        </div>        <div class="form-group">          <label for="siteAboutText1">Hakkımızda Metni 1</label>          <input type="text" id="siteAboutText1" placeholder="VHEORA, 25 yılı aşkın tecrübesiyle...">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label for="siteAboutText2">Hakkımızda Metni 2</label>          <input type="text" id="siteAboutText2" placeholder="Antalya'dan dünyaya açılan yolculuğumuzda...">        </div>        <div class="form-group">          <label for="siteStatCountry">İstatistik - Ülke</label>          <input type="text" id="siteStatCountry" placeholder="45">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label for="siteStatCustomer">İstatistik - Müşteri</label>          <input type="text" id="siteStatCustomer" placeholder="7589">        </div>        <div class="form-group">          <label for="siteStatCollection">İstatistik - Koleksiyon</label>          <input type="text" id="siteStatCollection" placeholder="250">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label for="siteContactAddress">İletişim - Adres</label>          <input type="text" id="siteContactAddress" placeholder="Muratpaşa, Antalya, Türkiye">        </div>        <div class="form-group">          <label for="siteContactEmail">İletişim - E-Posta</label>          <input type="text" id="siteContactEmail" placeholder="vheora.co@gmail.com">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label for="siteContactPhone">İletişim - Telefon</label>          <input type="text" id="siteContactPhone" placeholder="+90 (551) 020 7299">        </div>        <div class="form-group">          <label for="siteContactHours">İletişim - Çalışma Saatleri</label>          <input type="text" id="siteContactHours" placeholder="Pzt - Cmt: 10:00 - 20:00">        </div>      </div>    </div>        <div class="form-actions">      <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>    </div>  </main>  <script>    const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';    function getToken() {      const t = localStorage.getItem('vheora_token');      if (!t) window.location.href = '/admin/';      return t;    }    function logout() {      localStorage.removeItem('vheora_token');      localStorage.removeItem('vheora_user');      window.location.href = '/admin/';    }    document.getElementById('sidebar').innerHTML = `      <div class="sidebar-logo">VHEORA</div>      <div class="sidebar-sub">Admin Panel</div>      <nav class="sidebar-nav">                <div class="sidebar-category">Genel</div>        <a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a>                <div class="sidebar-category">İçerik Yönetimi</div>        <a href="/admin/products.html" class="sidebar-link">💎 Urunler</a>
-        <a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a>        <a href="/admin/testimonials.html" class="sidebar-link">⭐ Yorumlar</a>                
-        <div class="sidebar-category">Sipariş Yönetimi</div>
-        <a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a>
-        <div class="sidebar-category">İletişim</div>        <a href="/admin/messages.html" class="sidebar-link">✉️ Mesajlar</a>                <div class="sidebar-category">Sistem</div>        <a href="/admin/settings.html" class="sidebar-link active">🔧 Ayarlar</a>        <a href="/admin/logs.html" class="sidebar-link">📋 Loglar</a>                <div style="flex:1"></div>        <a href="/" class="sidebar-link">🌐 Siteye Git</a>      <button class="sidebar-logout" onclick="logout()">🚪 Cikis Yap</button>    `;    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menuyu ac/kapat">☰</button>');    function toggleSidebar() {      document.body.classList.toggle('sidebar-open');    }    function closeSidebar() {      document.body.classList.remove('sidebar-open');    }    function showAlert(type, msg) {      const el = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');      el.textContent = msg;      el.style.display = 'block';      setTimeout(() => el.style.display = 'none', 4000);    }    
-    async function btnAction(btn, label, verb, actionFn) {
-      var origHTML = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="btn-spinner"></span> ' + label + '...';
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="admin.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Ayarlar</h1>
+        <p class="page-subtitle">Bakım modu ve site ayarları.</p>
+      </div>
+    </div>
+    <div class="alert alert-success" id="successAlert" style="display:none;"></div>
+    <div class="alert alert-error" id="errorAlert" style="display:none;"></div>
+
+    <div class="settings-section">
+      <h3 class="section-heading">🛡️ Bakım Modu</h3>
+      <p class="section-desc">Siteyi ziyaretçilere kapatıp "Yakında Hizmetinizdeyiz" sayfasına yönlendirir. Yönetici paneli ve API erişime açık kalır.</p>
+      <div class="maintenance-toggle-row">
+        <div class="toggle-wrap">
+          <label class="toggle-label">
+            <span class="toggle-text" id="maintenanceStatus">Bakım Modu Kapalı</span>
+            <input type="checkbox" id="maintenanceToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:14px 16px;background:rgba(212,168,83,.06);border:1px solid rgba(212,168,83,.15);border-radius:var(--radius-md);">
+        <p style="color:var(--text-main);font-size:.85rem;margin-bottom:10px;">🔗 Bakım Modu Açıkken Site Erişimi (Sadece Senin İçin)</p>
+        <p style="color:var(--text-muted);font-size:.78rem;margin-bottom:12px;">Bypass token oluşturarak bakım modu açıkken bile siteyi görüntüleyebilirsin. Token sadece senin tarayıcına kaydedilir.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="generateBypass()">🔑 Token Oluştur & Etkinleştir</button>
+          <button class="btn btn-sm" onclick="clearBypass()" style="background:rgba(255,255,255,.06);color:var(--text-muted);">🗑️ Bypass'ı Kaldır</button>
+          <a href="/" target="_blank" class="btn btn-sm" style="background:rgba(212,168,83,.12);color:#d4a853;text-decoration:none;" id="bypassSiteLink">🌐 Siteyi Görüntüle</a>
+        </div>
+        <p style="color:var(--text-muted);font-size:.72rem;margin-top:10px;" id="bypassStatus">Durum: Pasif</p>
+      </div>
+      <div class="form-row" style="margin-top:20px;">
+        <div class="form-group">
+          <label for="maintenanceTitle">Başlık</label>
+          <input type="text" id="maintenanceTitle" placeholder="Yakında Hizmetinizdeyiz">
+        </div>
+        <div class="form-group">
+          <label for="maintenanceMessage">Mesaj</label>
+          <input type="text" id="maintenanceMessage" placeholder="Sizler için çalışıyoruz...">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="section-heading">🕐 Zaman Dilimi</h3>
+      <p class="section-desc">Admin panelindeki loglar, siparişler ve tarih gösterimleri için kullanılacak zaman dilimi.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="timezone">Zaman Dilimi</label>
+          <select id="timezone">
+            <option value="Europe/Istanbul">🇹🇷 Türkiye (UTC+3)</option>
+            <option value="Europe/London">🇬🇧 Londra (UTC+0/+1)</option>
+            <option value="Europe/Berlin">🇩🇪 Berlin (UTC+1/+2)</option>
+            <option value="Europe/Paris">🇫🇷 Paris (UTC+1/+2)</option>
+            <option value="Europe/Moscow">🇷🇺 Moskova (UTC+3)</option>
+            <option value="America/New_York">🇺🇸 New York (UTC-5/-4)</option>
+            <option value="America/Los_Angeles">🇺🇸 Los Angeles (UTC-8/-7)</option>
+            <option value="Asia/Dubai">🇦🇪 Dubai (UTC+4)</option>
+            <option value="Asia/Tokyo">🇯🇵 Tokyo (UTC+9)</option>
+            <option value="Asia/Shanghai">🇨🇳 Şanghay (UTC+8)</option>
+            <option value="Asia/Kolkata">🇮🇳 Hindistan (UTC+5:30)</option>
+            <option value="Australia/Sydney">🇦🇺 Sidney (UTC+10/+11)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <div style="padding:12px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-md);color:var(--text-muted);font-size:0.85rem;" id="timezonePreview">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3 class="section-heading">✨ Site İçeriği</h3>
+      <p class="section-desc">Ana sayfada görünen dinamik metinleri yönetin. Boş bırakılan alanlar varsayılan metinleri kullanır.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteHeroTitle">Hero Başlık (HTML)</label>
+          <input type="text" id="siteHeroTitle" placeholder='<span class="line">Zamansız</span>...'>
+        </div>
+        <div class="form-group">
+          <label for="siteHeroDesc">Hero Açıklama</label>
+          <input type="text" id="siteHeroDesc" placeholder="Her bir parça, yüzyıllık kuyumculuk...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteBadgeText">Hero Rozet Metni</label>
+          <input type="text" id="siteBadgeText" placeholder="Yeni Koleksiyon 2026">
+        </div>
+        <div class="form-group">
+          <label for="siteAboutText1">Hakkımızda Metni 1</label>
+          <input type="text" id="siteAboutText1" placeholder="VHEORA, 25 yılı aşkın tecrübesiyle...">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteAboutText2">Hakkımızda Metni 2</label>
+          <input type="text" id="siteAboutText2" placeholder="Antalya'dan dünyaya açılan yolculuğumuzda...">
+        </div>
+        <div class="form-group">
+          <label for="siteStatCountry">İstatistik - Ülke</label>
+          <input type="text" id="siteStatCountry" placeholder="45">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteStatCustomer">İstatistik - Müşteri</label>
+          <input type="text" id="siteStatCustomer" placeholder="7589">
+        </div>
+        <div class="form-group">
+          <label for="siteStatCollection">İstatistik - Koleksiyon</label>
+          <input type="text" id="siteStatCollection" placeholder="250">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteContactAddress">İletişim - Adres</label>
+          <input type="text" id="siteContactAddress" placeholder="Muratpaşa, Antalya, Türkiye">
+        </div>
+        <div class="form-group">
+          <label for="siteContactEmail">İletişim - E-Posta</label>
+          <input type="text" id="siteContactEmail" placeholder="vheora.co@gmail.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="siteContactPhone">İletişim - Telefon</label>
+          <input type="text" id="siteContactPhone" placeholder="+90 (551) 020 7299">
+        </div>
+        <div class="form-group">
+          <label for="siteContactHours">İletişim - Çalışma Saatleri</label>
+          <input type="text" id="siteContactHours" placeholder="Pzt - Cmt: 10:00 - 20:00">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>
+    </div>
+  </main>
+
+  <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+  <script>
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    function getToken() {
+      var t = localStorage.getItem('vheora_token');
+      if (!t) window.location.href = '/admin/';
+      return t;
+    }
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
       try {
-        await actionFn();
-        btn.innerHTML = '<span class="btn-check-icon">\u2713</span> ' + verb;
-        btn.className = btn.className.replace(/\b(?:btn-primary|btn-danger|btn-ghost)\b/g,'').trim() + ' btn-success';
-        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace('btn-success', 'btn-primary'); }, 2200);
+        var res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }
+    function adminToast(title, msg, type, duration) {
+      type = type || 'success'; duration = duration || 3500;
+      var c = document.getElementById('adminToast'); if (!c) return;
+      var t = document.createElement('div'); t.className = 'admin-toast';
+      var icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F' };
+      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
+      c.appendChild(t);
+      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
+    }
+
+    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a>\n        <div class="sidebar-category">İçerik Yönetimi</div>\n        <a href="/admin/products.html" class="sidebar-link">💎 Ürünler</a>\n        <a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">⭐ Yorumlar</a>\n        <div class="sidebar-category">Sipariş Yönetimi</div>\n        <a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a>\n        <div class="sidebar-category">İletişim</div>\n        <a href="/admin/messages.html" class="sidebar-link">✉️ Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link active">⚙️ Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link">📋 Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">🌐 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">🚪 Çıkış Yap</button>\n    ';
+    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
+    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+    function updateTimezonePreview() {
+      var tz = document.getElementById('timezone').value;
+      try {
+        var now = new Date();
+        var str = now.toLocaleString('tr-TR', { timeZone: tz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('timezonePreview').textContent = str;
       } catch(e) {
-        btn.innerHTML = '\u2717 Hata';
-        btn.className += ' btn-error';
-        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);
+        document.getElementById('timezonePreview').textContent = 'Geçersiz zaman dilimi';
       }
     }
-    async function loadSettings() {      const token = getToken();      try {        const res = await fetch(API + '/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + token } });        const data = await res.json();        if (data.error) { showAlert('error', data.error); return; }        document.getElementById('maintenanceToggle').checked = data.maintenance_mode === '1';        document.getElementById('maintenanceStatus').textContent = data.maintenance_mode === '1' ? 'Bakım Modu Açık' : 'Bakım Modu Kapalı';        document.getElementById('maintenanceTitle').value = data.maintenance_title || 'Yakında Hizmetinizdeyiz';        document.getElementById('maintenanceMessage').value = data.maintenance_message || '';        document.getElementById('siteHeroTitle').value = data.site_hero_title || '';        document.getElementById('siteHeroDesc').value = data.site_hero_desc || '';        document.getElementById('siteBadgeText').value = data.site_badge_text || '';        document.getElementById('siteAboutText1').value = data.site_about_text_1 || '';        document.getElementById('siteAboutText2').value = data.site_about_text_2 || '';        document.getElementById('siteStatCountry').value = data.site_stat_country || '';        document.getElementById('siteStatCustomer').value = data.site_stat_customer || '';        document.getElementById('siteStatCollection').value = data.site_stat_collection || '';        document.getElementById('siteContactAddress').value = data.site_contact_address || '';        document.getElementById('siteContactEmail').value = data.site_contact_email || '';        document.getElementById('siteContactPhone').value = data.site_contact_phone || '';        document.getElementById('siteContactHours').value = data.site_contact_hours || '';                      } catch (err) {        showAlert('error', 'Ayarlar yüklenirken hata oluştu');      }    }    document.getElementById('maintenanceToggle').addEventListener('change', function() {      document.getElementById('maintenanceStatus').textContent = this.checked ? 'Bakım Modu Açık' : 'Bakım Modu Kapalı';    });    async function saveSettings() {      const token = getToken();      const btn = document.querySelector('.form-actions .btn');      btn.disabled = true;      btn.textContent = 'Kaydediliyor...';      try {        const res = await fetch(API + '/api/admin/settings', {          method: 'PUT',          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },          body: JSON.stringify({            maintenance_mode: document.getElementById('maintenanceToggle').checked ? '1' : '0',            maintenance_title: document.getElementById('maintenanceTitle').value,            maintenance_message: document.getElementById('maintenanceMessage').value,            site_hero_title: document.getElementById('siteHeroTitle').value,            site_hero_desc: document.getElementById('siteHeroDesc').value,            site_badge_text: document.getElementById('siteBadgeText').value,            site_about_text_1: document.getElementById('siteAboutText1').value,            site_about_text_2: document.getElementById('siteAboutText2').value,            site_stat_country: document.getElementById('siteStatCountry').value,            site_stat_customer: document.getElementById('siteStatCustomer').value,            site_stat_collection: document.getElementById('siteStatCollection').value,            site_contact_address: document.getElementById('siteContactAddress').value,            site_contact_email: document.getElementById('siteContactEmail').value,            site_contact_phone: document.getElementById('siteContactPhone').value,            site_contact_hours: document.getElementById('siteContactHours').value,                                  })        });        const data = await res.json();        if (!res.ok) { showAlert('error', data.error || 'Hata'); return; }        showAlert('success', 'Ayarlar başarıyla kaydedildi');      } catch (err) {        showAlert('error', 'Kaydedilirken hata oluştu');      } finally {        btn.disabled = false;        btn.textContent = 'Kaydet';      }    }    loadSettings();  </script></body></html>
+    document.getElementById('timezone').addEventListener('change', updateTimezonePreview);
+
+    document.getElementById('maintenanceToggle').addEventListener('change', function() {
+      document.getElementById('maintenanceStatus').textContent = this.checked ? 'Bakım Modu Açık' : 'Bakım Modu Kapalı';
+    });
+
+    async function loadSettings() {
+      var token = getToken();
+      try {
+        var data = await fetchJSON(API + '/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (data == null) return;
+        document.getElementById('maintenanceToggle').checked = data.maintenance_mode === '1';
+        document.getElementById('maintenanceStatus').textContent = data.maintenance_mode === '1' ? 'Bakım Modu Açık' : 'Bakım Modu Kapalı';
+        document.getElementById('maintenanceTitle').value = data.maintenance_title || 'Yakında Hizmetinizdeyiz';
+        document.getElementById('maintenanceMessage').value = data.maintenance_message || '';
+        document.getElementById('timezone').value = data.timezone || 'Europe/Istanbul';
+        document.getElementById('siteHeroTitle').value = data.site_hero_title || '';
+        document.getElementById('siteHeroDesc').value = data.site_hero_desc || '';
+        document.getElementById('siteBadgeText').value = data.site_badge_text || '';
+        document.getElementById('siteAboutText1').value = data.site_about_text_1 || '';
+        document.getElementById('siteAboutText2').value = data.site_about_text_2 || '';
+        document.getElementById('siteStatCountry').value = data.site_stat_country || '';
+        document.getElementById('siteStatCustomer').value = data.site_stat_customer || '';
+        document.getElementById('siteStatCollection').value = data.site_stat_collection || '';
+        document.getElementById('siteContactAddress').value = data.site_contact_address || '';
+        document.getElementById('siteContactEmail').value = data.site_contact_email || '';
+        document.getElementById('siteContactPhone').value = data.site_contact_phone || '';
+        document.getElementById('siteContactHours').value = data.site_contact_hours || '';
+        updateTimezonePreview();
+        var serverToken = data.maintenance_bypass_token;
+        var localToken = localStorage.getItem('vheora_bypass_token');
+        if (serverToken && localToken !== serverToken) {
+          localStorage.setItem('vheora_bypass', '1');
+          localStorage.setItem('vheora_bypass_token', serverToken);
+          if (currentBypassToken !== serverToken) {
+            currentBypassToken = serverToken;
+            document.getElementById('bypassSiteLink').href = '/?bypass=' + serverToken;
+          }
+        } else if (!serverToken && localToken) {
+          localStorage.removeItem('vheora_bypass');
+          localStorage.removeItem('vheora_bypass_token');
+          currentBypassToken = null;
+          document.getElementById('bypassSiteLink').href = '/';
+        }
+        updateBypassStatus();
+      } catch (err) {
+        adminToast('Hata', 'Ayarlar yüklenirken hata oluştu', 'error');
+      }
+    }
+
+    async function saveSettings() {
+      var btn = document.querySelector('.form-actions .btn');
+      btn.disabled = true;
+      btn.textContent = 'Kaydediliyor...';
+      try {
+        var res = await fetch(API + '/api/admin/settings', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            maintenance_mode: document.getElementById('maintenanceToggle').checked ? '1' : '0',
+            maintenance_title: document.getElementById('maintenanceTitle').value,
+            maintenance_message: document.getElementById('maintenanceMessage').value,
+            timezone: document.getElementById('timezone').value,
+            site_hero_title: document.getElementById('siteHeroTitle').value,
+            site_hero_desc: document.getElementById('siteHeroDesc').value,
+            site_badge_text: document.getElementById('siteBadgeText').value,
+            site_about_text_1: document.getElementById('siteAboutText1').value,
+            site_about_text_2: document.getElementById('siteAboutText2').value,
+            site_stat_country: document.getElementById('siteStatCountry').value,
+            site_stat_customer: document.getElementById('siteStatCustomer').value,
+            site_stat_collection: document.getElementById('siteStatCollection').value,
+            site_contact_address: document.getElementById('siteContactAddress').value,
+            site_contact_email: document.getElementById('siteContactEmail').value,
+            site_contact_phone: document.getElementById('siteContactPhone').value,
+            site_contact_hours: document.getElementById('siteContactHours').value
+          })
+        });
+        var data = await res.json();
+        if (!res.ok) { adminToast('Hata', data.error || 'Hata', 'error'); return; }
+        adminToast('Kaydedildi', 'Ayarlar başarıyla güncellendi.', 'success');
+      } catch (err) {
+        adminToast('Hata', 'Kaydedilirken hata oluştu', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Kaydet';
+      }
+    }
+    function updateBypassStatus() {
+      var hasBypass = localStorage.getItem('vheora_bypass') === '1';
+      document.getElementById('bypassStatus').textContent = hasBypass ? 'Durum: Aktif \u2014 Siteyi.normal gibi g\u00F6r\u00FCnt\u00FCleyebilirsin. (Token URL: /?bypass=...)' : 'Durum: Pasif';
+    }
+
+    var currentBypassToken = null;
+
+    async function generateBypass() {
+      try {
+        var data = await fetchJSON(API + '/api/settings/bypass-token', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (!data || !data.token) { adminToast('Hata', 'Token olu\u015Fturulamad\u0131', 'error'); return; }
+        currentBypassToken = data.token;
+        document.cookie = 'vheora_bypass=' + data.token + ';path=/;max-age=604800;SameSite=None;Secure';
+        localStorage.setItem('vheora_bypass', '1');
+        localStorage.setItem('vheora_bypass_token', data.token);
+        var link = document.getElementById('bypassSiteLink');
+        link.href = '/?bypass=' + data.token;
+        link.textContent = '\uD83D\uDF0E Siteyi G\u00F6r\u00FCnt\u00FCle (\u2713)';
+        link.style.background = 'rgba(40,180,80,.15)';
+        link.style.color = '#4ade80';
+        updateBypassStatus();
+        adminToast('Etkinle\u015Ftirildi', 'Token olu\u015Fturuldu. A\u015Fa\u011F\u0131daki butona basarak siteyi a\u00E7.', 'success');
+      } catch (err) {
+        adminToast('Hata', 'Token olu\u015Fturulurken hata olu\u015Ftu', 'error');
+      }
+    }
+
+    async function clearBypass() {
+      try {
+        await fetchJSON(API + '/api/settings/bypass-token', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+        document.cookie = 'vheora_bypass=;path=/;max-age=0;SameSite=None;Secure';
+        localStorage.removeItem('vheora_bypass');
+        localStorage.removeItem('vheora_bypass_token');
+        currentBypassToken = null;
+        document.getElementById('bypassSiteLink').href = '/';
+        updateBypassStatus();
+        adminToast('Kald\u0131r\u0131ld\u0131', 'Bypass token silindi.', 'success');
+      } catch (err) {
+        adminToast('Hata', 'Token silinirken hata olu\u015Ftu', 'error');
+      }
+    }
+
+    function loadBypassLink() {
+      var savedToken = localStorage.getItem('vheora_bypass_token');
+      if (savedToken) {
+        currentBypassToken = savedToken;
+        document.getElementById('bypassSiteLink').href = '/?bypass=' + savedToken;
+      }
+    }
+
+    loadSettings();
+    loadBypassLink();
+    updateBypassStatus();
+  </script>
+</body>
+</html>

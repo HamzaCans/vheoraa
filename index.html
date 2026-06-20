@@ -2,9 +2,10 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
   <meta name="description" content="VHEORA — Global lüks kuyumculuk markası. Eşsiz pırlanta yüzükler, altın bileklikler, kolye ve küpeler. Zamansız zarafet, benzersiz işçilik.">
@@ -31,9 +32,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://translate.google.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preload" href="style.css" as="style">
-  <link rel="preload" href="images/hero_collection.png" as="image" fetchpriority="high">
+  <link rel="preload" href="script.js" as="script">
+  <link rel="preload" href="images/hero_collection.webp" as="image" type="image/webp" fetchpriority="high">
+  <link rel="preload" href="images/gold_diamond_ring.webp" as="image" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap"></noscript>
 
@@ -92,6 +94,45 @@
 </head>
 <body>
 
+  <!-- BAKIM MODU KONTROLÜ -->
+  <div id="maintenanceOverlay" style="position:fixed;inset:0;z-index:99999;background:#050505;display:none;"></div>
+  <script>
+    document.getElementById('maintenanceOverlay').style.display='block';
+    (function() {
+      if (localStorage.getItem('vheora_bypass') === '1') {
+        document.getElementById('maintenanceOverlay').style.display='none';
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { r.unregister(); });
+          });
+        }
+        caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+        return;
+      }
+      var urlParams = new URLSearchParams(window.location.search);
+      var bypassToken = urlParams.get('bypass');
+      if (bypassToken && bypassToken.length > 20) {
+        localStorage.setItem('vheora_bypass', '1');
+        localStorage.setItem('vheora_bypass_token', bypassToken);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { r.unregister(); });
+          });
+        }
+        caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+        document.getElementById('maintenanceOverlay').style.display='none';
+        return;
+      }
+      if (!bypassToken && localStorage.getItem('vheora_bypass') === '1') {
+        var savedToken = localStorage.getItem('vheora_bypass_token');
+        if (savedToken) {
+          window.history.replaceState({}, '', '/?bypass=' + savedToken);
+        }
+      }
+      document.getElementById('maintenanceOverlay').style.display='none';
+    })();
+  </script>
+
   <!-- ========== LOADING SCREEN ========== -->
   <div class="loader" id="loader">
     <canvas class="loader-canvas" id="loaderCanvas"></canvas>
@@ -109,7 +150,7 @@
         </div>
         <div class="loader-logo-line"></div>
       </div>
-      <div class="loader-sub">FINE JEWELRY</div>
+      <div class="loader-sub">VHEORA | JEWELRY</div>
       <div class="loader-bar">
         <div class="loader-bar-fill">
           <div class="loader-diamond-wrapper">
@@ -130,7 +171,7 @@
     <div class="container">
       <a href="#hero" class="nav-logo notranslate">
         VHEORA
-        <span>FINE JEWELRY</span>
+        <span>VHEORA | JEWELRY</span>
       </a>
       <div class="nav-links" id="navLinks">
         <a href="#hero">Ana Sayfa</a>
@@ -196,7 +237,10 @@
       </div>
       <div class="hero-visual">
         <div class="hero-image-wrapper">
-          <img src="images/hero_collection.png" alt="VHEORA Lüks Takı Koleksiyonu" width="520" height="650" loading="eager">
+          <picture>
+            <source srcset="images/hero_collection.webp" type="image/webp">
+            <picture><source srcset="images/hero_collection.webp" type="image/webp"><img src="images/hero_collection.png" alt="VHEORA Lüks Takı Koleksiyonu" width="520" height="650" loading="eager" fetchpriority="high" decoding="async"></picture>
+          </picture>
         </div>
         <div class="hero-float-card card-1">
           <div class="float-card-label">Sertifikalı</div>
@@ -218,28 +262,28 @@
   <section class="showcase">
     <div class="showcase-track" id="showcaseTrack">
       <div class="showcase-item">
-        <img src="images/gold_diamond_ring.png" alt="Altın Pırlanta Yüzük" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Altın Pırlanta Yüzük" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Sonsuz Çiçek</div>
           <div class="showcase-item-category">Pırlanta Yüzük</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/gold_bracelet.png" alt="Altın Bileklik" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_bracelet.webp" type="image/webp"><img src="images/gold_bracelet.png" alt="Altın Bileklik" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Altın Zincir</div>
           <div class="showcase-item-category">Altın Bileklik</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/diamond_necklace.png" alt="Pırlanta Kolye" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/diamond_necklace.webp" type="image/webp"><img src="images/diamond_necklace.png" alt="Pırlanta Kolye" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Göksel Damla</div>
           <div class="showcase-item-category">Pırlanta Kolye</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/gold_earrings.png" alt="Altın Küpe" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_earrings.webp" type="image/webp"><img src="images/gold_earrings.png" alt="Altın Küpe" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Şafak Damlaları</div>
           <div class="showcase-item-category">Altın Küpe</div>
@@ -247,28 +291,28 @@
       </div>
       <!-- Duplicate for infinite scroll -->
       <div class="showcase-item">
-        <img src="images/gold_diamond_ring.png" alt="Altın Pırlanta Yüzük" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Altın Pırlanta Yüzük" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Sonsuz Çiçek</div>
           <div class="showcase-item-category">Pırlanta Yüzük</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/gold_bracelet.png" alt="Altın Bileklik" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_bracelet.webp" type="image/webp"><img src="images/gold_bracelet.png" alt="Altın Bileklik" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Altın Zincir</div>
           <div class="showcase-item-category">Altın Bileklik</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/diamond_necklace.png" alt="Pırlanta Kolye" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/diamond_necklace.webp" type="image/webp"><img src="images/diamond_necklace.png" alt="Pırlanta Kolye" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Göksel Damla</div>
           <div class="showcase-item-category">Pırlanta Kolye</div>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="images/gold_earrings.png" alt="Altın Küpe" width="280" height="340" loading="lazy">
+        <picture><source srcset="images/gold_earrings.webp" type="image/webp"><img src="images/gold_earrings.png" alt="Altın Küpe" width="280" height="340" loading="lazy" decoding="async"></picture>
         <div class="showcase-item-overlay">
           <div class="showcase-item-name">Şafak Damlaları</div>
           <div class="showcase-item-category">Altın Küpe</div>
@@ -281,8 +325,8 @@
   <section class="about" id="about">
     <div class="container">
       <div class="about-visual reveal-left">
-        <img src="images/jewelry_workshop.png" alt="VHEORA Kuyumculuk Atölyesi" width="520" height="650" class="about-image" loading="lazy">
-        <img src="images/gold_diamond_ring.png" alt="Özel Tasarım Yüzük" width="300" height="375" class="about-image-accent" loading="lazy">
+        <picture><source srcset="images/jewelry_workshop.webp" type="image/webp"><img src="images/jewelry_workshop.png" alt="VHEORA Kuyumculuk Atölyesi" width="520" height="650" class="about-image" loading="lazy" decoding="async"></picture>
+        <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Özel Tasarım Yüzük" width="300" height="375" class="about-image-accent" loading="lazy" decoding="async"></picture>
         <div class="about-experience-badge">
           <span class="number">25</span>
           <span class="label">Yıllık Deneyim</span>
@@ -384,7 +428,7 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.1s">
           <div class="product-card-inner">
             <div class="product-image">
-              <img src="images/gold_diamond_ring.png" alt="Sonsuz Çiçek Pırlanta Yüzük" width="300" height="300" loading="lazy">
+              <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Sonsuz Çiçek Pırlanta Yüzük" width="300" height="300" loading="lazy" decoding="async"></picture>
               <span class="product-badge">Yeni</span>
             </div>
             <div class="product-info">
@@ -397,7 +441,7 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.2s">
           <div class="product-card-inner">
             <div class="product-image">
-              <img src="images/diamond_necklace.png" alt="Göksel Damla Kolye" width="300" height="300" loading="lazy">
+              <picture><source srcset="images/diamond_necklace.webp" type="image/webp"><img src="images/diamond_necklace.png" alt="Göksel Damla Kolye" width="300" height="300" loading="lazy" decoding="async"></picture>
               <span class="product-badge">Çok Satan</span>
             </div>
             <div class="product-info">
@@ -410,7 +454,7 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.3s">
           <div class="product-card-inner">
             <div class="product-image">
-              <img src="images/gold_earrings.png" alt="Şafak Damlaları Küpe" width="300" height="300" loading="lazy">
+              <picture><source srcset="images/gold_earrings.webp" type="image/webp"><img src="images/gold_earrings.png" alt="Şafak Damlaları Küpe" width="300" height="300" loading="lazy" decoding="async"></picture>
               <span class="product-badge">Sınırlı Seri</span>
             </div>
             <div class="product-info">
@@ -437,6 +481,7 @@
         <div class="testimonials-grid" id="testimonialGrid">
           <!-- Testimonials will be injected here by script.js -->
         </div>
+        <div class="testimonials-pages" id="testimonialPages"></div>
         <div class="slider-controls">
           <button class="slider-btn prev" id="prevTestimonial" aria-label="Önceki">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
@@ -618,7 +663,7 @@
         <div class="footer-brand">
           <a href="#hero" class="nav-logo notranslate">
             VHEORA
-            <span>FINE JEWELRY</span>
+            <span>VHEORA | JEWELRY</span>
           </a>
           <p class="footer-brand-text">
             Zamansız zarafet ve benzersiz işçilik ile global kuyumculuk deneyimi. 
@@ -673,8 +718,10 @@
           <a href="legal.html#gizlilik">Gizlilik Politikası</a>
           <a href="legal.html#kvkk">KVKK Metni</a>
           <a href="legal.html#cerez">Çerez Politikası</a>
-          <a href="admin/index.html" class="admin-link" title="Yönetici Paneli">⚙️</a>
         </div>
+        <button class="admin-secret-trigger" id="adminSecretTrigger" aria-label="Admin" title="⚙">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
       </div>
     </div>
   </footer>
@@ -694,7 +741,7 @@
   </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 
   <!-- ========== QUOTE MODAL ========== -->
   <div class="quote-modal" id="quoteModal">
@@ -873,59 +920,64 @@
   <!-- ========== TOAST CONTAINER ========== -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ========== ADMIN TOOLBAR ========== -->
-  <button class="admin-toolbar-btn" id="adminToolbarBtn" title="Yönetici Araçları">⚙️</button>
-  <div class="admin-toolbar-panel" id="adminToolbarPanel">
-    <h3>Yönetici Araçları</h3>
-    <div class="admin-toolbar-row">
-      <label>Bakım Modu</label>
-      <label class="admin-toggle">
-        <input type="checkbox" id="adminMaintenanceToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div class="admin-toolbar-row">
-      <label>Ürün Ekle</label>
-      <button class="admin-toolbar-btn-sm" id="adminAddProductBtn">+ Ekle</button>
-    </div>
-    <div class="admin-toolbar-row">
-      <span class="admin-panel-label">Panel →</span>
-      <a href="/admin/dashboard.html" class="admin-toolbar-btn-sm" style="text-decoration:none;text-align:center;">Git</a>
+  <!-- ========== ADMIN SECRET MODAL ========== -->
+  <div class="admin-secret-overlay" id="adminSecretOverlay">
+    <div class="admin-secret-modal">
+      <div class="admin-secret-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3 class="admin-secret-title">Yetkili Erişim</h3>
+      <p class="admin-secret-subtitle">Devam etmek için şifrenizi girin</p>
+      <form id="adminSecretForm">
+        <input type="password" id="adminSecretInput" class="admin-secret-input" placeholder="••••••••" autocomplete="off" required>
+        <div class="admin-secret-error" id="adminSecretError"></div>
+        <button type="submit" class="admin-secret-btn">Giriş Yap</button>
+        <button type="button" class="admin-secret-cancel" id="adminSecretCancel">İptal</button>
+      </form>
     </div>
   </div>
 
-  <!-- ========== ADMIN ÜRÜN EKLEME MODAL ========== -->
-  <div class="admin-product-modal" id="adminProductModal">
-    <div class="admin-product-overlay" id="adminProductOverlay"></div>
-    <div class="admin-product-container">
-      <button class="admin-product-close" id="adminProductClose">&times;</button>
-      <h2>Ürün Ekle</h2>
-      <form id="adminProductForm">
-        <label>Ürün Adı</label>
-        <input type="text" id="apName" required>
-        <label>Kategori</label>
-        <select id="apCategory">
-          <option value="yuzuk">Yüzük</option>
-          <option value="bileklik">Bileklik</option>
-          <option value="kolye">Kolye</option>
-          <option value="kupe">Küpe</option>
-          <option value="set">Set Takı</option>
-        </select>
-        <label>Açıklama</label>
-        <textarea id="apDescription" rows="2"></textarea>
-        <label>Fiyat</label>
-        <input type="text" id="apPrice" placeholder="örn: 12.500 TL">
-        <label>Resim URL</label>
-        <input type="text" id="apImage" placeholder="images/urun.png">
-        <label>Stok</label>
-        <input type="number" id="apStock" value="0" min="0">
-        <label>Rozet</label>
-        <input type="text" id="apBadge" placeholder="Yeni, Özel, vb.">
-        <button type="submit" class="form-submit" id="apSubmitBtn">Ürünü Kaydet</button>
-      </form>
-      <div id="apError" style="color:#ef5350;font-size:0.8rem;text-align:center;margin-top:8px;"></div>
-    </div>
-  </div>
+  <script>
+    (function(){
+      var overlay = document.getElementById('adminSecretOverlay');
+      var input = document.getElementById('adminSecretInput');
+      var error = document.getElementById('adminSecretError');
+      var form = document.getElementById('adminSecretForm');
+
+      document.getElementById('adminSecretTrigger').addEventListener('click', function(){
+        overlay.classList.add('active');
+        setTimeout(function(){ input.focus(); }, 300);
+      });
+
+      document.getElementById('adminSecretCancel').addEventListener('click', function(){
+        overlay.classList.remove('active');
+        input.value = '';
+        error.textContent = '';
+      });
+
+      overlay.addEventListener('click', function(e){
+        if(e.target === overlay){
+          overlay.classList.remove('active');
+          input.value = '';
+          error.textContent = '';
+        }
+      });
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var val = input.value.trim();
+        if(val === 'Vh_12345678'){
+          window.location.href = '/admin/';
+        } else {
+          error.textContent = 'Yanlış şifre';
+          input.value = '';
+          input.focus();
+        }
+      });
+    })();
+  </script>
+
+
 
 </body>
 </html>
