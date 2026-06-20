@@ -94,20 +94,8 @@
 </head>
 <body>
 
-  <!-- BAKIM MODU KONTROLÜ -->
+  <!-- BAKIM MODU KONTROLÜ — Server-side handles everything: cookie+redirect. If you see this page, you're authorized. -->
   <div id="maintenanceOverlay" style="position:fixed;inset:0;z-index:99999;background:#050505;display:none;"></div>
-  <script>
-    (function() {
-      document.getElementById('maintenanceOverlay').style.display='none';
-
-      fetch('/api/settings/public').then(function(r){return r.json()}).then(function(d){
-        if(d.maintenance_mode==='1'){
-          document.getElementById('maintenanceOverlay').style.display='block';
-          document.getElementById('maintenanceOverlay').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px"><div><h1 style="color:#d4a853;font-size:1.5rem;margin-bottom:12px">'+(d.maintenance_title||'Bakım Modu')+'</h1><p style="color:#aaa;font-size:.9rem;line-height:1.6">'+(d.maintenance_message||'Sitemiz şu an bakım modundadır.')+'</p></div></div>';
-        }
-      }).catch(function(){});
-    })();
-  </script>
 
   <!-- ========== LOADING SCREEN ========== -->
   <div class="loader" id="loader">
