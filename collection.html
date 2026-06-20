@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050505">
     <meta name="description" content="VHEORA'nın eşsiz koleksiyonunu keşfedin. Pırlanta yüzükler, altın bileklikler, kolyeler, küpeler ve set takılar.">
     <meta property="og:title" content="Koleksiyon | VHEORA — Luxury Jewelry">
@@ -15,8 +15,9 @@
   <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://translate.google.com">
+    <link rel="dns-prefetch" href="https://translate.google.com">
     <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preload" href="style.css" as="style">
     <style>
         body {
             background-color: var(--color-dark);
@@ -236,7 +237,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
     <script>
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -278,7 +279,7 @@
                 const filtered = filter === 'all' ? allProducts : allProducts.filter(p => p.category === filter);
                 productGrid.innerHTML = filtered.map(p => `
                     <div class="product-item" data-category="${p.category}" data-product-id="${p.id || ''}">
-                        <div class="product-img">${stockBadge(p.stock_status)}<img src="${p.image ? (p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
+                        <div class="product-img">${stockBadge(p.stock_status)}<img src="${p.image ? (p.image.startsWith('data:') || p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
                         <div class="product-content">
                             <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
                             <h3 class="product-title">${p.name}</h3>

@@ -1,2 +1,432 @@
-<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Siparişler | VHEORA Admin</title>  <link rel="stylesheet" href="admin.css?v=6">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></head><body>  <aside class="sidebar" id="sidebar"></aside>  <main class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Siparişler</h1>        <p class="page-subtitle">Sipariş ve kargo yönetimi.</p>      </div>      <button class="btn btn-primary" onclick="openCreateModal()">+ Yeni Sipariş</button>    </div>    <div class="cards-grid" id="orderStatsGrid">      <div class="stat-card" style="border-left:3px solid #ffc107;"><div class="stat-card-value" id="statPending">-</div><div class="stat-card-label">Bekleyen</div></div>      <div class="stat-card" style="border-left:3px solid #2979ff;"><div class="stat-card-value" id="statConfirmed">-</div><div class="stat-card-label">Onaylanan</div></div>      <div class="stat-card" style="border-left:3px solid #9c27b0;"><div class="stat-card-value" id="statPreparing">-</div><div class="stat-card-label">Hazırlanıyor</div></div>      <div class="stat-card" style="border-left:3px solid #ff9800;"><div class="stat-card-value" id="statShipped">-</div><div class="stat-card-label">Kargoda</div></div>      <div class="stat-card" style="border-left:3px solid #2ecc71;"><div class="stat-card-value" id="statDelivered">-</div><div class="stat-card-label">Teslim</div></div>      <div class="stat-card" style="border-left:3px solid #ff4d4d;"><div class="stat-card-value" id="statCancelled">-</div><div class="stat-card-label">İptal</div></div>    </div>    <div class="action-bar" style="margin-bottom:20px;gap:10px;">      <select id="filterStatus" onchange="loadOrders()" style="padding:10px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-main);font-size:0.85rem;font-family:var(--font);">        <option value="">Tüm Durumlar</option>        <option value="pending">Bekleyen</option>        <option value="confirmed">Onaylanan</option>        <option value="preparing">Hazırlanıyor</option>        <option value="shipped">Kargoda</option>        <option value="delivered">Teslim Edilen</option>        <option value="cancelled">İptal</option>      </select>      <input type="text" class="search-input" id="searchOrder" placeholder="Sipariş No / Müşteri ara..." oninput="loadOrders()" style="flex:1;min-width:150px;">    </div>    <div class="table-container" id="ordersContainer">      <p class="empty-state">Yükleniyor...</p>    </div>  </main>  <div class="modal-overlay" id="orderModal">    <div class="modal" style="max-width:700px;">      <h2 class="modal-title" id="orderModalTitle">Yeni Sipariş</h2>      <input type="hidden" id="editOrderId">      <div class="form-row">        <div class="form-group">          <label>Müşteri Adı *</label>          <input type="text" id="orderCustomer" required>        </div>        <div class="form-group">          <label>E-posta</label>          <input type="email" id="orderEmail">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label>Telefon</label>          <input type="text" id="orderPhone">        </div>        <div class="form-group">          <label>Şehir</label>          <input type="text" id="orderCity">        </div>      </div>      <div class="form-row">        <div class="form-group">          <label>İlçe</label>          <input type="text" id="orderDistrict">        </div>        <div class="form-group">          <label>Durum</label>          <select id="orderStatus">            <option value="pending">Bekleyen</option>            <option value="confirmed">Onaylandı</option>            <option value="preparing">Hazırlanıyor</option>            <option value="shipped">Kargoda</option>            <option value="delivered">Teslim Edildi</option>            <option value="cancelled">İptal</option>          </select>        </div>      </div>      <div class="form-group">        <label>Adres</label>        <textarea id="orderAddress" rows="2"></textarea>      </div>      <div class="form-row">        <div class="form-group">          <label>Kargo Firması</label>          <select id="orderCarrier">            <option value="">Seçin</option>            <option value="MNG Kargo">MNG Kargo</option>            <option value="Yurtiçi Kargo">Yurtiçi Kargo</option>            <option value="Aras Kargo">Aras Kargo</option>            <option value="PTT Kargo">PTT Kargo</option>            <option value="UPS">UPS</option>            <option value="FedEx">FedEx</option>            <option value="DHL">DHL</option>          </select>        </div>        <div class="form-group">          <label>Takip No</label>          <input type="text" id="orderTracking">        </div>      </div>      <div class="form-group">        <label>Notlar</label>        <textarea id="orderNotes" rows="2"></textarea>      </div>      <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">          <label style="font-size:0.7rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Sipariş Ürünleri</label>          <button class="btn btn-sm btn-ghost" onclick="addOrderItemRow()">+ Ürün Ekle</button>        </div>        <div id="orderItemsContainer"></div>      </div>      <div class="form-actions">        <button class="btn btn-ghost" onclick="closeOrderModal()">İptal</button>        <button class="btn btn-primary" id="saveOrderBtn" onclick="saveOrder()">Kaydet</button>      </div>    </div>  </div>  <div class="admin-toast-container" id="adminToast"></div>  <div class="confirm-overlay" id="confirmOverlay">    <div class="confirm-modal">      <h3 id="confirmTitle">Emin misiniz?</h3>      <p id="confirmText">Bu işlem geri alınamaz.</p>      <div class="confirm-actions">        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>        <button class="btn btn-danger" id="confirmBtn">Sil</button>      </div>    </div>  </div>  <script>    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';    var orderItemCount = 0;    var confirmResolve = null;    function adminToast(title, msg, type, duration) {      type = type || 'success'; duration = duration || 3500;      var c = document.getElementById('adminToast'); if (!c) return;      var t = document.createElement('div'); t.className = 'admin-toast';      var icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F' };      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';      c.appendChild(t);      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);    }    function showConfirm(title, text, btnText) {      btnText = btnText || 'Sil';      return new Promise(function(resolve) {        document.getElementById('confirmTitle').textContent = title;        document.getElementById('confirmText').textContent = text;        document.getElementById('confirmBtn').textContent = btnText;        document.getElementById('confirmOverlay').classList.add('active');        confirmResolve = resolve;      });    }    function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(false); confirmResolve = null; } }    document.getElementById('confirmBtn').addEventListener('click', function() { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(true); confirmResolve = null; } });    document.getElementById('confirmOverlay').addEventListener('click', function(e) { if (e.target === e.currentTarget) closeConfirm(); });    function getToken() { var t = localStorage.getItem('vheora_token'); if (!t) window.location.href = '/admin/'; return t; }    function logout() { localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">\u0130\u00E7erik Y\u00F6netimi</div>\n        <a href="/admin/products.html" class="sidebar-link">\uD83D\uDC8E \u00DCr\u00FCnler</a>
-        <a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a>\n        <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n        <div class="sidebar-category">Sipari\u015F Y\u00F6netimi</div>\n        <a href="/admin/orders.html" class="sidebar-link active">\uD83D\uDCE6 Sipari\u015Fler</a>\n        <div class="sidebar-category">\u0130leti\u015Fim</div>\n        <a href="/admin/messages.html" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA \u00C7\u0131k\u0131\u015F Yap</button>\n    ';    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menuyu ac/kapat">\u2630</button>');    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }    function closeSidebar() { document.body.classList.remove('sidebar-open'); }    function addOrderItemRow(productName, qty, price) {      productName = productName || ''; qty = qty || 1; price = price || 0;      orderItemCount++;      var html = '<div class="form-row" id="orderItemRow' + orderItemCount + '" style="margin-bottom:8px;align-items:end;">';      html += '<div class="form-group" style="margin-bottom:0;flex:2;"><input type="text" class="order-item-name" placeholder="Ürün adı" value="' + productName.replace(/"/g,'&quot;') + '" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';      html += '<div class="form-group" style="margin-bottom:0;flex:1;"><input type="number" class="order-item-qty" value="' + qty + '" min="1" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';      html += '<div class="form-group" style="margin-bottom:0;flex:1;"><input type="number" class="order-item-price" value="' + price + '" min="0" step="0.01" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';      html += '<button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="margin-bottom:0;">✕</button>';      html += '</div>';      document.getElementById('orderItemsContainer').insertAdjacentHTML('beforeend', html);    }    function openCreateModal() {      document.getElementById('editOrderId').value = '';      document.getElementById('orderModalTitle').textContent = 'Yeni Sipariş';      document.getElementById('orderCustomer').value = ''; document.getElementById('orderEmail').value = '';      document.getElementById('orderPhone').value = ''; document.getElementById('orderCity').value = '';      document.getElementById('orderDistrict').value = ''; document.getElementById('orderAddress').value = '';      document.getElementById('orderStatus').value = 'pending'; document.getElementById('orderCarrier').value = '';      document.getElementById('orderTracking').value = ''; document.getElementById('orderNotes').value = '';      document.getElementById('orderItemsContainer').innerHTML = '';      addOrderItemRow();      document.getElementById('orderModal').classList.add('active');    }    function openEditModal(order) {      document.getElementById('editOrderId').value = order.id;      document.getElementById('orderModalTitle').textContent = 'Sipariş Düzenle #' + order.order_no;      document.getElementById('orderCustomer').value = order.customer_name || '';      document.getElementById('orderEmail').value = order.customer_email || '';      document.getElementById('orderPhone').value = order.customer_phone || '';      document.getElementById('orderCity').value = order.city || '';      document.getElementById('orderDistrict').value = order.district || '';      document.getElementById('orderAddress').value = order.shipping_address || '';      document.getElementById('orderStatus').value = order.status || 'pending';      document.getElementById('orderCarrier').value = order.carrier || '';      document.getElementById('orderTracking').value = order.tracking_no || '';      document.getElementById('orderNotes').value = order.notes || '';      document.getElementById('orderItemsContainer').innerHTML = '';      if (order.items && order.items.length) {        order.items.forEach(function(item) { addOrderItemRow(item.product_name, item.quantity, item.unit_price); });      } else { addOrderItemRow(); }      document.getElementById('orderModal').classList.add('active');    }    function closeOrderModal() { document.getElementById('orderModal').classList.remove('active'); }    document.getElementById('orderModal').addEventListener('click', function(e) { if (e.target === this) closeOrderModal(); });    function getOrderItems() {      var rows = document.querySelectorAll('#orderItemsContainer .form-row');      var items = [];      rows.forEach(function(row) {        var name = row.querySelector('.order-item-name').value.trim();        var qty = parseInt(row.querySelector('.order-item-qty').value) || 1;        var price = parseFloat(row.querySelector('.order-item-price').value) || 0;        if (name) items.push({ product_name: name, quantity: qty, unit_price: price });      });      return items;    }    async function saveOrder() {      var btn = document.getElementById('saveOrderBtn');      var editId = document.getElementById('editOrderId').value;      var data = {        customer_name: document.getElementById('orderCustomer').value.trim(),        customer_email: document.getElementById('orderEmail').value.trim(),        customer_phone: document.getElementById('orderPhone').value.trim(),        city: document.getElementById('orderCity').value.trim(),        district: document.getElementById('orderDistrict').value.trim(),        shipping_address: document.getElementById('orderAddress').value.trim(),        status: document.getElementById('orderStatus').value,        carrier: document.getElementById('orderCarrier').value,        tracking_no: document.getElementById('orderTracking').value.trim(),        notes: document.getElementById('orderNotes').value.trim(),        items: getOrderItems()      };      if (!data.customer_name) { adminToast('Hata', 'Müşteri adı gerekli.', 'error'); return; }      if (!data.items.length) { adminToast('Hata', 'En az bir ürün gerekli.', 'error'); return; }      await btnAction(btn, 'Kaydediliyor', 'Kaydedildi', async function() {        var url = editId ? API + '/api/admin/orders/' + editId : API + '/api/admin/orders';        var method = editId ? 'PUT' : 'POST';        var res = await fetch(url, { method: method, headers: { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' }, body: JSON.stringify(data) });        var result = await res.json();        if (!res.ok) throw new Error(result.error || 'Hata');        closeOrderModal();        loadOrders();        loadOrderStats();        adminToast(editId ? 'Güncellendi' : 'Oluşturuldu', 'Sipariş başarıyla ' + (editId ? 'güncellendi.' : 'oluşturuldu.'), 'success');      });    }    function renderTimeline(status) {      var steps = [        { key: 'pending', label: 'Bekliyor', icon: '📋' },        { key: 'confirmed', label: 'Onaylandı', icon: '✅' },        { key: 'preparing', label: 'Hazırlanıyor', icon: '🔧' },        { key: 'shipped', label: 'Kargoda', icon: '🚚' },        { key: 'delivered', label: 'Teslim', icon: '📦' }      ];      var idx = steps.findIndex(function(s) { return s.key === status; });      if (status === 'cancelled') return '<div style="text-align:center;padding:8px;color:var(--red);font-weight:600;font-size:0.85rem;">❌ Sipariş İptal Edildi</div>';      var html = '<div class="order-timeline">';      steps.forEach(function(step, i) {        var state = i < idx ? 'done' : (i === idx ? 'active' : '');        html += '<div class="timeline-step ' + state + '"><div class="timeline-dot">' + step.icon + '</div><span class="timeline-label">' + step.label + '</span></div>';        if (i < steps.length - 1) html += '<div class="timeline-connector' + (i < idx ? ' done' : '') + '"></div>';      });      html += '</div>';      return html;    }    function getStatusBadge(status) {      var map = { pending: '<span class="badge badge-pending">📋 Bekliyor</span>', confirmed: '<span class="badge badge-confirmed">✅ Onaylandı</span>', preparing: '<span class="badge badge-preparing">🔧 Hazırlanıyor</span>', shipped: '<span class="badge badge-shipped">🚚 Kargoda</span>', delivered: '<span class="badge badge-delivered">📦 Teslim</span>', cancelled: '<span class="badge badge-cancelled">❌ İptal</span>' };      return map[status] || '<span class="badge">' + status + '</span>';    }    function formatCurrency(amount) {      return parseFloat(amount || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });    }    async function deleteOrder(id) {      var confirmed = await showConfirm('Siparişi Sil', 'Bu sipariş kalıcı olarak silinecek.');      if (!confirmed) return;      var btn = event.target;      await btnAction(btn, 'Siliniyor', 'Silindi', async function() {        var res = await fetch(API + '/api/admin/orders/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });        var data = await res.json();        if (!res.ok) throw new Error(data.error || 'Hata');        loadOrders();        loadOrderStats();      });    }    async function loadOrders() {      var container = document.getElementById('ordersContainer');      var status = document.getElementById('filterStatus').value;      var search = document.getElementById('searchOrder').value.trim();      var token = getToken();      try {        var url = API + '/api/admin/orders?';        if (status) url += 'status=' + encodeURIComponent(status) + '&';        if (search) url += 'search=' + encodeURIComponent(search) + '&';        var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });        var orders = await res.json();        if (!orders.length) {          container.innerHTML = '<p class="empty-state">' + (search || status ? 'Aramanızla eşleşen sipariş bulunamadı.' : 'Henüz sipariş yok. "Yeni Sipariş" butonu ile ekleyin.') + '</p>';          return;        }        container.innerHTML = '\n        <table>\n          <thead><tr><th>Sipariş No</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Kargo</th><th>Takip No</th><th>Tarih</th><th style="text-align:right;">İşlem</th></tr></thead>\n          <tbody>\n            ' + orders.map(function(o) {              return '\n            <tr>\n              <td style="font-weight:600;font-family:monospace;font-size:0.8rem;">' + (o.order_no || '#' + o.id) + '</td>\n              <td style="font-weight:500;">' + o.customer_name + '<br><span style="font-size:0.75rem;color:var(--text-muted);">' + (o.city || '') + '</span></td>\n              <td style="font-weight:600;">' + formatCurrency(o.total_amount) + '</td>\n              <td>' + getStatusBadge(o.status) + renderTimeline(o.status) + '</td>\n              <td style="color:var(--text-muted);font-size:0.85rem;">' + (o.carrier || '-') + '</td>\n              <td style="font-family:monospace;font-size:0.8rem;color:var(--gold);">' + (o.tracking_no || '-') + '</td>\n              <td style="color:var(--text-muted);font-size:0.8rem;">' + new Date(o.created_at).toLocaleDateString('tr-TR') + '</td>\n              <td style="text-align:right;white-space:nowrap;">\n                <button class="btn btn-sm btn-primary" onclick=\'openEditModal(' + JSON.stringify(o).replace(/'/g,"\\'") + ')\'>✏️</button>\n                <button class="btn btn-sm btn-danger" onclick="deleteOrder(' + o.id + ')">🗑️</button>\n              </td>\n            </tr>\n            '; }).join('') + '\n          </tbody>\n        </table>\n        ';      } catch (err) {        container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';      }    }    async function loadOrderStats() {      try {        var res = await fetch(API + '/api/admin/orders/stats', { headers: { 'Authorization': 'Bearer ' + getToken() } });        var stats = await res.json();        document.getElementById('statPending').textContent = stats.pending || 0;        document.getElementById('statConfirmed').textContent = stats.confirmed || 0;        document.getElementById('statPreparing').textContent = stats.preparing || 0;        document.getElementById('statShipped').textContent = stats.shipped || 0;        document.getElementById('statDelivered').textContent = stats.delivered || 0;        document.getElementById('statCancelled').textContent = stats.cancelled || 0;      } catch(e) {}    }    async function btnAction(btn, label, verb, actionFn) {      var origHTML = btn.innerHTML;      btn.disabled = true;      btn.innerHTML = '<span class="btn-spinner"></span> ' + label + '...';      try {        await actionFn();        btn.innerHTML = '<span class="btn-check-icon">\u2713</span> ' + verb;        btn.className = btn.className.replace(/\b(?:btn-primary|btn-danger|btn-ghost)\b/g,'').trim() + ' btn-success';        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace('btn-success', 'btn-primary'); }, 2200);      } catch(e) {        btn.innerHTML = '\u2717 Hata';        btn.className += ' btn-error';        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);      }    }    loadOrderStats();    loadOrders();  </script></body></html>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="admin.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Siparişler</h1>
+        <p class="page-subtitle">Sipariş ve kargo yönetimi.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openCreateModal()">+ Yeni Sipariş</button>
+    </div>
+    <div class="cards-grid" id="orderStatsGrid">
+      <div class="stat-card" style="border-left:3px solid #ffc107;"><div class="stat-card-value" id="statPending">-</div><div class="stat-card-label">Bekleyen</div></div>
+      <div class="stat-card" style="border-left:3px solid #2979ff;"><div class="stat-card-value" id="statConfirmed">-</div><div class="stat-card-label">Onaylanan</div></div>
+      <div class="stat-card" style="border-left:3px solid #9c27b0;"><div class="stat-card-value" id="statPreparing">-</div><div class="stat-card-label">Hazırlanıyor</div></div>
+      <div class="stat-card" style="border-left:3px solid #ff9800;"><div class="stat-card-value" id="statShipped">-</div><div class="stat-card-label">Kargoda</div></div>
+      <div class="stat-card" style="border-left:3px solid #2ecc71;"><div class="stat-card-value" id="statDelivered">-</div><div class="stat-card-label">Teslim</div></div>
+      <div class="stat-card" style="border-left:3px solid #ff4d4d;"><div class="stat-card-value" id="statCancelled">-</div><div class="stat-card-label">İptal</div></div>
+    </div>
+    <div class="action-bar" style="margin-bottom:20px;gap:10px;">
+      <select id="filterStatus" onchange="loadOrders()" style="padding:10px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-main);font-size:0.85rem;font-family:var(--font);">
+        <option value="">Tüm Durumlar</option>
+        <option value="pending">Bekleyen</option>
+        <option value="confirmed">Onaylanan</option>
+        <option value="preparing">Hazırlanıyor</option>
+        <option value="shipped">Kargoda</option>
+        <option value="delivered">Teslim Edilen</option>
+        <option value="cancelled">İptal</option>
+      </select>
+      <input type="text" class="search-input" id="searchOrder" placeholder="Sipariş No / Müşteri ara..." oninput="loadOrders()" style="flex:1;min-width:150px;">
+    </div>
+    <div class="table-container" id="ordersContainer">
+      <p class="empty-state">Yükleniyor...</p>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal" style="max-width:700px;">
+      <h2 class="modal-title" id="orderModalTitle">Yeni Sipariş</h2>
+      <input type="hidden" id="editOrderId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Müşteri Adı *</label>
+          <input type="text" id="orderCustomer" required>
+        </div>
+        <div class="form-group">
+          <label>E-posta</label>
+          <input type="email" id="orderEmail">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="text" id="orderPhone">
+        </div>
+        <div class="form-group">
+          <label>Şehir</label>
+          <input type="text" id="orderCity">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>İlçe</label>
+          <input type="text" id="orderDistrict">
+        </div>
+        <div class="form-group">
+          <label>Durum</label>
+          <select id="orderStatus">
+            <option value="pending">Bekleyen</option>
+            <option value="confirmed">Onaylandı</option>
+            <option value="preparing">Hazırlanıyor</option>
+            <option value="shipped">Kargoda</option>
+            <option value="delivered">Teslim Edildi</option>
+            <option value="cancelled">İptal</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Adres</label>
+        <textarea id="orderAddress" rows="2"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kargo Firması</label>
+          <select id="orderCarrier">
+            <option value="">Seçin</option>
+            <option value="MNG Kargo">MNG Kargo</option>
+            <option value="Yurtiçi Kargo">Yurtiçi Kargo</option>
+            <option value="Aras Kargo">Aras Kargo</option>
+            <option value="PTT Kargo">PTT Kargo</option>
+            <option value="UPS">UPS</option>
+            <option value="FedEx">FedEx</option>
+            <option value="DHL">DHL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Takip No</label>
+          <input type="text" id="orderTracking">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notlar</label>
+        <textarea id="orderNotes" rows="2"></textarea>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <label style="font-size:0.7rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Sipariş Ürünleri</label>
+          <button class="btn btn-sm btn-ghost" onclick="addOrderItemRow()">+ Ürün Ekle</button>
+        </div>
+        <div id="orderItemsContainer"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeOrderModal()">İptal</button>
+        <button class="btn btn-primary" id="saveOrderBtn" onclick="saveOrder()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <h3 id="confirmTitle">Emin misiniz?</h3>
+      <p id="confirmText">Bu işlem geri alınamaz.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>
+        <button class="btn btn-danger" id="confirmBtn">Sil</button>
+      </div>
+    </div>
+  </div>
+  <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+  <script>
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var orderItemCount = 0;
+    var userTimezone = 'Europe/Istanbul';
+
+    function getToken() {
+      var t = localStorage.getItem('vheora_token');
+      if (!t) window.location.href = '/admin/';
+      return t;
+    }
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }
+    function adminToast(title, msg, type, duration) {
+      type = type || 'success'; duration = duration || 3500;
+      var c = document.getElementById('adminToast'); if (!c) return;
+      var t = document.createElement('div'); t.className = 'admin-toast';
+      var icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F' };
+      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
+      c.appendChild(t);
+      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
+    }
+    var confirmResolve = null;
+    function showConfirm(title, text, btnText) {
+      btnText = btnText || 'Sil';
+      return new Promise(function(resolve) {
+        confirmResolve = resolve;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        document.getElementById('confirmBtn').textContent = btnText;
+        document.getElementById('confirmOverlay').classList.add('active');
+      });
+    }
+    function closeConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(false); confirmResolve = null; }
+    }
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(true); confirmResolve = null; }
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === e.currentTarget) closeConfirm();
+    });
+    async function btnAction(btn, label, verb, actionFn) {
+      var origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-spinner"></span> ' + label + '...';
+      try {
+        await actionFn();
+        btn.innerHTML = '<span class="btn-check-icon">\u2713</span> ' + verb;
+        btn.className = btn.className.replace(/\b(?:btn-primary|btn-danger|btn-ghost)\b/g,'').trim() + ' btn-success';
+        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace('btn-success', 'btn-primary'); }, 2200);
+      } catch(e) {
+        btn.innerHTML = '\u2717 Hata';
+        btn.className += ' btn-error';
+        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);
+      }
+    }
+
+    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">İçerik Yönetimi</div>\n        <a href="/admin/products.html" class="sidebar-link">\uD83D\uDC8E Ürünler</a>\n        <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n        <div class="sidebar-category">Sipariş Yönetimi</div>\n        <a href="/admin/orders.html" class="sidebar-link active">\uD83D\uDCE6 Siparişler</a>\n        <div class="sidebar-category">İletişim</div>\n        <a href="/admin/messages.html" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA Çıkış Yap</button>\n    ';
+    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menüyü aç/kapat">\u2630</button>');
+    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+    function formatDate(d) {
+      var s = String(d).trim();
+      if (!/Z$|[+-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+      var date = new Date(s);
+      return date.toLocaleDateString('tr-TR', { timeZone: userTimezone, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addOrderItemRow(productName, qty, price) {
+      productName = productName || ''; qty = qty || 1; price = price || 0;
+      orderItemCount++;
+      var html = '<div class="form-row" id="orderItemRow' + orderItemCount + '" style="margin-bottom:8px;align-items:end;">';
+      html += '<div class="form-group" style="margin-bottom:0;flex:2;"><input type="text" class="order-item-name" placeholder="Ürün adı" value="' + productName.replace(/"/g,'&quot;') + '" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';
+      html += '<div class="form-group" style="margin-bottom:0;flex:1;"><input type="number" class="order-item-qty" value="' + qty + '" min="1" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';
+      html += '<div class="form-group" style="margin-bottom:0;flex:1;"><input type="number" class="order-item-price" value="' + price + '" min="0" step="0.01" style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:0.85rem;font-family:var(--font);"></div>';
+      html += '<button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="margin-bottom:0;">\uD83D\uDDD1\uFE0F</button>';
+      html += '</div>';
+      document.getElementById('orderItemsContainer').insertAdjacentHTML('beforeend', html);
+    }
+
+    function openCreateModal() {
+      document.getElementById('editOrderId').value = '';
+      document.getElementById('orderModalTitle').textContent = 'Yeni Sipariş';
+      document.getElementById('orderCustomer').value = '';
+      document.getElementById('orderEmail').value = '';
+      document.getElementById('orderPhone').value = '';
+      document.getElementById('orderCity').value = '';
+      document.getElementById('orderDistrict').value = '';
+      document.getElementById('orderAddress').value = '';
+      document.getElementById('orderStatus').value = 'pending';
+      document.getElementById('orderCarrier').value = '';
+      document.getElementById('orderTracking').value = '';
+      document.getElementById('orderNotes').value = '';
+      document.getElementById('orderItemsContainer').innerHTML = '';
+      addOrderItemRow();
+      document.getElementById('orderModal').classList.add('active');
+    }
+
+    function openEditModal(order) {
+      document.getElementById('editOrderId').value = order.id;
+      document.getElementById('orderModalTitle').textContent = 'Sipariş Düzenle #' + order.order_no;
+      document.getElementById('orderCustomer').value = order.customer_name || '';
+      document.getElementById('orderEmail').value = order.customer_email || '';
+      document.getElementById('orderPhone').value = order.customer_phone || '';
+      document.getElementById('orderCity').value = order.city || '';
+      document.getElementById('orderDistrict').value = order.district || '';
+      document.getElementById('orderAddress').value = order.shipping_address || '';
+      document.getElementById('orderStatus').value = order.status || 'pending';
+      document.getElementById('orderCarrier').value = order.carrier || '';
+      document.getElementById('orderTracking').value = order.tracking_no || '';
+      document.getElementById('orderNotes').value = order.notes || '';
+      document.getElementById('orderItemsContainer').innerHTML = '';
+      if (order.items && order.items.length) {
+        order.items.forEach(function(item) { addOrderItemRow(item.product_name, item.quantity, item.unit_price); });
+      } else {
+        addOrderItemRow();
+      }
+      document.getElementById('orderModal').classList.add('active');
+    }
+
+    function closeOrderModal() { document.getElementById('orderModal').classList.remove('active'); }
+    document.getElementById('orderModal').addEventListener('click', function(e) { if (e.target === this) closeOrderModal(); });
+
+    function getOrderItems() {
+      var rows = document.querySelectorAll('#orderItemsContainer .form-row');
+      var items = [];
+      rows.forEach(function(row) {
+        var name = row.querySelector('.order-item-name').value.trim();
+        var qty = parseInt(row.querySelector('.order-item-qty').value) || 1;
+        var price = parseFloat(row.querySelector('.order-item-price').value) || 0;
+        if (name) items.push({ product_name: name, quantity: qty, unit_price: price });
+      });
+      return items;
+    }
+
+    async function saveOrder() {
+      var btn = document.getElementById('saveOrderBtn');
+      var editId = document.getElementById('editOrderId').value;
+      var data = {
+        customer_name: document.getElementById('orderCustomer').value.trim(),
+        customer_email: document.getElementById('orderEmail').value.trim(),
+        customer_phone: document.getElementById('orderPhone').value.trim(),
+        city: document.getElementById('orderCity').value.trim(),
+        district: document.getElementById('orderDistrict').value.trim(),
+        shipping_address: document.getElementById('orderAddress').value.trim(),
+        status: document.getElementById('orderStatus').value,
+        carrier: document.getElementById('orderCarrier').value,
+        tracking_no: document.getElementById('orderTracking').value.trim(),
+        notes: document.getElementById('orderNotes').value.trim(),
+        items: getOrderItems()
+      };
+      if (!data.customer_name) { adminToast('Hata', 'Müşteri adı gerekli.', 'error'); return; }
+      if (!data.items.length) { adminToast('Hata', 'En az bir ürün gerekli.', 'error'); return; }
+      await btnAction(btn, 'Kaydediliyor', 'Kaydedildi', async function() {
+        var url = editId ? API + '/api/admin/orders/' + editId : API + '/api/admin/orders';
+        var method = editId ? 'PUT' : 'POST';
+        var res = await fetch(url, { method: method, headers: { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        var result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Hata');
+        closeOrderModal();
+        loadOrders();
+        loadOrderStats();
+        adminToast(editId ? 'Güncellendi' : 'Oluşturuldu', 'Sipariş başarıyla ' + (editId ? 'güncellendi.' : 'oluşturuldu.'), 'success');
+      });
+    }
+
+    function renderTimeline(status) {
+      var steps = [
+        { key: 'pending', label: 'Bekliyor', icon: '\u23F3' },
+        { key: 'confirmed', label: 'Onaylandı', icon: '\u2705' },
+        { key: 'preparing', label: 'Hazırlanıyor', icon: '\uD83D\uDCE6' },
+        { key: 'shipped', label: 'Kargoda', icon: '\uD83D\uDE9A' },
+        { key: 'delivered', label: 'Teslim', icon: '\u2705' }
+      ];
+      var idx = steps.findIndex(function(s) { return s.key === status; });
+      if (status === 'cancelled') return '<div style="text-align:center;padding:8px;color:var(--red);font-weight:600;font-size:0.85rem;">\u274C Sipariş İptal Edildi</div>';
+      var html = '<div class="order-timeline">';
+      steps.forEach(function(step, i) {
+        var state = i < idx ? 'done' : (i === idx ? 'active' : '');
+        html += '<div class="timeline-step ' + state + '"><div class="timeline-dot">' + step.icon + '</div><span class="timeline-label">' + step.label + '</span></div>';
+        if (i < steps.length - 1) html += '<div class="timeline-connector' + (i < idx ? ' done' : '') + '"></div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function getStatusBadge(status) {
+      var map = {
+        pending: '<span class="badge badge-pending">\u23F3 Bekliyor</span>',
+        confirmed: '<span class="badge badge-confirmed">\u2705 Onaylandı</span>',
+        preparing: '<span class="badge badge-preparing">\uD83D\uDCE6 Hazırlanıyor</span>',
+        shipped: '<span class="badge badge-shipped">\uD83D\uDE9A Kargoda</span>',
+        delivered: '<span class="badge badge-delivered">\u2705 Teslim</span>',
+        cancelled: '<span class="badge badge-cancelled">\u274C İptal</span>'
+      };
+      return map[status] || '<span class="badge">' + status + '</span>';
+    }
+
+    function formatCurrency(amount) {
+      return parseFloat(amount || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+    }
+
+    async function deleteOrder(id, btn) {
+      var confirmed = await showConfirm('Siparişi Sil', 'Bu sipariş kalıcı olarak silinecek.');
+      if (!confirmed) return;
+      await btnAction(btn, 'Siliniyor', 'Silindi', async function() {
+        var res = await fetch(API + '/api/admin/orders/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Hata');
+        loadOrders();
+        loadOrderStats();
+      });
+    }
+
+    async function loadOrders() {
+      var container = document.getElementById('ordersContainer');
+      var status = document.getElementById('filterStatus').value;
+      var search = document.getElementById('searchOrder').value.trim();
+      var token = getToken();
+      try {
+        var url = API + '/api/admin/orders?';
+        if (status) url += 'status=' + encodeURIComponent(status) + '&';
+        if (search) url += 'search=' + encodeURIComponent(search) + '&';
+        var orders = await fetchJSON(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (orders == null) return;
+        if (!orders.length) {
+          container.innerHTML = '<p class="empty-state">' + (search || status ? 'Aramanızla eşleşen sipariş bulunamadı.' : 'Henüz sipariş yok. "Yeni Sipariş" butonu ile ekleyin.') + '</p>';
+          return;
+        }
+        container.innerHTML = '<table><thead><tr><th>Sipariş No</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Kargo</th><th>Takip No</th><th>Tarih</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
+          orders.map(function(o) {
+            return '<tr>' +
+              '<td style="font-weight:600;font-family:monospace;font-size:0.8rem;">' + (o.order_no || '#' + o.id) + '</td>' +
+              '<td style="font-weight:500;">' + o.customer_name + '<br><span style="font-size:0.75rem;color:var(--text-muted);">' + (o.city || '') + '</span></td>' +
+              '<td style="font-weight:600;">' + formatCurrency(o.total_amount) + '</td>' +
+              '<td>' + getStatusBadge(o.status) + renderTimeline(o.status) + '</td>' +
+              '<td style="color:var(--text-muted);font-size:0.85rem;">' + (o.carrier || '-') + '</td>' +
+              '<td style="font-family:monospace;font-size:0.8rem;color:var(--gold);">' + (o.tracking_no || '-') + '</td>' +
+              '<td style="color:var(--text-muted);font-size:0.8rem;">' + formatDate(o.created_at) + '</td>' +
+              '<td style="text-align:right;white-space:nowrap;">' +
+              '<button class="btn btn-sm btn-primary" onclick=\'openEditModal(' + JSON.stringify(o).replace(/'/g,"\\'") + ')\'>\uD83D\uDCDD</button> ' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteOrder(' + o.id + ', this)">\uD83D\uDDD1\uFE0F</button>' +
+              '</td></tr>';
+          }).join('') +
+          '</tbody></table>';
+      } catch (err) {
+        container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';
+      }
+    }
+
+    async function loadOrderStats() {
+      try {
+        var stats = await fetchJSON(API + '/api/admin/orders/stats', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (stats == null) return;
+        document.getElementById('statPending').textContent = stats.pending || 0;
+        document.getElementById('statConfirmed').textContent = stats.confirmed || 0;
+        document.getElementById('statPreparing').textContent = stats.preparing || 0;
+        document.getElementById('statShipped').textContent = stats.shipped || 0;
+        document.getElementById('statDelivered').textContent = stats.delivered || 0;
+        document.getElementById('statCancelled').textContent = stats.cancelled || 0;
+      } catch(e) {}
+    }
+
+    async function loadTimezone() {
+      try {
+        var settings = await fetchJSON(API + '/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (settings && settings.timezone) userTimezone = settings.timezone;
+      } catch(e) {}
+    }
+
+    async function init() {
+      await loadTimezone();
+      loadOrderStats();
+      loadOrders();
+    }
+    init();
+  </script>
+</body>
+</html>

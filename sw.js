@@ -1,7 +1,8 @@
-const CACHE_NAME = 'vheora-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
+const CACHE_NAME = 'vheora-v4';
+const STATIC_CACHE = 'vheora-static-v4';
+const DYNAMIC_CACHE = 'vheora-dynamic-v4';
+
+const STATIC_ASSETS = [
   '/style.css',
   '/script.js',
   '/favicon.png',
@@ -10,59 +11,65 @@ const ASSETS = [
   '/custom-design.html',
   '/legal.html',
   '/manifest.json',
-  '/images/hero_collection.png',
-  '/images/gold_diamond_ring.png',
-  '/images/gold_bracelet.png',
-  '/images/diamond_necklace.png',
-  '/images/gold_earrings.png',
-  '/images/jewelry_workshop.png',
-  '/workshop.jpg'
+  '/images/hero_collection.webp',
+  '/images/gold_diamond_ring.webp',
+  '/images/gold_bracelet.webp',
+  '/images/diamond_necklace.webp',
+  '/images/gold_earrings.webp',
+  '/images/jewelry_workshop.webp',
+  '/workshop.webp'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k !== STATIC_CACHE && k !== DYNAMIC_CACHE).map(k => caches.delete(k))
+      )
+    )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // Do not intercept API or Admin calls
-  if (event.request.url.includes('/api/') || event.request.url.includes('/admin/')) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  if (request.method !== 'GET') return;
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin/')) return;
+  if (!url.protocol.startsWith('http')) return;
+
+  if (url.pathname.endsWith('.html') || url.pathname === '/') {
+    event.respondWith(
+      fetch(request).then(response => {
+        if (response.status === 200) {
+          const clone = response.clone();
+          caches.open(DYNAMIC_CACHE).then(c => c.put(request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(request).then(r => r || caches.match('/404.html')))
+    );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(event.request).then(response => {
-        if (event.request.method === 'GET' && response.status === 200) {
+    caches.match(request).then(cached => {
+      const fetchPromise = fetch(request).then(response => {
+        if (response.status === 200) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, clone);
-          });
+          caches.open(STATIC_CACHE).then(c => c.put(request, clone));
         }
         return response;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/404.html');
-        }
-        return new Response('Offline', { status: 503 });
-      });
+      }).catch(() => cached);
+
+      return cached || fetchPromise;
     })
   );
 });

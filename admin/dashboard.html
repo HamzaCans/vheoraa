@@ -1,5 +1,96 @@
-<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Dashboard | VHEORA Admin</title>  <link rel="stylesheet" href="admin.css?v=6">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script></head><body>  <aside class="sidebar" id="sidebar"></aside>  <main class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Dashboard</h1>        <p class="page-subtitle">VHEORA yonetim paneline hos geldiniz.</p>      </div>      <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSV Export</button>    </div>    <div class="cards-grid" id="statsGrid">      <div class="stat-card"><div class="stat-card-value" id="statProducts">-</div><div class="stat-card-label">Ürünler</div></div>      <div class="stat-card"><div class="stat-card-value" id="statMessages">-</div><div class="stat-card-label">Mesajlar</div></div>      <div class="stat-card"><div class="stat-card-value" id="statUnread">-</div><div class="stat-card-label">Okunmamis Mesaj</div></div>      <div class="stat-card"><div class="stat-card-value" id="statTestimonials">-</div><div class="stat-card-label">Yorumlar</div></div>      <div class="stat-card"><div class="stat-card-value" id="statApproved">-</div><div class="stat-card-label">Onaylı Yorum</div></div>          <div class="stat-card" style="border-left:3px solid #ffc107;"><div class="stat-card-value" id="statPendingOrders">-</div><div class="stat-card-label">Bekleyen Sipariş</div></div>
-      <div class="stat-card" style="border-left:3px solid #ff9800;"><div class="stat-card-value" id="statLowStockItems">-</div><div class="stat-card-label" style="color:var(--red);">Kritik Stok</div></div>      <div class="stat-card" style="border-left:3px solid #42a5f5;"><div class="stat-card-value" id="statVisitors">-</div><div class="stat-card-label" style="color:#42a5f5;">Toplam Ziyaretçi</div></div>      <div class="stat-card" style="border-left:3px solid #66bb6a;"><div class="stat-card-value" id="statTodayVisitors">-</div><div class="stat-card-label" style="color:#66bb6a;">Bugünkü Ziyaretçi</div></div>      <div class="stat-card" style="border-left:3px solid #ab47bc;"><div class="stat-card-value" id="statUniqueIps">-</div><div class="stat-card-label" style="color:#ab47bc;">Tekil IP</div></div></div>    <div class="charts-row">      <div class="chart-card">        <h3 class="chart-title">Aylık Mesajlar</h3>        <canvas id="messagesChart"></canvas>      </div>      <div class="chart-card">        <h3 class="chart-title">Aylık Yorumlar</h3>        <canvas id="testimonialsChart"></canvas>      </div>    </div>    <div class="charts-row">      <div class="chart-card">        <h3 class="chart-title">Cihaz Dağılımı</h3>        <canvas id="devicesChart"></canvas>      </div>      <div class="chart-card">        <h3 class="chart-title">Tarayıcı Dağılımı</h3>        <canvas id="browsersChart"></canvas>      </div>    </div>    <div class="widget-card" id="latestActivityWidget">      <div class="widget-title">        <span>🛡️ Son Admin İşlemleri</span>        <a href="/admin/logs.html" class="widget-link">Tümünü Gör →</a>      </div>      <div id="latestActivityList">        <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Yükleniyor...</p>      </div>    </div>    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:24px;">      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px;">Son Mesajlar</h3>      <div id="recentMessages"><p class="empty-state">Yükleniyor...</p></div>    </div>  </main>  <div class="admin-toast-container" id="adminToast"></div>  <script>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="admin.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">VHEORA yönetim paneline hoş geldiniz.</p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSV Export</button>
+    </div>
+    <div class="cards-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-card-value" id="statProducts">-</div><div class="stat-card-label">Ürünler</div></div>
+      <div class="stat-card"><div class="stat-card-value" id="statMessages">-</div><div class="stat-card-label">Mesajlar</div></div>
+      <div class="stat-card"><div class="stat-card-value" id="statUnread">-</div><div class="stat-card-label">Okunmamış Mesaj</div></div>
+      <div class="stat-card"><div class="stat-card-value" id="statTestimonials">-</div><div class="stat-card-label">Yorumlar</div></div>
+      <div class="stat-card"><div class="stat-card-value" id="statApproved">-</div><div class="stat-card-label">Onaylı Yorum</div></div>
+      <div class="stat-card" style="border-left:3px solid #ffc107;"><div class="stat-card-value" id="statPendingOrders">-</div><div class="stat-card-label">Bekleyen Sipariş</div></div>
+      <div class="stat-card" style="border-left:3px solid #ff9800;"><div class="stat-card-value" id="statLowStockItems">-</div><div class="stat-card-label" style="color:var(--red);">Kritik Stok</div></div>
+      <div class="stat-card" style="border-left:3px solid #42a5f5;"><div class="stat-card-value" id="statVisitors">-</div><div class="stat-card-label" style="color:#42a5f5;">Toplam Ziyaretçi</div></div>
+      <div class="stat-card" style="border-left:3px solid #66bb6a;"><div class="stat-card-value" id="statTodayVisitors">-</div><div class="stat-card-label" style="color:#66bb6a;">Bugünkü Ziyaretçi</div></div>
+      <div class="stat-card" style="border-left:3px solid #ab47bc;"><div class="stat-card-value" id="statUniqueIps">-</div><div class="stat-card-label" style="color:#ab47bc;">Tekil IP</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 class="chart-title">Aylık Mesajlar</h3>
+        <canvas id="messagesChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Aylık Yorumlar</h3>
+        <canvas id="testimonialsChart"></canvas>
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 class="chart-title">Cihaz Dağılımı</h3>
+        <canvas id="devicesChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Tarayıcı Dağılımı</h3>
+        <canvas id="browsersChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">İşletim Sistemi Dağılımı</h3>
+        <canvas id="osChart"></canvas>
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 class="chart-title">🌍 Ülke Dağılımı</h3>
+        <canvas id="countryChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">🏙️ Şehir Dağılımı</h3>
+        <canvas id="cityChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">📱 Cihaz Modelleri</h3>
+        <canvas id="modelsChart"></canvas>
+      </div>
+    </div>
+    <div class="widget-card" id="latestActivityWidget">
+      <div class="widget-title">
+        <span>📋 Son Admin İşlemleri</span>
+        <a href="/admin/logs.html" class="btn btn-ghost btn-sm">Tümünü Gör</a>
+      </div>
+      <div class="widget-list" id="latestActivityList">
+        <p class="empty-state">Yükleniyor...</p>
+      </div>
+    </div>
+    <div class="widget-card">
+      <div class="widget-title">
+        <span>✉️ Son Mesajlar</span>
+        <a href="/admin/messages.html" class="btn btn-ghost btn-sm">Tümünü Gör</a>
+      </div>
+      <div class="widget-list" id="recentMessages">
+        <p class="empty-state">Yükleniyor...</p>
+      </div>
+    </div>
+  </main>
+  <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+  <script>
     function adminToast(title, msg, type, duration) {
       type = type || 'success'; duration = duration || 3500;
       var c = document.getElementById('adminToast'); if (!c) return;
@@ -9,23 +100,28 @@
       c.appendChild(t);
       setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
     }
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
     var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var userTimezone = 'Europe/Istanbul';
     function getToken() {
       var t = localStorage.getItem('vheora_token');
       if (!t) window.location.href = '/admin/';
       return t;
     }
-    function logout() {
-      localStorage.removeItem('vheora_token');
-      localStorage.removeItem('vheora_user');
-      window.location.href = '/admin/';
-    }
-    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href=\"/admin/dashboard.html\" class="sidebar-link active">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">İçerik Yönetimi</div>\n        <a href=\"/admin/products.html\" class="sidebar-link">\uD83D\uDC8E Ürünler</a>\n        <a href=\"/admin/testimonials.html\" class="sidebar-link">\u2B50 Yorumlar</a>\n        
-        <div class="sidebar-category">Sipariş Yönetimi</div>
-        <a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a>
-        <div class="sidebar-category">İletişim</div>\n        <a href=\"/admin/messages.html\" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href=\"/admin/settings.html\" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href=\"/admin/logs.html\" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href=\"/\" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA Çıkış Yap</button>\n    ';
+    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }
+    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link active">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">İçerik Yönetimi</div>\n        <a href="/admin/products.html" class="sidebar-link">\uD83D\uDC8E Ürünler</a>\n        <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n        <div class="sidebar-category">Sipariş Yönetimi</div>\n        <a href="/admin/orders.html" class="sidebar-link">\uD83D\uDCE6 Siparişler</a>\n        <div class="sidebar-category">İletişim</div>\n        <a href="/admin/messages.html" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA Çıkış Yap</button>\n    ';
     document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
-    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menuyu ac/kapat">\u2630</button>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menüyü aç/kapat">\u2630</button>');
     function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
     function closeSidebar() { document.body.classList.remove('sidebar-open'); }
     var messagesChart = null;
@@ -40,7 +136,19 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#8a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
       });
     }
-    
+    var doughnutColors = ['rgba(212,168,83,0.7)','rgba(66,165,245,0.7)','rgba(102,187,106,0.7)','rgba(206,147,216,0.7)','rgba(255,193,7,0.7)','rgba(239,83,80,0.7)','rgba(92,107,192,0.7)','rgba(38,166,154,0.7)','rgba(255,87,34,0.7)','rgba(0,0,0,0.3)'];
+    function renderDoughnut(canvasId, labels, data, existingChart) {
+      if (existingChart && typeof existingChart.destroy === 'function') existingChart.destroy();
+      var ctx = document.getElementById(canvasId);
+      if (!ctx || typeof Chart === 'undefined' || !labels.length) return null;
+      ctx.height = 220;
+      return new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: doughnutColors.slice(0, labels.length), borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8a8a9a', font: { size: 11 }, padding: 12 } } } }
+      });
+    }
+
     async function btnAction(btn, label, verb, actionFn) {
       var origHTML = btn.innerHTML;
       btn.disabled = true;
@@ -58,97 +166,83 @@
     }
     async function loadDashboard() {
       var token = getToken();
+      var headers = { 'Authorization': 'Bearer ' + token };
       try {
-        var res = await Promise.all([
-          fetch(API + '/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } }),
-          fetch(API + '/api/admin/messages', { headers: { 'Authorization': 'Bearer ' + token } })
-        ]);
-        if (!res[0].ok || !res[1].ok) {
-          if (res[0].status === 401 || res[1].status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return; }
-          throw new Error('Sunucu yaniti basarisiz');
+        var stats = await fetchJSON(API + '/api/admin/stats', { headers: headers });
+        if (stats != null) {
+          document.getElementById('statProducts').textContent = stats.products ?? 0;
+          document.getElementById('statMessages').textContent = stats.messages ?? 0;
+          document.getElementById('statUnread').textContent = stats.unread_messages ?? 0;
+          document.getElementById('statTestimonials').textContent = stats.testimonials ?? 0;
+          document.getElementById('statApproved').textContent = stats.approved_testimonials ?? 0;
+          var msgLabels = (stats.monthly_messages || []).map(function(m) { return m.month; });
+          var msgData = (stats.monthly_messages || []).map(function(m) { return m.count; });
+          if (messagesChart) messagesChart.destroy();
+          messagesChart = renderChart('messagesChart', msgLabels, msgData, 'Mesaj');
+          var testLabels = (stats.monthly_testimonials || []).map(function(m) { return m.month; });
+          var testData = (stats.monthly_testimonials || []).map(function(m) { return m.count; });
+          if (testimonialsChart) testimonialsChart.destroy();
+          testimonialsChart = renderChart('testimonialsChart', testLabels, testData, 'Yorum', 'rgba(46, 204, 113, 0.3)');
+          if (stats.pending !== undefined) document.getElementById('statPendingOrders').textContent = stats.pending || 0;
         }
-        var stats = await res[0].json();
-        try {
-          var visitorStatsRes = await fetch(API + '/api/admin/visitor-stats', { headers: { 'Authorization': 'Bearer ' + token } });
-          var visitorStats = await visitorStatsRes.json();
-        } catch(e) { var visitorStats = { total:0, today:0, unique_ips:0, devices: [], browsers: [] }; }
-        if (visitorStats && visitorStats.devices) {
+      } catch(e) { console.warn('Stats error:', e); }
+      try {
+        var messages = await fetchJSON(API + '/api/admin/messages', { headers: headers });
+        if (messages != null) {
+          var recent = (messages || []).slice(0, 5);
+          var recentHtml = recent.length ? '<table><thead><tr><th>Tarih</th><th>İsim</th><th>Konu</th><th>Tip</th></tr></thead><tbody>' + recent.map(function(m) {
+            return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + (m.created_at ? new Date(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td></tr>';
+          }).join('') + '</tbody></table>' : '<p class="empty-state">Henüz mesaj yok</p>';
+          document.getElementById('recentMessages').innerHTML = recentHtml;
+        }
+      } catch(e) { console.warn('Messages error:', e); }
+      try {
+        var visitorStats = await fetchJSON(API + '/api/admin/visitor-stats', { headers: headers });
+        if (visitorStats) {
           document.getElementById('statVisitors').textContent = visitorStats.total || 0;
           document.getElementById('statTodayVisitors').textContent = visitorStats.today || 0;
           document.getElementById('statUniqueIps').textContent = visitorStats.unique_ips || 0;
-          var devLabels = visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; });
-          var devData = visitorStats.devices.map(function(d) { return d.count; });
-          if (window.devicesChart) window.devicesChart.destroy();
-          if (typeof Chart !== 'undefined') {
-            var devCtx = document.getElementById('devicesChart');
-            if (devCtx) {
-              window.devicesChart = new Chart(devCtx, {
-                type: 'doughnut',
-                data: { labels: devLabels, datasets: [{ data: devData, backgroundColor: ['rgba(212,168,83,0.7)','rgba(66,165,245,0.7)','rgba(102,187,106,0.7)','rgba(206,147,216,0.7)','rgba(255,193,7,0.7)'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8a8a9a', font: { size: 11 } } } } }
-              });
-            }
+          if (visitorStats.devices && visitorStats.devices.length) {
+            renderDoughnut('devicesChart', visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; }), visitorStats.devices.map(function(d) { return parseInt(d.count) || 0; }), window.devicesChart);
           }
-          var browserLabels = visitorStats.browsers.map(function(b) { return b.browser || 'Diğer'; });
-          var browserData = visitorStats.browsers.map(function(b) { return b.count; });
-          if (window.browsersChart) window.browsersChart.destroy();
-          if (typeof Chart !== 'undefined') {
-            var brCtx = document.getElementById('browsersChart');
-            if (brCtx) {
-              window.browsersChart = new Chart(brCtx, {
-                type: 'doughnut',
-                data: { labels: browserLabels, datasets: [{ data: browserData, backgroundColor: ['rgba(66,165,245,0.7)','rgba(102,187,106,0.7)','rgba(255,193,7,0.7)','rgba(212,168,83,0.7)','rgba(206,147,216,0.7)'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8a8a9a', font: { size: 11 } } } } }
-              });
-            }
+          if (visitorStats.browsers && visitorStats.browsers.length) {
+            window.browsersChart = renderDoughnut('browsersChart', visitorStats.browsers.map(function(b) { return b.browser || 'Diğer'; }), visitorStats.browsers.map(function(b) { return parseInt(b.count) || 0; }), window.browsersChart);
+          }
+          if (visitorStats.os && visitorStats.os.length) {
+            window.osChart = renderDoughnut('osChart', visitorStats.os.map(function(o) { return o.os || 'Diğer'; }), visitorStats.os.map(function(o) { return parseInt(o.count) || 0; }), window.osChart);
+          }
+          if (visitorStats.countries && visitorStats.countries.length) {
+            window.countryChart = renderDoughnut('countryChart', visitorStats.countries.map(function(c) { return c.country || 'Bilinmiyor'; }), visitorStats.countries.map(function(c) { return parseInt(c.count) || 0; }), window.countryChart);
+          }
+          if (visitorStats.cities && visitorStats.cities.length) {
+            window.cityChart = renderDoughnut('cityChart', visitorStats.cities.map(function(c) { return c.city || 'Bilinmiyor'; }), visitorStats.cities.map(function(c) { return parseInt(c.count) || 0; }), window.cityChart);
+          }
+          if (visitorStats.models && visitorStats.models.length) {
+            window.modelsChart = renderDoughnut('modelsChart', visitorStats.models.map(function(m) { return m.device_model || 'Bilinmiyor'; }), visitorStats.models.map(function(m) { return parseInt(m.count) || 0; }), window.modelsChart);
           }
         }
-        try {
-          var orderStatsRes = await fetch(API + '/api/admin/orders/stats', { headers: { 'Authorization': 'Bearer ' + token } });
-          var orderStats = await orderStatsRes.json();
-          document.getElementById('statPendingOrders').textContent = orderStats.pending || 0;
-        } catch(e) {}
-        try {
-          var lowStockRes = await fetch(API + '/api/admin/products/low-stock', { headers: { 'Authorization': 'Bearer ' + token } });
-          var lowStock = await lowStockRes.json();
-          document.getElementById('statLowStockItems').textContent = Array.isArray(lowStock) ? lowStock.length : 0;
-        } catch(e) {}
-        var messages = await res[1].json();
-        document.getElementById('statProducts').textContent = stats.products ?? 0;
-        document.getElementById('statMessages').textContent = stats.messages ?? 0;
-        document.getElementById('statUnread').textContent = stats.unread_messages ?? 0;
-        document.getElementById('statTestimonials').textContent = stats.testimonials ?? 0;
-        document.getElementById('statApproved').textContent = stats.approved_testimonials ?? 0;
-        var msgLabels = (stats.monthly_messages || []).map(function(m) { return m.month; });
-        var msgData = (stats.monthly_messages || []).map(function(m) { return m.count; });
-        if (messagesChart) messagesChart.destroy();
-        messagesChart = renderChart('messagesChart', msgLabels, msgData, 'Mesaj');
-        var testLabels = (stats.monthly_testimonials || []).map(function(m) { return m.month; });
-        var testData = (stats.monthly_testimonials || []).map(function(m) { return m.count; });
-        if (testimonialsChart) testimonialsChart.destroy();
-        testimonialsChart = renderChart('testimonialsChart', testLabels, testData, 'Yorum', 'rgba(46, 204, 113, 0.3)');
-        var recent = (messages || []).slice(0, 5);
-        var recentHtml = recent.length ? '<table><thead><tr><th>Tarih</th><th>Isim</th><th>Konu</th><th>Tip</th></tr></thead><tbody>' + recent.map(function(m) {
-          return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + new Date(m.created_at).toLocaleDateString('tr-TR') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'Iletisim') + '</span></td></tr>';
-        }).join('') + '</tbody></table>' : '<p class="empty-state">Henuz mesaj yok</p>';
-        document.getElementById('recentMessages').innerHTML = recentHtml;
-      } catch (err) {
-        console.error('[Dashboard Load Error]', err);
-        document.getElementById('statsGrid').innerHTML = '<p class="empty-state">Sunucuya baglanilamadi. Hata: ' + err.message + '</p>';
-      }
+      } catch(e) { console.warn('Visitor stats error:', e); }
+      try {
+        var orderStats = await fetchJSON(API + '/api/admin/orders/stats', { headers: headers });
+        if (orderStats) document.getElementById('statPendingOrders').textContent = orderStats.pending || 0;
+      } catch(e) {}
+      try {
+        var lowStock = await fetchJSON(API + '/api/admin/products/low-stock', { headers: headers });
+        if (lowStock) document.getElementById('statLowStockItems').textContent = Array.isArray(lowStock) ? lowStock.length : 0;
+      } catch(e) {}
     }
     async function exportCSV() {
       var token = getToken();
       try {
         var res = await fetch(API + '/api/admin/messages', { headers: { 'Authorization': 'Bearer ' + token } });
         var messages = await res.json();
-        var csv = 'Tarih,Isim,E-posta,Telefon,Konu/Urun,Mesaj,Tip\n';
+        var csv = 'Tarih,İsim,E-posta,Telefon,Konu/Ürün,Mesaj,Tip\n';
         csv += messages.map(function(m) {
-          var date = new Date(m.created_at).toLocaleDateString('tr-TR');
+          var date = new Date(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone });
           var name = ((m.first_name || '') + ' ' + (m.last_name || '')).trim();
           var subject = (m.subject || m.product_name || '').replace(/,/g, ' ');
           var msg = (m.message || '').replace(/,/g, ' ').replace(/\n/g, ' ');
-          var type = m.type === 'quote' ? 'Teklif' : 'Iletisim';
+          var type = m.type === 'quote' ? 'Teklif' : 'İletişim';
           return date + ',' + name + ',' + (m.email || '') + ',' + (m.phone || '') + ',' + subject + ',' + msg + ',' + type;
         }).join('\n');
         var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -158,21 +252,35 @@
         a.download = 'vheora-mesajlar-' + new Date().toISOString().slice(0,10) + '.csv';
         a.click();
         URL.revokeObjectURL(url);
-      } catch (err) { alert('Export basarisiz'); }
+      } catch (err) { adminToast('Hata', 'Export başarısız', 'error'); }
     }
     async function loadLatestActivity() {
       try {
-        var res = await fetch(API + '/api/admin/logs?limit=5', { headers: { 'Authorization': 'Bearer ' + getToken() } });
-        var logs = await res.json();
+        var logs = await fetchJSON(API + '/api/admin/logs?limit=5', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (logs == null) return;
         var list = document.getElementById('latestActivityList');
-        if (!logs.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Henüz kayıt yok.</p>'; return; }
+        if (!logs.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Hen\u00FCz kay\u0131t yok.</p>'; return; }
         var actionMap = { login: '\uD83D\uDD11 Giriş', logout: '\uD83D\uDEAA Çıkış', delete_message: '\uD83D\uDDD1\uFE0F Mesaj Silme', delete_testimonial: '\uD83D\uDDD1\uFE0F Yorum Silme', approve_testimonial: '\u2705 Yorum Onay', delete_product: '\uD83D\uDDD1\uFE0F Ürün Silme', update_product: '\uD83D\uDCDD Ürün Düzenleme', create_product: '\u2795 Ürün Ekleme', read_message: '\uD83D\uDCE9 Mesaj Okundu', create_order: '\u2795 Sipari\u015F Olu\u015Fturma', update_order_status: '\uD83D\uDEE1\uFE0F Sipari\u015F Durumu', stock_adjustment: '\uD83D\uDCE6 Stok D\u00FCzenleme' };
         list.innerHTML = logs.map(function(l) {
-          return '<div class="widget-item"><div class="widget-item-icon ' + (l.action === 'login' ? 'login' : 'action') + '">' + (l.action === 'login' ? '\uD83D\uDD11' : '\u26A1') + '</div><div class="widget-item-info"><div class="wi-top">' + ((actionMap[l.action] || l.action)) + ' - <strong>' + l.username + '</strong></div><div class="wi-bottom"><span class="security-tag">\uD83D\uDEE1\uFE0F Verified</span><span class="device-tag">\uD83D\uDCBB ' + (l.device_info || 'Unknown Device') + '</span><span class="ip-tag">\uD83C\uDF94 ' + (l.ip_address || '0.0.0.0') + '</span></div></div><div class="widget-item-time">' + new Date(l.created_at + 'Z').toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) + '</div></div>';
+          var time = l.created_at ? new Date(l.created_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
+          return '<div class="widget-item"><div class="widget-item-icon ' + (l.action === 'login' ? 'login' : 'action') + '">' + (l.action === 'login' ? '\uD83D\uDD11' : '\u26A1') + '</div><div class="widget-item-info"><div class="wi-top">' + ((actionMap[l.action] || l.action)) + ' - <strong>' + l.username + '</strong></div><div class="wi-bottom"><span class="security-tag">\uD83D\uDEE1\uFE0F Verified</span><span class="device-tag">\uD83D\uDCBB ' + (l.device_info || 'Unknown Device') + '</span><span class="ip-tag">\uD83C\uDF94 ' + (l.ip_address || '0.0.0.0') + '</span></div></div><div class="widget-item-time">' + time + '</div></div>';
         }).join('');
       } catch(e) {
-        document.getElementById('latestActivityList').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Yüklenemedi.</p>';
+        document.getElementById('latestActivityList').innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Y\u00FCklenemedi.</p>';
       }
     }
-    loadLatestActivity();
-</script></body></html>
+    async function loadTimezone() {
+      try {
+        var settings = await fetchJSON(API + '/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (settings && settings.timezone) userTimezone = settings.timezone;
+      } catch(e) {}
+    }
+    async function init() {
+      await loadTimezone();
+      loadDashboard();
+      loadLatestActivity();
+    }
+    init();
+</script>
+</body>
+</html>

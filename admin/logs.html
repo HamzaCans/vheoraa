@@ -1,8 +1,145 @@
-﻿<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Loglar | VHEORA Admin</title>  <link rel="preconnect" href="https://fonts.googleapis.com">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">  <link rel="stylesheet" href="admin.css?v=6"></head><body>  <aside class="sidebar" id="sidebar"></aside>  <div class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Loglar</h1>        <p class="page-subtitle">Admin işlem ve ziyaretçi kayıtları.</p>      </div>      <div class="action-bar">        <button class="btn btn-primary btn-sm" onclick="refreshLogs()">🔄 Yenile</button>      </div>    </div>    <div class="tabs" id="logTabs">      <button class="tab-btn active" data-tab="admin">🛡️ Admin İşlemleri</button>      <button class="tab-btn" data-tab="visitor">👤 Ziyaretçi Kayıtları</button>    </div>    <div class="logs-section" id="adminLogsSection">      <div class="log-filters">        <button class="log-filter-btn active" data-action="all">Tümü</button>        <button class="log-filter-btn" data-action="login">🔑 Giriş</button>        <button class="log-filter-btn" data-action="logout">🚪 Çıkış</button>        <button class="log-filter-btn" data-action="delete">🗑️ Silme</button>        <button class="log-filter-btn" data-action="approve">✅ Onay</button>      </div>      <div class="log-table-wrap">        <table id="adminLogTable">          <thead>            <tr>              <th>Tarih</th>              <th>Kullanıcı</th>              <th>İşlem</th>              <th>IP Adresi</th>              <th>Cihaz</th>            </tr>          </thead>          <tbody id="adminLogBody"></tbody>        </table>      </div>    </div>    <div class="logs-section" id="visitorLogsSection" style="display:none">      <div class="log-table-wrap">        <table>          <thead>            <tr>              <th>Tarih</th>              <th>Sayfa</th>              <th>IP Adresi</th>              <th>Cihaz</th>              <th>Referrer</th>            </tr>          </thead>          <tbody id="visitorLogBody"></tbody>        </table>      </div>    </div>  </div>  <script>    const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';    function getToken() {      const t = localStorage.getItem('vheora_token');      if (!t) window.location.href = '/admin/';      return t;    }    function logout() {      localStorage.removeItem('vheora_token');      window.location.href = '/admin/';    }    document.getElementById('sidebar').innerHTML = `      <div class="sidebar-logo">VHEORA</div>      <div class="sidebar-sub">Admin Panel</div>      <nav class="sidebar-nav">                <div class="sidebar-category">Genel</div>        <a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a>                <div class="sidebar-category">İçerik Yönetimi</div>        <a href="/admin/products.html" class="sidebar-link">💎 Ürünler</a>
-        <a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a>        <a href="/admin/testimonials.html" class="sidebar-link">⭐ Yorumlar</a>                
-        <div class="sidebar-category">Sipariş Yönetimi</div>
-        <a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a>
-        <div class="sidebar-category">İletişim</div>        <a href="/admin/messages.html" class="sidebar-link">✉️ Mesajlar</a>                <div class="sidebar-category">Sistem</div>        <a href="/admin/settings.html" class="sidebar-link">🔧 Ayarlar</a>        <a href="/admin/logs.html" class="sidebar-link active">📋 Loglar</a>                <div style="flex:1"></div>        <a href="/" class="sidebar-link">🌐 Siteye Git</a>      <button class="sidebar-logout" onclick="logout()">🚪 Çıkış Yap</button>    `;    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menuyu ac/kapat">☰</button>');    function toggleSidebar() {      document.body.classList.toggle('sidebar-open');    }    function closeSidebar() {      document.body.classList.remove('sidebar-open');    }    const token = getToken();    let currentTab = 'admin';    let adminLogs = [];    function formatDate(d) {      const date = new Date(d + 'Z');      const now = new Date();      const diff = now - date;      if (diff < 60000) return 'Az önce';      if (diff < 3600000) return Math.floor(diff / 60000) + ' dk önce';      if (diff < 86400000) return Math.floor(diff / 3600000) + ' saat önce';      return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });    }    function formatAction(action) {      const map = {        login: '🔑 Giriş',        logout: '🚪 Çıkış',        delete_message: '🗑️ Mesaj Silme',        delete_testimonial: '🗑️ Yorum Silme',        approve_testimonial: '✅ Yorum Onay',        delete_product: '🗑️ Ürün Silme',        update_product: '✏️ Ürün Düzenleme',        create_product: '➕ Ürün Ekleme',        read_message: '📩 Mesaj Okundu'      };      return map[action] || action;    }    function renderAdminLogs(filter = 'all') {      const body = document.getElementById('adminLogBody');      const filtered = filter === 'all' ? adminLogs : adminLogs.filter(l => l.action === filter);      if (!filtered.length) {        body.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Kayıt bulunamadı.</p></td></tr>';        return;      }      body.innerHTML = filtered.map(l => `        <tr>          <td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">${formatDate(l.created_at)}</td>          <td><strong>${l.username}</strong></td>          <td>${formatAction(l.action)}</td>          <td><span class="ip-address">${l.ip_address || '-'}</span></td>          <td><span class="device-chip">${l.device_info || '-'}</span></td>        </tr>      `).join('');    }    
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=7">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Loglar</h1>
+        <p class="page-subtitle">Admin işlem ve ziyaretçi kayıtları.</p>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-primary btn-sm" onclick="refreshLogs()">🔄 Yenile</button>
+        <button class="btn btn-danger btn-sm" onclick="resetAdminLogs()">🗑️ Logları Sıfırla</button>
+        <button class="btn btn-danger btn-sm" onclick="resetVisitorLogs()">🗑️ Ziyaretçileri Sıfırla</button>
+      </div>
+    </div>
+    <div class="tabs" id="logTabs">
+      <button class="tab-btn active" data-tab="admin" onclick="switchTab('admin')">📋 Admin İşlemleri</button>
+      <button class="tab-btn" data-tab="visitor" onclick="switchTab('visitor')">👁️ Ziyaretçi Kayıtları</button>
+    </div>
+    <div class="logs-section" id="adminLogsSection">
+      <div class="log-filters">
+        <button class="log-filter-btn active" data-action="all" onclick="filterAdminLogs('all', this)">Tümü</button>
+        <button class="log-filter-btn" data-action="login" onclick="filterAdminLogs('login', this)">🔑 Giriş</button>
+        <button class="log-filter-btn" data-action="logout" onclick="filterAdminLogs('logout', this)">🚪 Çıkış</button>
+        <button class="log-filter-btn" data-action="delete" onclick="filterAdminLogs('delete', this)">🗑️ Silme</button>
+        <button class="log-filter-btn" data-action="approve" onclick="filterAdminLogs('approve', this)">✅ Onay</button>
+      </div>
+      <div class="log-table-wrap">
+        <table id="adminLogTable">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Kullanıcı</th>
+              <th>İşlem</th>
+              <th>IP Adresi</th>
+              <th>Cihaz</th>
+              <th>Cihaz Modeli</th>
+            </tr>
+          </thead>
+          <tbody id="adminLogBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="logs-section" id="visitorLogsSection" style="display:none">
+      <div class="log-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Sayfa</th>
+              <th>IP Adresi</th>
+              <th>Tarayıcı</th>
+              <th>İşletim Sistemi</th>
+              <th>Cihaz</th>
+              <th>Cihaz Modeli</th>
+              <th>Saat Dilimi</th>
+              <th>Referrer</th>
+            </tr>
+          </thead>
+          <tbody id="visitorLogBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <h3 id="confirmTitle">Emin misiniz?</h3>
+      <p id="confirmText">Bu işlem geri alınamaz.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>
+        <button class="btn btn-danger" id="confirmBtn">Sil</button>
+      </div>
+    </div>
+  </div>
+  <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+  <script>
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var token = getToken();
+    var currentTab = 'admin';
+    var adminLogs = [];
+    var userTimezone = 'Europe/Istanbul';
+
+    function getToken() {
+      var t = localStorage.getItem('vheora_token');
+      if (!t) window.location.href = '/admin/';
+      return t;
+    }
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }
+    function adminToast(title, msg, type, duration) {
+      type = type || 'success'; duration = duration || 3500;
+      var c = document.getElementById('adminToast'); if (!c) return;
+      var t = document.createElement('div'); t.className = 'admin-toast';
+      var icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F' };
+      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
+      c.appendChild(t);
+      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
+    }
+    var confirmResolve = null;
+    function showConfirm(title, text, btnText) {
+      btnText = btnText || 'Sil';
+      return new Promise(function(resolve) {
+        confirmResolve = resolve;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        document.getElementById('confirmBtn').textContent = btnText;
+        document.getElementById('confirmOverlay').classList.add('active');
+      });
+    }
+    function closeConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(false); confirmResolve = null; }
+    }
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(true); confirmResolve = null; }
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === e.currentTarget) closeConfirm();
+    });
     async function btnAction(btn, label, verb, actionFn) {
       var origHTML = btn.innerHTML;
       btn.disabled = true;
@@ -18,4 +155,167 @@
         setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);
       }
     }
-    async function loadAdminLogs() {      document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="5" class="loading-spinner">Yükleniyor</td></tr>';      try {        const res = await fetch(`${API}/api/admin/logs?limit=200`, { headers: { 'Authorization': 'Bearer ' + token } });        adminLogs = await res.json();        renderAdminLogs('all');      } catch (err) {        document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="5" class="empty-state"><p>Loglar yüklenemedi.</p></td></tr>';      }    }    async function loadVisitorLogs() {      document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="5" class="loading-spinner">Yükleniyor</td></tr>';      try {        const res = await fetch(`${API}/api/admin/visitor-logs?limit=200`, { headers: { 'Authorization': 'Bearer ' + token } });        const logs = await res.json();        const body = document.getElementById('visitorLogBody');        if (!logs.length) {          body.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Henüz ziyaretçi kaydı yok.</p></td></tr>';          return;        }        body.innerHTML = logs.map(l => `          <tr>            <td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">${formatDate(l.created_at)}</td>            <td><span class="badge badge-gold">${l.page_visited || '-'}</span></td>            <td><span class="ip-address">${l.ip_address || '-'}</span></td>            <td><span class="device-chip">${l.device_info || '-'}</span></td>            <td style="font-size:0.8rem;color:var(--text-muted)">${l.referrer ? l.referrer.replace(/https?:\/\//,'').split('/')[0] : '-'}</td>          </tr>        `).join('');      } catch (err) {        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="5" class="empty-state"><p>Ziyaretçi logları yüklenemedi.</p></td></tr>';      }    }    function refreshLogs() {      if (currentTab === 'admin') loadAdminLogs();      else loadVisitorLogs();    }    // Tab switching    document.querySelectorAll('#logTabs .tab-btn').forEach(btn => {      btn.addEventListener('click', () => {        document.querySelectorAll('#logTabs .tab-btn').forEach(b => b.classList.remove('active'));        btn.classList.add('active');        currentTab = btn.dataset.tab;        document.getElementById('adminLogsSection').style.display = currentTab === 'admin' ? 'block' : 'none';        document.getElementById('visitorLogsSection').style.display = currentTab === 'visitor' ? 'block' : 'none';        if (currentTab === 'admin' && !adminLogs.length) loadAdminLogs();        if (currentTab === 'visitor') loadVisitorLogs();      });    });    // Filter buttons    document.querySelectorAll('.log-filter-btn').forEach(btn => {      btn.addEventListener('click', () => {        document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));        btn.classList.add('active');        renderAdminLogs(btn.dataset.action);      });    });    loadAdminLogs();  </script></body></html>
+
+    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">\u0130\u00E7erik Y\u00F6netimi</div>\n        <a href="/admin/products.html" class="sidebar-link">\uD83D\uDC8E \u00DCr\u00FCnler</a>\n        <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n        <div class="sidebar-category">Sipari\u015F Y\u00F6netimi</div>\n        <a href="/admin/orders.html" class="sidebar-link">\uD83D\uDCE6 Sipari\u015Fler</a>\n        <div class="sidebar-category">\u0130leti\u015Fim</div>\n        <a href="/admin/messages.html" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link active">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA \u00C7\u0131k\u0131\u015F Yap</button>\n    ';
+    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
+    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+    function formatDate(d) {
+      var s = String(d).trim();
+      if (!/Z$|[+-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+      var date = new Date(s);
+      var now = new Date();
+      var diff = now - date;
+      if (diff < 60000) return 'Az \u00F6nce';
+      if (diff < 3600000) return Math.floor(diff / 60000) + ' dk \u00F6nce';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + ' saat \u00F6nce';
+      return date.toLocaleDateString('tr-TR', { timeZone: userTimezone, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatAction(action) {
+      var map = {
+        login: '\uD83D\uDD11 Giri\u015F',
+        logout: '\uD83D\uDEAA \u00C7\u0131k\u0131\u015F',
+        delete_message: '\uD83D\uDDD1\uFE0F Mesaj Silme',
+        delete_testimonial: '\uD83D\uDDD1\uFE0F Yorum Silme',
+        approve_testimonial: '\u2705 Yorum Onay',
+        delete_product: '\uD83D\uDDD1\uFE0F \u00DCr\u00FCn Silme',
+        update_product: '\uD83D\uDCDD \u00DCr\u00FCn D\u00FCzenleme',
+        create_product: '\u2795 \u00DCr\u00FCn Ekleme',
+        read_message: '\uD83D\uDCE9 Mesaj Okundu',
+        create_order: '\u2795 Sipari\u015F Olu\u015Fturma',
+        update_order_status: '\uD83D\uDEE1\uFE0F Sipari\u015F Durumu',
+        stock_adjustment: '\uD83D\uDCE6 Stok D\u00FCzenleme'
+      };
+      if (!action) return '? Bilinmeyen';
+      var key = action.split(':')[0].trim();
+      return (map[key] || '? ' + key) + (action.includes(':') ? ' - ' + action.split(':').slice(1).join(':').trim() : '');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
+      document.getElementById('adminLogsSection').style.display = tab === 'admin' ? '' : 'none';
+      document.getElementById('visitorLogsSection').style.display = tab === 'visitor' ? '' : 'none';
+    }
+
+    function filterAdminLogs(action, btn) {
+      document.querySelectorAll('.log-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      renderAdminLogs(action);
+    }
+
+    function renderAdminLogs(filter) {
+      var body = document.getElementById('adminLogBody');
+      var filtered = adminLogs;
+      if (filter && filter !== 'all') {
+        filtered = adminLogs.filter(function(l) { return l.action && l.action.toLowerCase().indexOf(filter) !== -1; });
+      }
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="6" class="empty-state"><p>Hen\u00FCz log kayd\u0131 yok.</p></td></tr>';
+        return;
+      }
+      body.innerHTML = filtered.map(function(l) {
+        return '<tr>' +
+          '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDate(l.created_at) + '</td>' +
+          '<td><span class="badge badge-gold">' + (l.username || '-') + '</span></td>' +
+          '<td>' + formatAction(l.action) + '</td>' +
+          '<td><span class="ip-address">' + (l.ip_address || '-') + '</span></td>' +
+          '<td><span class="device-chip">' + (l.device_info || '-') + '</span></td>' +
+          '<td><span class="device-chip">' + (l.device_model || '-') + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    async function loadAdminLogs() {
+      document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="6" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
+      try {
+        var logs = await fetchJSON(API + '/api/admin/logs?limit=200', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (logs == null) return;
+        adminLogs = logs;
+        renderAdminLogs('all');
+      } catch (err) {
+        document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="5" class="empty-state"><p>Loglar y\u00FCklenemedi.</p></td></tr>';
+      }
+    }
+
+    async function loadVisitorLogs() {
+      document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="9" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
+      try {
+        var logs = await fetchJSON(API + '/api/admin/visitor-logs?limit=200', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (logs == null) return;
+        var body = document.getElementById('visitorLogBody');
+        if (!logs.length) {
+          body.innerHTML = '<tr><td colspan="9" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
+          return;
+        }
+        body.innerHTML = logs.map(function(l) {
+          return '<tr>' +
+            '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDate(l.created_at) + '</td>' +
+            '<td><span class="badge badge-gold">' + (l.page_visited || '-') + '</span></td>' +
+            '<td><span class="ip-address">' + (l.ip_address || '-') + '</span></td>' +
+            '<td><span class="device-chip">' + (l.browser || '-') + '</span></td>' +
+            '<td><span class="device-chip">' + (l.os || '-') + '</span></td>' +
+            '<td><span class="device-chip">' + (l.device_info || '-') + '</span></td>' +
+            '<td><span class="device-chip">' + (l.device_model || '-') + '</span></td>' +
+            '<td><span class="device-chip">' + (l.timezone || '-') + '</span></td>' +
+            '<td style="font-size:0.8rem;color:var(--text-muted)">' + (l.referrer ? l.referrer.replace(/https?:\/\//,'').split('/')[0] : '-') + '</td>' +
+            '</tr>';
+        }).join('');
+      } catch (err) {
+        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="8" class="empty-state"><p>Y\u00FCklenemedi.</p></td></tr>';
+      }
+    }
+
+    function refreshLogs() {
+      loadAdminLogs();
+      loadVisitorLogs();
+    }
+
+    async function resetAdminLogs() {
+      var confirmed = await showConfirm('Loglar\u0131 S\u0131f\u0131rla', 'T\u00FCm admin i\u015Flem loglar\u0131 kal\u0131c\u0131 olarak silinecek. Bu i\u015Flem geri al\u0131namaz.', 'S\u0131f\u0131rla');
+      if (!confirmed) return;
+      try {
+        var res = await fetch(API + '/api/admin/logs', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Hata');
+        adminLogs = [];
+        renderAdminLogs('all');
+        adminToast('S\u0131f\u0131rland\u0131', 'Admin loglar\u0131 ba\u015Far\u0131yla silindi.', 'success');
+      } catch (err) {
+        adminToast('Hata', err.message || 'Loglar silinemedi.', 'error');
+      }
+    }
+
+    async function resetVisitorLogs() {
+      var confirmed = await showConfirm('Ziyaret\u00E7i Kay\u0131tlar\u0131n\u0131 S\u0131f\u0131rla', 'T\u00FCm ziyaret\u00E7i kay\u0131tlar\u0131 kal\u0131c\u0131 olarak silinecek. Bu i\u015Flem geri al\u0131namaz.', 'S\u0131f\u0131rla');
+      if (!confirmed) return;
+      try {
+        var res = await fetch(API + '/api/admin/visitor-logs', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Hata');
+        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="9" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
+        adminToast('S\u0131f\u0131rland\u0131', 'Ziyaret\u00E7i kay\u0131tlar\u0131 ba\u015Far\u0131yla silindi.', 'success');
+      } catch (err) {
+        adminToast('Hata', err.message || 'Kay\u0131tlar silinemedi.', 'error');
+      }
+    }
+
+    async function loadTimezone() {
+      try {
+        var settings = await fetchJSON(API + '/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (settings && settings.timezone) userTimezone = settings.timezone;
+      } catch(e) {}
+    }
+
+    async function init() {
+      await loadTimezone();
+      loadAdminLogs();
+      loadVisitorLogs();
+    }
+    init();
+  </script>
+</body>
+</html>

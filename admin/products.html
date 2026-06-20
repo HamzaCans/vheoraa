@@ -1,8 +1,147 @@
-﻿<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Ürünler | VHEORA Admin</title>  <link rel="stylesheet" href="admin.css?v=6">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></head><body>  <aside class="sidebar" id="sidebar"></aside>  <main class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Ürünler</h1>        <p class="page-subtitle">Koleksiyon ürünlerini yönetin.</p>      </div>      <button class="btn btn-primary" onclick="openModal()">+ Yeni Ürün</button>    </div>    <div class="table-container" id="productsContainer">      <p class="empty-state">Yükleniyor...</p>    </div>  </main>  <div class="modal-overlay" id="modalOverlay">    <div class="modal">      <h2 class="modal-title" id="modalTitle">Yeni Ürün</h2>      <form id="productForm">        <input type="hidden" id="editId">        <div class="form-row">          <div class="form-group">            <label>Ürün Adı *</label>            <input type="text" id="prodName" required>          </div>          <div class="form-group">            <label>Kategori *</label>            <select id="prodCategory" required>              <option value="">Seçin</option>              <option value="yuzuk">Yüzük</option>              <option value="bileklik">Bileklik</option>              <option value="kolye">Kolye</option>              <option value="kupe">Küpe</option>              <option value="set">Set Takı</option>            </select>          </div>        </div>        <div class="form-group">          <label>Açıklama</label>          <textarea id="prodDescription"></textarea>        </div>        <div class="form-row">          <div class="form-group">            <label>Fiyat / Referans</label>            <input type="text" id="prodPrice" placeholder="Örn: Talep üzerine">          </div>          <div class="form-group">            <label>Rozet</label>            <input type="text" id="prodBadge" placeholder="Yeni, Çok Satan, Sınırlı Seri">          </div>        </div>        <div class="form-row">          <div class="form-group">            <label>Görsel</label>            <input type="file" id="prodImage" accept="image/*">          </div>          <div class="form-group">            <label>Öne Çıkan</label>            <select id="prodFeatured">              <option value="0">Hayır</option>              <option value="1">Evet</option>            </select>          </div>        </div>        <div class="form-actions">          <button type="button" class="btn" style="background:var(--border);color:var(--text-muted);" onclick="closeModal()">İptal</button>          <button type="submit" class="btn btn-primary">Kaydet</button>        </div>      </form>    </div>  </div>  <div class="admin-toast-container" id="adminToast"></div>  <div class="confirm-overlay" id="confirmOverlay">    <div class="confirm-modal">      <h3 id="confirmTitle">Emin misiniz?</h3>      <p id="confirmText">Bu işlem geri alınamaz.</p>      <div class="confirm-actions">        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>        <button class="btn btn-danger" id="confirmBtn">Sil</button>      </div>    </div>  </div>  <script>    function adminToast(title, msg, type = 'success', duration = 3500) {      const c = document.getElementById('adminToast'); if (!c) return;      const t = document.createElement('div'); t.className = 'admin-toast';      const icons = { success: '✓', error: '✗', info: 'ℹ' };      t.innerHTML = `<div class="admin-toast-icon ${type}">${icons[type]}</div><div class="admin-toast-body"><div class="admin-toast-title">${title}</div><div class="admin-toast-msg">${msg}</div></div>`;      c.appendChild(t);      setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 250); }, duration);    }    let confirmResolve = null;    function showConfirm(title, text, btnText = 'Sil') {      return new Promise((resolve) => {        document.getElementById('confirmTitle').textContent = title;        document.getElementById('confirmText').textContent = text;        document.getElementById('confirmBtn').textContent = btnText;        document.getElementById('confirmOverlay').classList.add('active');        confirmResolve = resolve;      });    }    function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(false); confirmResolve = null; } }    document.getElementById('confirmBtn').addEventListener('click', () => { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(true); confirmResolve = null; } });    document.getElementById('confirmOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeConfirm(); });    const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';    function getToken() {      const t = localStorage.getItem('vheora_token');      if (!t) window.location.href = '/admin/';      return t;    }    document.getElementById('sidebar').innerHTML = `      <div class="sidebar-logo">VHEORA</div>      <div class="sidebar-sub">Admin Panel</div>      <nav class="sidebar-nav">                <div class="sidebar-category">Genel</div>        <a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a>                <div class="sidebar-category">İçerik Yönetimi</div>        <a href="/admin/products.html" class="sidebar-link active">💎 Ürünler</a>
-        <a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a>        <a href="/admin/testimonials.html" class="sidebar-link">⭐ Yorumlar</a>                
-        <div class="sidebar-category">Sipariş Yönetimi</div>
-        <a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a>
-        <div class="sidebar-category">İletişim</div>        <a href="/admin/messages.html" class="sidebar-link">✉️ Mesajlar</a>                <div class="sidebar-category">Sistem</div>        <a href="/admin/settings.html" class="sidebar-link">🔧 Ayarlar</a>        <a href="/admin/logs.html" class="sidebar-link">📋 Loglar</a>                <div style="flex:1"></div>        <a href="/" class="sidebar-link">🌐 Siteye Git</a>      <button class="sidebar-logout" onclick="logout()">🚪 Çıkış Yap</button>    `;    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menuyu ac/kapat">☰</button>');    function toggleSidebar() {      document.body.classList.toggle('sidebar-open');    }    function closeSidebar() {      document.body.classList.remove('sidebar-open');    }    function logout() {      localStorage.removeItem('vheora_token');      window.location.href = '/admin/';    }    function openModal(product) {      document.getElementById('modalOverlay').classList.add('active');      if (product) {        document.getElementById('modalTitle').textContent = 'Ürün Düzenle';        document.getElementById('editId').value = product.id;        document.getElementById('prodName').value = product.name;        document.getElementById('prodCategory').value = product.category;        document.getElementById('prodDescription').value = product.description || '';        document.getElementById('prodPrice').value = product.price || '';        document.getElementById('prodBadge').value = product.badge || '';        document.getElementById('prodFeatured').value = product.is_featured;      } else {        document.getElementById('modalTitle').textContent = 'Yeni Ürün';        document.getElementById('editId').value = '';        document.getElementById('productForm').reset();        document.getElementById('prodFeatured').value = '0';      }    }    function closeModal() {      document.getElementById('modalOverlay').classList.remove('active');    }    document.getElementById('modalOverlay').addEventListener('click', (e) => {      if (e.target === e.currentTarget) closeModal();    });    document.getElementById('productForm').addEventListener('submit', async (e) => {      e.preventDefault();      const token = getToken();      const editId = document.getElementById('editId').value;      const isEdit = !!editId;      const formData = new FormData();      formData.append('name', document.getElementById('prodName').value);      formData.append('category', document.getElementById('prodCategory').value);      formData.append('description', document.getElementById('prodDescription').value);      formData.append('price', document.getElementById('prodPrice').value);      formData.append('badge', document.getElementById('prodBadge').value);      formData.append('is_featured', document.getElementById('prodFeatured').value);      const fileInput = document.getElementById('prodImage');      if (fileInput.files[0]) formData.append('image', fileInput.files[0]);      const url = isEdit ? `${API}/api/products/${editId}` : `${API}/api/products`;      const method = isEdit ? 'PUT' : 'POST';      try {        const res = await fetch(url, {          method,          headers: { 'Authorization': `Bearer ${token}` },          body: formData        });        const data = await res.json();        if (res.ok) {          closeModal();          loadProducts();          adminToast(isEdit ? 'Güncellendi' : 'Eklendi', `Ürün başarıyla ${isEdit ? 'güncellendi' : 'eklendi'}.`, 'success');        } else {          adminToast('Hata', data.error || 'Bir hata oluştu', 'error');        }      } catch (err) {        adminToast('Sunucu Hatası', 'Sunucuya bağlanılamadı.', 'error');      }    });    async function deleteProduct(id) {      const confirmed = await showConfirm('Ürünü Sil', 'Bu ürün kalıcı olarak silinecek. Emin misiniz?');      if (!confirmed) return;      const token = getToken();      try {        await fetch(`${API}/api/products/${id}`, {          method: 'DELETE',          headers: { 'Authorization': `Bearer ${token}` }        });        loadProducts();        adminToast('Silindi', 'Ürün başarıyla silindi.', 'success');      } catch (err) {        adminToast('Hata', 'Silme işlemi başarısız.', 'error');      }    }    
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="admin.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Ürünler</h1>
+        <p class="page-subtitle">Koleksiyon ürünlerini yönetin.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">+ Yeni Ürün</button>
+    </div>
+    <div class="table-container" id="productsContainer">
+      <p class="empty-state">Yükleniyor...</p>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2 class="modal-title" id="modalTitle">Yeni Ürün</h2>
+      <form id="productForm">
+        <input type="hidden" id="editId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ürün Adı *</label>
+            <input type="text" id="prodName" required>
+          </div>
+          <div class="form-group">
+            <label>Kategori *</label>
+            <select id="prodCategory" required>
+              <option value="">Seçin</option>
+              <option value="yuzuk">Yüzük</option>
+              <option value="bileklik">Bileklik</option>
+              <option value="kolye">Kolye</option>
+              <option value="kupe">Küpe</option>
+              <option value="set">Set Takı</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Açıklama</label>
+          <textarea id="prodDescription"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fiyat / Referans</label>
+            <input type="text" id="prodPrice" placeholder="Örn: Talep üzerine">
+          </div>
+          <div class="form-group">
+            <label>Rozet</label>
+            <input type="text" id="prodBadge" placeholder="Örn: Yeni, İndirim">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Öne Çıkan</label>
+            <select id="prodFeatured">
+              <option value="0">Hayır</option>
+              <option value="1">Evet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Görsel</label>
+            <input type="file" id="prodImage" accept="image/*">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">İptal</button>
+          <button type="submit" class="btn btn-primary" id="saveProductBtn">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <h3 id="confirmTitle">Emin misiniz?</h3>
+      <p id="confirmText">Bu işlem geri alınamaz.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>
+        <button class="btn btn-danger" id="confirmBtn">Sil</button>
+      </div>
+    </div>
+  </div>
+  <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+  <script>
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    function getToken() {
+      var t = localStorage.getItem('vheora_token');
+      if (!t) window.location.href = '/admin/';
+      return t;
+    }
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); localStorage.removeItem('vheora_user'); window.location.href = '/admin/'; }
+    function adminToast(title, msg, type, duration) {
+      type = type || 'success'; duration = duration || 3500;
+      var c = document.getElementById('adminToast'); if (!c) return;
+      var t = document.createElement('div'); t.className = 'admin-toast';
+      var icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F' };
+      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
+      c.appendChild(t);
+      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
+    }
+    var confirmResolve = null;
+    function showConfirm(title, text, btnText) {
+      btnText = btnText || 'Sil';
+      return new Promise(function(resolve) {
+        confirmResolve = resolve;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        document.getElementById('confirmBtn').textContent = btnText;
+        document.getElementById('confirmOverlay').classList.add('active');
+      });
+    }
+    function closeConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(false); confirmResolve = null; }
+    }
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) { confirmResolve(true); confirmResolve = null; }
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === e.currentTarget) closeConfirm();
+    });
     async function btnAction(btn, label, verb, actionFn) {
       var origHTML = btn.innerHTML;
       btn.disabled = true;
@@ -18,4 +157,121 @@
         setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);
       }
     }
-    async function loadProducts() {      const container = document.getElementById('productsContainer');      try {        const res = await fetch(`${API}/api/products`);        const products = await res.json();        if (!products.length) {          container.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';          return;        }        container.innerHTML = `          <table>            <thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead>            <tbody>              ${products.map(p => `                <tr>                  <td><img src="${p.image ? `${API}${p.image}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>'}" alt="${p.name}" class="product-thumb"></td>                  <td style="font-weight:500;">${p.name}</td>                  <td><span class="badge badge-gold">${p.category}</span></td>                  <td>${p.badge || '-'}</td>                  <td>${p.is_featured ? '⭐' : '-'}</td>                  <td style="text-align:right;">                    <button class="btn btn-sm btn-primary" onclick='openModal(${JSON.stringify(p)})'>✏️</button>                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">🗑️</button>                  </td>                </tr>              `).join('')}            </tbody>          </table>        `;      } catch (err) {        container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';      }    }    loadProducts();  </script></body></html>
+
+    document.getElementById('sidebar').innerHTML = '\n      <div class="sidebar-logo">VHEORA</div>\n      <div class="sidebar-sub">Admin Panel</div>\n      <nav class="sidebar-nav">\n        <div class="sidebar-category">Genel</div>\n        <a href="/admin/dashboard.html" class="sidebar-link">\uD83D\uDCCA Dashboard</a>\n        <div class="sidebar-category">\u0130\u00E7erik Y\u00F6netimi</div>\n        <a href="/admin/products.html" class="sidebar-link active">\uD83D\uDC8E \u00DCr\u00FCnler</a>\n        <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n        <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n        <div class="sidebar-category">Sipari\u015F Y\u00F6netimi</div>\n        <a href="/admin/orders.html" class="sidebar-link">\uD83D\uDCE6 Sipari\u015Fler</a>\n        <div class="sidebar-category">\u0130leti\u015Fim</div>\n        <a href="/admin/messages.html" class="sidebar-link">\u2709\uFE0F Mesajlar</a>\n        <div class="sidebar-category">Sistem</div>\n        <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n        <a href="/admin/logs.html" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n        <div style="flex:1"></div>\n        <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n      </nav>\n      <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA \u00C7\u0131k\u0131\u015F Yap</button>\n    ';
+    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
+    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+    function readFileAsDataURL(file) {
+      return new Promise(function(resolve) {
+        var r = new FileReader();
+        r.onload = function() { resolve(r.result); };
+        r.readAsDataURL(file);
+      });
+    }
+
+    function openModal(product) {
+      if (product) {
+        document.getElementById('modalTitle').textContent = 'Ürün Düzenle';
+        document.getElementById('editId').value = product.id;
+        document.getElementById('prodName').value = product.name;
+        document.getElementById('prodCategory').value = product.category;
+        document.getElementById('prodDescription').value = product.description || '';
+        document.getElementById('prodPrice').value = product.price || '';
+        document.getElementById('prodBadge').value = product.badge || '';
+        document.getElementById('prodFeatured').value = product.is_featured ? '1' : '0';
+      } else {
+        document.getElementById('modalTitle').textContent = 'Yeni Ürün';
+        document.getElementById('editId').value = '';
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodCategory').value = '';
+        document.getElementById('prodDescription').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodBadge').value = '';
+        document.getElementById('prodFeatured').value = '0';
+      }
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var token = getToken();
+      var editId = document.getElementById('editId').value;
+      var isEdit = !!editId;
+      var body = {
+        name: document.getElementById('prodName').value,
+        category: document.getElementById('prodCategory').value,
+        description: document.getElementById('prodDescription').value,
+        price: document.getElementById('prodPrice').value,
+        badge: document.getElementById('prodBadge').value,
+        is_featured: document.getElementById('prodFeatured').value
+      };
+      var fileInput = document.getElementById('prodImage');
+      if (fileInput.files[0]) body.image_data = await readFileAsDataURL(fileInput.files[0]);
+      var url = isEdit ? API + '/api/products/' + editId : API + '/api/products';
+      var method = isEdit ? 'PUT' : 'POST';
+      try {
+        var res = await fetch(url, {
+          method: method,
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        if (res.ok) {
+          closeModal();
+          loadProducts();
+          adminToast(isEdit ? 'Güncellendi' : 'Eklendi', 'Ürün başarıyla ' + (isEdit ? 'güncellendi' : 'eklendi') + '.', 'success');
+        } else {
+          adminToast('Hata', data.error || 'Bir hata oluştu', 'error');
+        }
+      } catch (err) {
+        adminToast('Sunucu Hatası', 'Sunucuya bağlanılamadı.', 'error');
+      }
+    });
+
+    async function deleteProduct(id, btn) {
+      var confirmed = await showConfirm('Ürünü Sil', 'Bu ürün kalıcı olarak silinecek.');
+      if (!confirmed) return;
+      var token = getToken();
+      await btnAction(btn, 'Siliniyor', 'Silindi', async function() {
+        await fetch(API + '/api/products/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        loadProducts();
+      });
+    }
+
+    async function loadProducts() {
+      var container = document.getElementById('productsContainer');
+      try {
+        var products = await fetchJSON(API + '/api/products');
+        if (products == null) return;
+        if (!products.length) {
+          container.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';
+          return;
+        }
+        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
+          products.map(function(p) {
+            var imgSrc = p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>';
+            return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb"></td>' +
+              '<td style="font-weight:500;">' + p.name + '</td>' +
+              '<td><span class="badge badge-gold">' + p.category + '</span></td>' +
+              '<td>' + (p.badge || '-') + '</td>' +
+              '<td>' + (p.is_featured ? '?' : '-') + '</td>' +
+              '<td style="text-align:right;">' +
+              '<button class="btn btn-sm btn-primary" onclick=\'openModal(' + JSON.stringify(p) + ')\'>??</button> ' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteProduct(' + p.id + ', this)">???</button>' +
+              '</td></tr>';
+          }).join('') +
+          '</tbody></table>';
+      } catch (err) {
+        container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';
+      }
+    }
+    loadProducts();
+  </script>
+</body>
+</html>

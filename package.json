@@ -19,5 +19,8 @@
     "nodemailer": "^9.0.1",
     "pg": "^8.21.0",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.1"
   }
 }
