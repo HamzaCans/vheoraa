@@ -1,6 +1,6 @@
-const CACHE_NAME = 'vheora-v4';
-const STATIC_CACHE = 'vheora-static-v4';
-const DYNAMIC_CACHE = 'vheora-dynamic-v4';
+const CACHE_NAME = 'vheora-v5';
+const STATIC_CACHE = 'vheora-static-v5';
+const DYNAMIC_CACHE = 'vheora-dynamic-v5';
 
 const STATIC_ASSETS = [
   '/style.css',
@@ -47,13 +47,16 @@ self.addEventListener('fetch', event => {
   if (!url.protocol.startsWith('http')) return;
 
   if (url.pathname.endsWith('.html') || url.pathname === '/') {
+    var isBypass = url.searchParams.has('bypass');
+    if (isBypass) {
+      event.respondWith(fetch(request));
+      return;
+    }
     event.respondWith(
       fetch(request).then(response => {
         if (response.status === 200) {
           const clone = response.clone();
           caches.open(DYNAMIC_CACHE).then(c => c.put(request, clone));
-        } else if (response.status === 503) {
-          return response;
         }
         return response;
       }).catch(() => caches.match(request).then(r => r || caches.match('/404.html')))
