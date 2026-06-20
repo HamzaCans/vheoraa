@@ -6,12 +6,7 @@
 const isFile = window.location.protocol === 'file:';const isLocal = ['localhost','127.0.0.1','::1'].includes(window.location.hostname);const API_URL = (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : '';
 
 // ========== BAKIM MODU KONTROLÜ ==========
-// Server-side handles maintenance redirect for "/".
-// Client-side fallback only for non-root pages:
-(function() {
-  if (window.location.pathname !== '/') return;
-  if (localStorage.getItem('vheora_bypass') === '1') return;
-})();
+// Server-side handles maintenance check via middleware + cookie + redirect.
 
 // ========== PINCH ZOOM ENGELLE ==========
 document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
@@ -34,8 +29,6 @@ document.addEventListener('touchmove', function(e) {
 
 // ========== SERVICE WORKER REGISTRATION ==========
 if ('serviceWorker' in navigator) {
-  var bypassActive = localStorage.getItem('vheora_bypass') === '1' || new URLSearchParams(window.location.search).get('bypass');
-  if (!bypassActive) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js?v=5', { updateViaCache: 'none' }).then(reg => {
         reg.addEventListener('updatefound', () => {
@@ -51,7 +44,6 @@ if ('serviceWorker' in navigator) {
       }).catch(() => {});
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {});
-  }
 }
 
 // ========== CONFETTI EFFECT ==========

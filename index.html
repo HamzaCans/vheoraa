@@ -100,61 +100,12 @@
     (function() {
       document.getElementById('maintenanceOverlay').style.display='none';
 
-      function getCookieVal(name) {
-        var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-        return m ? m[1] : null;
-      }
-
-      var isBypass = localStorage.getItem('vheora_bypass') === '1';
-      var urlParams = new URLSearchParams(window.location.search);
-      var bypassToken = urlParams.get('bypass');
-
-      if (!isBypass && bypassToken && bypassToken.length > 20) {
-        localStorage.setItem('vheora_bypass', '1');
-        localStorage.setItem('vheora_bypass_token', bypassToken);
-        isBypass = true;
-      }
-
-      if (!isBypass) {
-        var cookieToken = getCookieVal('vheora_bypass');
-        if (cookieToken && cookieToken.length > 20) {
-          localStorage.setItem('vheora_bypass', '1');
-          localStorage.setItem('vheora_bypass_token', cookieToken);
-          isBypass = true;
-        }
-      }
-
-      if (isBypass) {
-        var token = bypassToken || localStorage.getItem('vheora_bypass_token') || getCookieVal('vheora_bypass') || '';
-        if (token) {
-          document.cookie = 'vheora_bypass=' + token + ';path=/;max-age=604800;SameSite=Lax;Secure';
-        }
-        if (!sessionStorage.getItem('vheora_sw_cleared')) {
-          sessionStorage.setItem('vheora_sw_cleared', '1');
-          var p1 = ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          }) : Promise.resolve();
-          var p2 = caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
-          Promise.all([p1, p2]).then(function() { window.location.reload(); });
-          return;
-        }
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          });
-        }
-        caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
-        return;
-      }
-
-      document.getElementById('maintenanceOverlay').style.display='block';
       fetch('/api/settings/public').then(function(r){return r.json()}).then(function(d){
         if(d.maintenance_mode==='1'){
+          document.getElementById('maintenanceOverlay').style.display='block';
           document.getElementById('maintenanceOverlay').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px"><div><h1 style="color:#d4a853;font-size:1.5rem;margin-bottom:12px">'+(d.maintenance_title||'Bakım Modu')+'</h1><p style="color:#aaa;font-size:.9rem;line-height:1.6">'+(d.maintenance_message||'Sitemiz şu an bakım modundadır.')+'</p></div></div>';
-        } else {
-          document.getElementById('maintenanceOverlay').style.display='none';
         }
-      }).catch(function(){ document.getElementById('maintenanceOverlay').style.display='none'; });
+      }).catch(function(){});
     })();
   </script>
 

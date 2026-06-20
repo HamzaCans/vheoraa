@@ -164,7 +164,6 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/health') ||
     url.includes('/api/visit') ||
     url.includes('/api/admin') ||
-    url === '/maintenance.html' ||
     url === '/sw.js' || url === '/manifest.json' ||
     url === '/favicon.png' ||
     url.match(/\.(css|js|webp|png|jpg|jpeg|svg|ico|woff2|woff|ttf|otf|eot)($|\?)/) && !url.includes('/api/')
@@ -212,7 +211,8 @@ const maintenanceCheck = async (req, res, next) => {
       }
       if (!urlBypass && req.query && req.query.bypass) urlBypass = req.query.bypass;
       if (urlBypass && urlBypass === bypassRow.value) {
-        return next();
+        res.setHeader('Set-Cookie', 'vheora_bypass=' + bypassRow.value + ';Path=/;Max-Age=604800;SameSite=Lax;Secure');
+        return res.redirect(302, '/');
       }
     }
 
