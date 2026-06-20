@@ -1418,6 +1418,22 @@ tr.loading-spinner {
   transition: all 0.3s var(--ease-smooth);
 }
 
+.form-group select option {
+  background: #1a1a24;
+  color: #e0e0e0;
+  padding: 8px 12px;
+}
+
+.form-group select option[value=""] {
+  color: #888891;
+}
+
+.form-group select option:hover,
+.form-group select option:checked {
+  background: rgba(212, 168, 83, 0.15);
+  color: #d4a853;
+}
+
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
@@ -1425,6 +1441,12 @@ tr.loading-spinner {
   background: rgba(212, 168, 83, 0.06);
   box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.1);
   outline: none;
+  color: #ffffff;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .modal .form-group {
@@ -1455,6 +1477,18 @@ tr.loading-spinner {
   transition: all 0.25s ease;
 }
 
+.modal .form-group select option {
+  background: #1a1a24;
+  color: #e0e0e0;
+  padding: 8px 12px;
+}
+
+.modal .form-group select option:hover,
+.modal .form-group select option:checked {
+  background: rgba(212, 168, 83, 0.15);
+  color: #d4a853;
+}
+
 .modal .form-group input:focus,
 .modal .form-group textarea:focus,
 .modal .form-group select:focus {
@@ -1462,6 +1496,12 @@ tr.loading-spinner {
   background: rgba(212, 168, 83, 0.06);
   box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.1);
   outline: none;
+  color: #ffffff;
+}
+
+.modal .form-group input::placeholder,
+.modal .form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .modal .form-group textarea {
