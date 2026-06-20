@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'vheora-jwt-secret-2026';
 
-function generateToken(userId) {
-  return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '24h' });
+function generateToken(userId, username) {
+  return jwt.sign({ id: userId, username: username || '' }, JWT_SECRET, { expiresIn: '24h' });
 }
 
 function authenticateToken(req, res, next) {
@@ -19,6 +19,7 @@ function authenticateToken(req, res, next) {
       return res.status(403).json({ error: 'Geçersiz token' });
     }
     req.userId = decoded.id;
+    req.user = { id: decoded.id, username: decoded.username || 'admin' };
     next();
   });
 }

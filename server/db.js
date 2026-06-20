@@ -28,22 +28,27 @@ function normalizeSql(sql) {
   }
   result = result
     .replace(/datetime\(\)/gi, "NOW()")
+    .replace(/date\('now'\)/gi, "CURRENT_DATE")
+    .replace(/date\(([^)]+)\)/gi, (m, col) => `${col.trim()}::date`)
     .replace(/datetime\('now'\)/gi, 'NOW()')
-    .replace(/strftime\('%Y-%m',\s*(\w+)\)/gi, "to_char($1, 'YYYY-MM')")
+    .replace(/strftime\('%Y-%m',\s*(\w+)\)/gi, "to_char($1::timestamp, 'YYYY-MM')")
     .replace(/date\('now',\s*'([^']+)'\)/gi, (_, interval) => {
       const parts = interval.split(' ');
       if (parts.length === 2) {
         const num = parseInt(parts[0]);
         const unit = parts[1].toLowerCase().replace(/s$/, '');
         const map = { day: 'days', month: 'months', year: 'years' };
-        return `NOW() - INTERVAL '${num} ${map[unit] || unit + 's'}'`;
+        const absNum = Math.abs(num);
+        const op = num < 0 ? '-' : '+';
+        return `NOW() ${op} INTERVAL '${absNum} ${map[unit] || unit + 's'}'`;
       }
-      return `NOW() - INTERVAL '${interval}'`;
+      return `NOW() ${interval.startsWith('-') ? '-' : '+'} INTERVAL '${interval.replace(/^[+-]/, '')}'`;
     })
     .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY')
     .replace(/DEFAULT \(datetime\('now'\)\)/gi, 'DEFAULT NOW()')
     .replace(/DEFAULT \(datetime\(\)\)/gi, 'DEFAULT NOW()')
-    .replace(/DEFAULT \(date\('now'\)\)/gi, 'DEFAULT CURRENT_DATE');
+    .replace(/DEFAULT \(date\('now'\)\)/gi, 'DEFAULT CURRENT_DATE')
+    .replace(/(\W)date\('now'\)(\W|$)/gi, '$1CURRENT_DATE$2');
   return result;
 }
 
@@ -107,6 +112,9 @@ async function initSchema(driver) {
       ip_address TEXT DEFAULT '',
       user_agent TEXT DEFAULT '',
       device_info TEXT DEFAULT '',
+      browser TEXT DEFAULT '',
+      os TEXT DEFAULT '',
+      timezone TEXT DEFAULT '',
       page_visited TEXT DEFAULT '',
       referrer TEXT DEFAULT '',
       created_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
@@ -171,6 +179,25 @@ async function initSchema(driver) {
 
   for (const sql of schema) {
     await driver.exec(normalizeSql(sql));
+  }
+}
+
+async function runMigrations(driver) {
+  const migrations = [
+    `ALTER TABLE visitor_logs ADD COLUMN browser TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN os TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN timezone TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN country TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN city TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN device_model TEXT DEFAULT ''`,
+    `ALTER TABLE visitor_logs ADD COLUMN device_model TEXT DEFAULT ''`
+  ];
+  for (const sql of migrations) {
+    try {
+      await driver.exec(normalizeSql(sql));
+    } catch (e) {
+      // Column already exists — ignore
+    }
   }
 }
 
@@ -293,9 +320,10 @@ function createPgDriver(connectionString) {
     },
     async run(sql, params) {
       const hasReturning = /RETURNING/i.test(sql);
-      const finalSql = hasReturning ? sql : sql + ' RETURNING id';
+      const finalSql = hasReturning ? sql : sql + ' RETURNING *';
       const res = await pool.query(normalizeSql(finalSql), params);
-      return { lastInsertRowid: res.rows[0]?.id || res.rows[0]?.lastInsertRowid || null, changes: res.rowCount };
+      const row = res.rows[0] || {};
+      return { lastInsertRowid: row.id || row.lastInsertRowid || null, changes: res.rowCount };
     },
     async exec(sql) {
       await pool.query(normalizeSql(sql));
@@ -318,6 +346,7 @@ async function getDb() {
   }
 
   await initSchema(db);
+  await runMigrations(db);
   await seedIfEmpty(db);
 
   return db;

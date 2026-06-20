@@ -7,6 +7,7 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
 const { getDb } = require('./db');
+const { logAdminAction, getClientIp, parseDeviceInfo } = require('./middleware/adminLogger');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const messageRoutes = require('./routes/messages');
@@ -38,37 +39,68 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
       scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://www.googletagmanager.com'],
-      imgSrc: ["'self'", 'data:', 'blob:'],
-      connectSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://vheora.co'],
+      connectSrc: ["'self'", 'https://cdn.jsdelivr.net', 'https://www.google-analytics.com'],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
       upgradeInsecureRequests: [],
     }
-  }
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  noSniff: true,
+  frameguard: { action: 'deny' },
+  xssFilter: true,
 }));
 
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000', 'https://vheora.co', 'http://localhost:5173', 'http://localhost:5500', 'http://localhost:5501', 'http://localhost:5502', 'http://127.0.0.1:5500', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'null'],
+  origin: ['https://vheora.co', 'https://vheoraa.vercel.app', 'http://localhost:3001', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: true,
+  maxAge: 86400
 }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, // Güvenlik limiti geri yüklendi
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Çok fazla istek gönderdiniz. Lütfen 15 dakika bekleyin.' }
 });
 
-app.use('/api/', apiLimiter);
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Çok fazla deneme yapıldı. Lütfen 15 dakika bekleyin.' }
+});
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+const strictLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Çok fazla istek. Biraz bekleyin.' }
+});
+
+app.use('/api/', apiLimiter);
+app.use('/api/auth', authLimiter);
+app.use('/api/admin', strictLimiter);
+
+app.use(express.json({ limit: '500kb' }));
+app.use(express.urlencoded({ extended: true, limit: '500kb' }));
 
 function sanitize(obj) {
   if (typeof obj === 'string') {
-    return obj.replace(/<[^>]*>/g, '').trim();
+    return obj
+      .replace(/<[^>]*>/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+      .replace(/data:text\/html/gi, '')
+      .trim();
   }
   if (obj && typeof obj === 'object') {
     for (const key in obj) {
@@ -80,6 +112,30 @@ function sanitize(obj) {
   return obj;
 }
 
+function validateEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+}
+
+function validatePhone(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  return /^\+?[\d\s\-()]{7,20}$/.test(phone);
+}
+
+function maxLength(str, max) {
+  if (!str || typeof str !== 'string') return str;
+  return str.substring(0, max);
+}
+
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+  next();
+});
+
 app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object' && !req._sanitized) {
     sanitize(req.body);
@@ -89,6 +145,96 @@ app.use((req, res, next) => {
     sanitize(req.query);
   }
   next();
+});
+
+const { JWT_SECRET } = require('./middleware/auth');
+
+const maintenanceCheck = async (req, res, next) => {
+  const url = req.originalUrl || req.path;
+
+  if (url.startsWith('/admin') || url === '/admin') {
+    return next();
+  }
+
+  const alwaysAllowed = (
+    url.includes('/api/auth/login') ||
+    url.includes('/api/auth/logout') ||
+    url.includes('/api/settings/public') ||
+    url.includes('/api/settings/bypass-token') ||
+    url.includes('/api/health') ||
+    url.includes('/api/visit') ||
+    url.includes('/api/admin') ||
+    url === '/maintenance.html' ||
+    url.endsWith('.css') ||
+    url.endsWith('.js') ||
+    url.endsWith('.webp') || url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.svg') || url.endsWith('.ico') ||
+    url.endsWith('.woff2') || url.endsWith('.woff') || url.endsWith('.ttf') ||
+    url === '/sw.js' || url === '/manifest.json'
+  );
+
+  if (alwaysAllowed) {
+    return next();
+  }
+
+  try {
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      if (token) {
+        try {
+          const jwt = require('jsonwebtoken');
+          jwt.verify(token, JWT_SECRET);
+          return next();
+        } catch (_) {}
+      }
+    }
+
+    const cookies = (req.headers.cookie || '').split(';').reduce((acc, c) => {
+      const [k, v] = c.trim().split('=');
+      if (k) acc[k] = v;
+      return acc;
+    }, {});
+
+    const db = await getDb();
+    const bypassRow = await db.get("SELECT value FROM settings WHERE key = 'maintenance_bypass_token'");
+
+    if (bypassRow && bypassRow.value) {
+      if (cookies['vheora_bypass'] === bypassRow.value) {
+        return next();
+      }
+      var rawUrl = req.originalUrl || req.url || '';
+      var qIdx = rawUrl.indexOf('?');
+      var urlBypass = '';
+      if (qIdx !== -1) {
+        var params = rawUrl.substring(qIdx + 1).split('&');
+        for (var p = 0; p < params.length; p++) {
+          var kv = params[p].split('=');
+          if (kv[0] === 'bypass') { urlBypass = decodeURIComponent(kv[1] || ''); break; }
+        }
+      }
+      if (!urlBypass && req.query && req.query.bypass) urlBypass = req.query.bypass;
+      if (urlBypass && urlBypass === bypassRow.value) {
+        return next();
+      }
+    }
+
+    const row = await db.get("SELECT value FROM settings WHERE key = 'maintenance_mode'");
+    if (row && row.value === '1') {
+      if (url.includes('/api/')) {
+        return res.status(503).json({ error: 'Site bakım modundadır. Lütfen daha sonra tekrar deneyin.', maintenance: true });
+      }
+      return res.status(503).sendFile(path.join(__dirname, '..', 'maintenance.html'));
+    }
+  } catch (e) {
+    // DB error — proceed normally
+  }
+  next();
+};
+
+app.use(maintenanceCheck);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 app.use('/api/auth', authRoutes);
@@ -104,42 +250,27 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const { JWT_SECRET } = require('./middleware/auth');
-
-const maintenanceCheck = async (req, res, next) => {
-  if (req.path.startsWith('/api/') || req.path.startsWith('/admin/') || req.path === '/admin') {
-    return next();
-  }
-  try {
-    const authHeader = req.headers['authorization'];
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      if (token) {
-        try {
-          const jwt = require('jsonwebtoken');
-          jwt.verify(token, JWT_SECRET);
-          return next();
-        } catch (_) {}
-      }
-    }
-    const db = await getDb();
-    const row = await db.get("SELECT value FROM settings WHERE key = 'maintenance_mode'");
-    if (row && row.value === '1' && !req.path.startsWith('/maintenance')) {
-      return res.status(503).sendFile(path.join(__dirname, '..', 'maintenance.html'));
-    }
-  } catch (e) {
-    // If DB error, proceed normally
-  }
-  next();
-};
-
-app.use(maintenanceCheck);
-
 const cacheTime = 7 * 24 * 60 * 60;
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
   maxAge: cacheTime * 1000,
   immutable: true
 }));
+app.use('/admin', async (req, res, next) => {
+  if (req.path === '/' || req.path.endsWith('.html')) {
+    try {
+      const db = await getDb();
+      const ua = req.headers['user-agent'] || '';
+      const ip = getClientIp(req);
+      const info = parseDeviceInfo(ua);
+      const page = req.path === '/' ? '/admin/' : `/admin${req.path}`;
+      await db.run(
+        'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info) VALUES (?, ?, ?, ?, ?, ?)',
+        [0, 'anonymous', `page_visit: ${page}`, ip, ua, info.display]
+      );
+    } catch (_) {}
+  }
+  next();
+});
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin'), {
   maxAge: 0,
   etag: true
