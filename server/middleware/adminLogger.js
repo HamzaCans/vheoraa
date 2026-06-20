@@ -194,7 +194,7 @@ function parseDeviceInfo(ua, clientModel) {
   else if (/macintosh|mac os/i.test(ua)) os = 'macOS';
   else if (/linux/i.test(ua)) os = 'Linux';
 
-  let model = detectModel(ua) || clientModel || '';
+  let model = (clientModel && clientModel !== 'iPhone' && clientModel !== 'iPad') ? clientModel : detectModel(ua);
 
   return { device_type, browser, os, model, display: device_type + ' · ' + browser + ' · ' + os + (model ? ' · ' + model : '') };
 }

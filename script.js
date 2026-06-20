@@ -1463,12 +1463,76 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navigator.sendBeacon) {
     var _ua = navigator.userAgent || '';
     var _model = '';
-    if (/android/i.test(_ua)) {
+
+    function _detectiPhone() {
+      try {
+        var scr = screen;
+        var w = Math.min(scr.width, scr.height);
+        var h = Math.max(scr.width, scr.height);
+        var r = window.devicePixelRatio || 1;
+        var dw = Math.round(w * r);
+        var dh = Math.round(h * r);
+        var t = navigator.maxTouchPoints || 0;
+        if (t < 1) return '';
+        var models = [
+          [428, 926, 'iPhone 14 Plus'], [393, 852, 'iPhone 14'], [390, 844, 'iPhone 14'],
+          [430, 932, 'iPhone 14 Pro Max'], [393, 852, 'iPhone 14 Pro'],
+          [428, 926, 'iPhone 13'], [390, 844, 'iPhone 13'], [375, 812, 'iPhone 13 mini'],
+          [428, 926, 'iPhone 13 Pro Max'], [393, 852, 'iPhone 13 Pro'],
+          [428, 926, 'iPhone 12'], [390, 844, 'iPhone 12'], [375, 812, 'iPhone 12 mini'],
+          [428, 926, 'iPhone 12 Pro Max'], [390, 844, 'iPhone 12 Pro'],
+          [414, 896, 'iPhone 11'], [375, 812, 'iPhone 11 Pro'], [414, 896, 'iPhone 11 Pro Max'],
+          [414, 896, 'iPhone XR'], [414, 896, 'iPhone XS Max'], [375, 812, 'iPhone XS'],
+          [414, 736, 'iPhone 8 Plus'], [375, 667, 'iPhone 8'], [375, 667, 'iPhone SE (2.nesil)'], [375, 667, 'iPhone SE (3.nesil)'],
+          [414, 736, 'iPhone 7 Plus'], [375, 667, 'iPhone 7'],
+          [414, 736, 'iPhone 6s Plus'], [375, 667, 'iPhone 6s'],
+          [414, 736, 'iPhone 6 Plus'], [375, 667, 'iPhone 6'],
+          [320, 568, 'iPhone SE (1.nesil)'], [320, 568, 'iPhone 5s'], [320, 568, 'iPhone 5c'], [320, 568, 'iPhone 5']
+        ];
+        for (var i = 0; i < models.length; i++) {
+          if (w === models[i][0] && h === models[i][1]) return models[i][2];
+        }
+        if (r >= 3 && w <= 440 && h <= 940) return 'iPhone Pro Max';
+        if (r >= 2 && w <= 400 && h <= 860) return 'iPhone Pro';
+        if (r >= 2 && w <= 440 && h <= 940) return 'iPhone Plus';
+        if (r >= 2 && w <= 400) return 'iPhone';
+        return 'iPhone';
+      } catch (e) { return 'iPhone'; }
+    }
+
+    function _detectiPad() {
+      try {
+        var scr = screen;
+        var w = Math.min(scr.width, scr.height);
+        var h = Math.max(scr.width, scr.height);
+        if (w >= 1024) return 'iPad Pro';
+        if (w >= 834) return 'iPad Air';
+        if (w >= 820) return 'iPad Air';
+        if (w >= 768) return 'iPad';
+        return 'iPad mini';
+      } catch (e) { return 'iPad'; }
+    }
+
+    if (/iPhone/i.test(_ua)) {
+      _model = _detectiPhone();
+    } else if (/iPad/i.test(_ua)) {
+      _model = _detectiPad();
+    } else if (/android/i.test(_ua)) {
       var _m2 = _ua.match(/;\s*([^;)]+?)\s*Build/i);
       _model = _m2 ? _m2[1].trim() : '';
       if (!_model) { var _m3 = _ua.match(/Android[^;]*;\s*([^;)]+)/i); _model = _m3 ? _m3[1].trim() : ''; }
     }
-    navigator.sendBeacon('/api/visit', JSON.stringify({ page: location.pathname, referrer: document.referrer, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, device_model: _model }));
+
+    if (_model && navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion', 'model']).then(function(ua) {
+        if (ua.model) _model = ua.model;
+        navigator.sendBeacon('/api/visit', JSON.stringify({ page: location.pathname, referrer: document.referrer, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, device_model: _model }));
+      })['catch'](function() {
+        navigator.sendBeacon('/api/visit', JSON.stringify({ page: location.pathname, referrer: document.referrer, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, device_model: _model }));
+      });
+    } else {
+      navigator.sendBeacon('/api/visit', JSON.stringify({ page: location.pathname, referrer: document.referrer, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, device_model: _model }));
+    }
   }
 
   // ========== ADMIN TOOLBAR ==========
