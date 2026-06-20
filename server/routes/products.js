@@ -94,7 +94,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    let { name, category, description, price, is_featured, badge, image_data } = req.body;
+    let { name, category, description, price, is_featured, badge, gram, image_data } = req.body;
     const image = image_data || '';
 
     if (!name || !category) {
@@ -106,12 +106,13 @@ router.post('/', authenticateToken, async (req, res) => {
     description = String(description || '').substring(0, 5000);
     price = String(price || '').substring(0, 50);
     badge = String(badge || '').substring(0, 100);
+    gram = String(gram || '').substring(0, 50);
 
     const now = new Date().toISOString();
     const result = await db.run(
-      `INSERT INTO products (name, category, description, price, image, is_featured, badge, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, category, description || '', price || '', image, is_featured === '1' ? 1 : 0, badge || '', now, now]
+      `INSERT INTO products (name, category, description, price, image, is_featured, badge, gram, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, category, description || '', price || '', image, is_featured === '1' ? 1 : 0, badge || '', gram || '', now, now]
     );
 
     try { logAdminAction(req, `create_product: ${name}`); } catch (_) {}
@@ -132,7 +133,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Ürün bulunamadı' });
     }
 
-    let { name, category, description, price, is_featured, badge, image_data } = req.body;
+    let { name, category, description, price, is_featured, badge, gram, image_data } = req.body;
     const image = image_data !== undefined ? image_data : existing.image;
 
     if (name !== undefined) name = String(name).substring(0, 200);
@@ -140,11 +141,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (description !== undefined) description = String(description).substring(0, 5000);
     if (price !== undefined) price = String(price).substring(0, 50);
     if (badge !== undefined) badge = String(badge).substring(0, 100);
+    if (gram !== undefined) gram = String(gram).substring(0, 50);
 
     const now = new Date().toISOString();
     await db.run(
       `UPDATE products SET name = ?, category = ?, description = ?, price = ?, image = ?,
-       is_featured = ?, badge = ?, updated_at = ? WHERE id = ?`,
+       is_featured = ?, badge = ?, gram = ?, updated_at = ? WHERE id = ?`,
       [
         name || existing.name,
         category || existing.category,
@@ -153,6 +155,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
         image,
         is_featured !== undefined ? (is_featured === '1' ? 1 : 0) : existing.is_featured,
         badge !== undefined ? badge : existing.badge,
+        gram !== undefined ? gram : (existing.gram || ''),
         now,
         req.params.id
       ]

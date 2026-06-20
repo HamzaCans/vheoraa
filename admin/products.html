@@ -55,11 +55,15 @@
             <input type="text" id="prodPrice" placeholder="Örn: Talep üzerine">
           </div>
           <div class="form-group">
-            <label>Rozet</label>
-            <input type="text" id="prodBadge" placeholder="Örn: Yeni, İndirim">
+            <label>Gram</label>
+            <input type="text" id="prodGram" placeholder="Örn: 3.5g">
           </div>
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label>Rozet</label>
+            <input type="text" id="prodBadge" placeholder="Örn: Yeni, İndirim">
+          </div>
           <div class="form-group">
             <label>Öne Çıkan</label>
             <select id="prodFeatured">
@@ -67,10 +71,10 @@
               <option value="1">Evet</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Görsel</label>
-            <input type="file" id="prodImage" accept="image/*">
-          </div>
+        </div>
+        <div class="form-group">
+          <label>Görsel</label>
+          <input type="file" id="prodImage" accept="image/*">
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" onclick="closeModal()">İptal</button>
@@ -180,6 +184,7 @@
         document.getElementById('prodCategory').value = product.category;
         document.getElementById('prodDescription').value = product.description || '';
         document.getElementById('prodPrice').value = product.price || '';
+        document.getElementById('prodGram').value = product.gram || '';
         document.getElementById('prodBadge').value = product.badge || '';
         document.getElementById('prodFeatured').value = product.is_featured ? '1' : '0';
       } else {
@@ -189,6 +194,7 @@
         document.getElementById('prodCategory').value = '';
         document.getElementById('prodDescription').value = '';
         document.getElementById('prodPrice').value = '';
+        document.getElementById('prodGram').value = '';
         document.getElementById('prodBadge').value = '';
         document.getElementById('prodFeatured').value = '0';
       }
@@ -208,6 +214,7 @@
         category: document.getElementById('prodCategory').value,
         description: document.getElementById('prodDescription').value,
         price: document.getElementById('prodPrice').value,
+        gram: document.getElementById('prodGram').value,
         badge: document.getElementById('prodBadge').value,
         is_featured: document.getElementById('prodFeatured').value
       };
@@ -253,17 +260,23 @@
           container.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';
           return;
         }
-        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
+        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>Fiyat</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
           products.map(function(p) {
             var imgSrc = p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>';
+            var catColors = { yuzuk: '#d4a853', bileklik: '#e07c4f', kolye: '#5cb3e0', kupe: '#b07cd4', set: '#5ce0a0' };
+            var catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+            var catColor = catColors[p.category] || '#d4a853';
+            var catLabel = catLabels[p.category] || p.category;
             return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb"></td>' +
               '<td style="font-weight:500;">' + p.name + '</td>' +
-              '<td><span class="badge badge-gold">' + p.category + '</span></td>' +
+              '<td><span class="badge" style="background:' + catColor + '15;color:' + catColor + ';">' + catLabel + '</span></td>' +
+              '<td>' + (p.gram || '-') + '</td>' +
+              '<td>' + (p.price || '-') + '</td>' +
               '<td>' + (p.badge || '-') + '</td>' +
-              '<td>' + (p.is_featured ? '?' : '-') + '</td>' +
+              '<td>' + (p.is_featured ? '\u2605' : '-') + '</td>' +
               '<td style="text-align:right;">' +
-              '<button class="btn btn-sm btn-primary" onclick=\'openModal(' + JSON.stringify(p) + ')\'>??</button> ' +
-              '<button class="btn btn-sm btn-danger" onclick="deleteProduct(' + p.id + ', this)">???</button>' +
+              '<button class="btn btn-sm btn-primary" onclick=\'openModal(' + JSON.stringify(p) + ')\'>\u270F\uFE0F</button> ' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteProduct(' + p.id + ', this)">\uD83D\uDDD1\uFE0F</button>' +
               '</td></tr>';
           }).join('') +
           '</tbody></table>';
