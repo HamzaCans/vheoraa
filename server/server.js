@@ -150,7 +150,7 @@ app.use((req, res, next) => {
 const { JWT_SECRET } = require('./middleware/auth');
 
 const maintenanceCheck = async (req, res, next) => {
-  const url = req.originalUrl || req.path;
+  const url = req.originalUrl || req.url || '';
 
   if (url.startsWith('/admin') || url === '/admin') {
     return next();
@@ -165,11 +165,9 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/visit') ||
     url.includes('/api/admin') ||
     url === '/maintenance.html' ||
-    url.endsWith('.css') ||
-    url.endsWith('.js') ||
-    url.endsWith('.webp') || url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.svg') || url.endsWith('.ico') ||
-    url.endsWith('.woff2') || url.endsWith('.woff') || url.endsWith('.ttf') ||
-    url === '/sw.js' || url === '/manifest.json'
+    url === '/sw.js' || url === '/manifest.json' ||
+    url === '/favicon.png' ||
+    url.match(/\.(css|js|webp|png|jpg|jpeg|svg|ico|woff2|woff|ttf|otf|eot)($|\?)/) && !url.includes('/api/')
   );
 
   if (alwaysAllowed) {
