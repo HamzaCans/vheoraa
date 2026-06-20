@@ -54,13 +54,16 @@ router.post('/contact', async (req, res) => {
 router.post('/quote', async (req, res) => {
   try {
     const db = await getDb();
-    let { phone, product_name } = req.body;
+    let { first_name, last_name, phone, email, product_name } = req.body;
 
-    if (!phone) {
-      return res.status(400).json({ error: 'Telefon numarası gerekli' });
+    if (!first_name || !last_name || !phone) {
+      return res.status(400).json({ error: 'Ad, soyad ve telefon numarası gerekli' });
     }
 
+    first_name = String(first_name).substring(0, 100);
+    last_name = String(last_name).substring(0, 100);
     phone = String(phone).substring(0, 20);
+    email = String(email || '').substring(0, 254);
     product_name = String(product_name || '').substring(0, 200);
 
     if (!/^\+?[\d\s\-()]{7,20}$/.test(phone)) {
@@ -70,20 +73,22 @@ router.post('/quote', async (req, res) => {
     const now = new Date().toISOString();
     await db.run(
       `INSERT INTO messages (first_name, last_name, email, subject, message, type, product_name, phone, is_read, created_at)
-       VALUES ('', '', ?, ?, ?, 'quote', ?, ?, 0, ?)`,
-      ['', `Teklif Talebi: ${product_name || 'Belirtilmedi'}`, `Telefon: ${phone}`, product_name || '', phone, now]
+       VALUES (?, ?, ?, ?, ?, 'quote', ?, ?, 0, ?)`,
+      [first_name, last_name, email, `Teklif Talebi: ${product_name || 'Belirtilmedi'}`, `${first_name} ${last_name} - Telefon: ${phone}${email ? ' - E-posta: ' + email : ''}`, product_name || '', phone, now]
     );
 
     sendEmailNotification({
       subject: `VHEORA - Yeni Teklif Talebi: ${product_name || 'Belirtilmedi'}`,
       html: `
         <h2>Yeni Teklif Talebi</h2>
-        <p><strong>Ürün:</strong> ${product_name || 'Belirtilmedi'}</p>
+        <p><strong>Isim:</strong> ${first_name} ${last_name}</p>
         <p><strong>Telefon:</strong> ${phone}</p>
+        ${email ? `<p><strong>E-posta:</strong> ${email}</p>` : ''}
+        <p><strong>Urun:</strong> ${product_name || 'Belirtilmedi'}</p>
       `
     });
 
-    res.json({ message: 'Teklif talebiniz alındı' });
+    res.json({ message: 'Teklif talebiniz alındı, en kısa sürede sizinle iletişime geçeceğiz.' });
   } catch (err) {
     console.error('[Quote Error]', err);
     res.status(500).json({ error: 'Teklif gönderilirken hata oluştu' });

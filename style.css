@@ -3721,18 +3721,29 @@ font {
 .quote-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+}
+
+.quote-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .quote-form input {
-  padding: 16px 20px;
+  padding: 14px 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(212, 168, 83, 0.2);
   border-radius: 8px;
   color: var(--color-white);
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
-  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.quote-form input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .quote-form input:focus {
@@ -3742,51 +3753,95 @@ font {
   outline: none;
 }
 
-.quote-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 10px;
-}
-
-.btn-quote-wa {
-  background: linear-gradient(135deg, #25d366, #128c7e);
-  color: white;
-  padding: 16px;
-  border-radius: 8px;
+.quote-notice {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  border: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(212, 168, 83, 0.08);
+  border: 1px solid rgba(212, 168, 83, 0.15);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
 }
 
-.btn-quote-mail {
+.quote-notice span {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.btn-quote-submit {
   background: var(--gradient-gold);
   color: var(--color-dark);
-  padding: 16px;
+  padding: 15px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: 1px;
   text-transform: uppercase;
   transition: all 0.3s ease;
   border: none;
+  cursor: pointer;
+  width: 100%;
 }
 
-.btn-quote-wa:hover, .btn-quote-mail:hover {
+.btn-quote-submit:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-  filter: brightness(1.1);
+  box-shadow: 0 8px 30px rgba(212, 168, 83, 0.3);
+}
+
+.btn-quote-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.quote-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.quote-success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.quote-success h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--color-gold);
+  margin-bottom: 10px;
+}
+
+.quote-success p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .quote-form-row {
+    grid-template-columns: 1fr;
+  }
+  .quote-container {
+    padding: 40px 24px;
+  }
 }
 
 /* Update original product cards for Teklif Al button */

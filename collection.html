@@ -223,16 +223,26 @@
                 <h2>Teklif Al</h2>
                 <p class="quote-product-name" id="modalProductName">Ürün Adı</p>
             </div>
-            <div class="quote-form">
-                <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (Örn: 05xx...)" required>
-                <div class="quote-actions">
-                    <button id="sendWhatsApp" class="btn-quote-wa">
-                        <span>WhatsApp</span>
-                    </button>
-                    <button id="sendEmail" class="btn-quote-mail">
-                        <span>E-Posta</span>
-                    </button>
+            <div class="quote-form" id="quoteFormContent">
+                <div class="quote-form-row">
+                    <input type="text" id="quoteFirstName" placeholder="Adınız" required>
+                    <input type="text" id="quoteLastName" placeholder="Soyadınız" required>
                 </div>
+                <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (05xx...)" required>
+                <input type="email" id="quoteEmail" placeholder="E-Posta (isteğe bağlı)">
+                <div class="quote-notice">
+                    <span>📋</span>
+                    <p>Bilgilerinizi gönderdiğinizde ekibimiz en kısa sürede sizinle iletişime geçecektir.</p>
+                </div>
+                <button id="sendQuote" class="btn-quote-submit">
+                    <span>Teklif Gönder</span>
+                </button>
+            </div>
+            <div class="quote-success" id="quoteSuccess" style="display:none">
+                <div class="quote-success-icon">✓</div>
+                <h3>Talebiniz Alındı!</h3>
+                <p>En kısa sürede sizinle iletişime geçeceğiz.</p>
+                <button class="btn-quote-submit" onclick="document.getElementById('quoteModal').classList.remove('active')">Kapat</button>
             </div>
         </div>
     </div>
@@ -307,7 +317,12 @@
             const overlay = document.getElementById('quoteOverlay');
             const closeBtn = document.getElementById('quoteClose');
             const productNameEl = document.getElementById('modalProductName');
+            const formContent = document.getElementById('quoteFormContent');
+            const successContent = document.getElementById('quoteSuccess');
+            const firstNameInput = document.getElementById('quoteFirstName');
+            const lastNameInput = document.getElementById('quoteLastName');
             const phoneInput = document.getElementById('quotePhone');
+            const emailInput = document.getElementById('quoteEmail');
             const openBtns = document.querySelectorAll('.open-quote');
             
             let currentProduct = '';
@@ -316,37 +331,67 @@
                 btn.addEventListener('click', () => {
                     currentProduct = btn.getAttribute('data-product');
                     productNameEl.textContent = currentProduct;
+                    formContent.style.display = '';
+                    successContent.style.display = 'none';
                     modal.classList.add('active');
                 });
             });
 
             const closeModal = () => {
                 modal.classList.remove('active');
+                firstNameInput.value = '';
+                lastNameInput.value = '';
                 phoneInput.value = '';
+                emailInput.value = '';
+                formContent.style.display = '';
+                successContent.style.display = 'none';
             };
 
             overlay.addEventListener('click', closeModal);
             closeBtn.addEventListener('click', closeModal);
 
-            document.getElementById('sendWhatsApp').addEventListener('click', async () => {
+            document.getElementById('sendQuote').addEventListener('click', async () => {
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
                 const phone = phoneInput.value.trim();
-                if(!phone) { showToast('Eksik Bilgi', 'Lütfen telefon numaranızı girin.', 'error'); return; }
-                try { await fetch(`${API_URL}/api/quote`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone, product_name: currentProduct}) }); } catch(e) {}
-                const message = `*YENİ TEKLİF TALEBİ*\n\n*Ürün:* ${currentProduct}\n*Müşteri Telefon:* ${phone}\n\nBu talep web siteniz üzerinden oluşturulmuştur.`;
-                const waUrl = `https://wa.me/905510207299?text=${encodeURIComponent(message)}`;
-                window.open(waUrl, '_blank');
-                closeModal();
-            });
+                const email = emailInput.value.trim();
 
-            document.getElementById('sendEmail').addEventListener('click', async () => {
-                const phone = phoneInput.value.trim();
-                if(!phone) { showToast('Eksik Bilgi', 'Lütfen telefon numaranızı girin.', 'error'); return; }
-                try { await fetch(`${API_URL}/api/quote`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone, product_name: currentProduct}) }); } catch(e) {}
-                const subject = `VHEORA - Yeni Teklif Talebi: ${currentProduct}`;
-                const body = `Sayın VHEORA Ekibi,\n\nWeb siteniz üzerinden yeni bir teklif talebi alınmıştır:\n\nÜrün Adı: ${currentProduct}\nMüşteri İletişim Numarası: ${phone}\n\nLütfen en kısa sürede dönüş sağlayınız.`;
-                const mailUrl = `mailto:vheora.co@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                window.open(mailUrl, '_blank');
-                closeModal();
+                if (!firstName) { showToast('Eksik Bilgi', 'Lütfen adınızı girin.', 'error'); return; }
+                if (!lastName) { showToast('Eksik Bilgi', 'Lütfen soyadınızı girin.', 'error'); return; }
+                if (!phone) { showToast('Eksik Bilgi', 'Lütfen telefon numaranızı girin.', 'error'); return; }
+
+                const btn = document.getElementById('sendQuote');
+                const origHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span>Gönderiliyor...</span>';
+
+                try {
+                    const res = await fetch(`${API_URL}/api/quote`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            first_name: firstName,
+                            last_name: lastName,
+                            phone: phone,
+                            email: email,
+                            product_name: currentProduct
+                        })
+                    });
+
+                    if (res.ok) {
+                        formContent.style.display = 'none';
+                        successContent.style.display = '';
+                    } else {
+                        const data = await res.json();
+                        showToast('Hata', data.error || 'Bir hata oluştu.', 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = origHTML;
+                    }
+                } catch(e) {
+                    showToast('Bağlantı Hatası', 'Sunucuya bağlanılamadı.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = origHTML;
+                }
             });
         });
     </script>

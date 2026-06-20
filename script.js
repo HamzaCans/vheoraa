@@ -1180,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ========== BUTTON RIPPLE EFFECT ==========
-  document.querySelectorAll('.btn-primary, .btn-secondary, .form-submit, .btn-quote-wa, .btn-quote-mail').forEach(btn => {
+  document.querySelectorAll('.btn-primary, .btn-secondary, .form-submit, .btn-quote-submit').forEach(btn => {
     btn.addEventListener('click', function(e) {
       const ripple = document.createElement('span');
       ripple.className = 'btn-ripple';
