@@ -123,12 +123,6 @@
         document.getElementById('maintenanceOverlay').style.display='none';
         return;
       }
-      if (!bypassToken && localStorage.getItem('vheora_bypass') === '1') {
-        var savedToken = localStorage.getItem('vheora_bypass_token');
-        if (savedToken) {
-          window.history.replaceState({}, '', '/?bypass=' + savedToken);
-        }
-      }
       document.getElementById('maintenanceOverlay').style.display='none';
     })();
   </script>

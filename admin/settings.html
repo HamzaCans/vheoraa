@@ -288,7 +288,7 @@
     }
     function updateBypassStatus() {
       var hasBypass = localStorage.getItem('vheora_bypass') === '1';
-      document.getElementById('bypassStatus').textContent = hasBypass ? 'Durum: Aktif \u2014 Siteyi.normal gibi g\u00F6r\u00FCnt\u00FCleyebilirsin. (Token URL: /?bypass=...)' : 'Durum: Pasif';
+      document.getElementById('bypassStatus').textContent = hasBypass ? 'Durum: Aktif - Siteyi normal gibi g\u00F6r\u00FCnt\u00FCleyebilirsin.' : 'Durum: Pasif';
     }
 
     var currentBypassToken = null;
