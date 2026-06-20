@@ -52,6 +52,8 @@ self.addEventListener('fetch', event => {
         if (response.status === 200) {
           const clone = response.clone();
           caches.open(DYNAMIC_CACHE).then(c => c.put(request, clone));
+        } else if (response.status === 503) {
+          return response;
         }
         return response;
       }).catch(() => caches.match(request).then(r => r || caches.match('/404.html')))

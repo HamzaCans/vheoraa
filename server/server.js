@@ -164,7 +164,6 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/health') ||
     url.includes('/api/visit') ||
     url.includes('/api/admin') ||
-    url.includes('/api/debug-cookies') ||
     url === '/maintenance.html' ||
     url === '/sw.js' || url === '/manifest.json' ||
     url === '/favicon.png' ||
@@ -247,13 +246,6 @@ app.use('/api/admin', orderRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-app.get('/api/debug-cookies', (req, res) => {
-  const rawCookie = req.headers.cookie || 'NONE';
-  const url = req.originalUrl || req.url;
-  const qBypass = req.query && req.query.bypass ? req.query.bypass : 'none';
-  res.json({ rawCookie, url, qBypass });
 });
 
 const cacheTime = 7 * 24 * 60 * 60;

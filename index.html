@@ -97,10 +97,8 @@
   <!-- BAKIM MODU KONTROLÜ -->
   <div id="maintenanceOverlay" style="position:fixed;inset:0;z-index:99999;background:#050505;display:none;"></div>
   <script>
-    document.getElementById('maintenanceOverlay').style.display='block';
     (function() {
       if (localStorage.getItem('vheora_bypass') === '1') {
-        document.getElementById('maintenanceOverlay').style.display='none';
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(regs) {
             regs.forEach(function(r) { r.unregister(); });
@@ -120,10 +118,16 @@
           });
         }
         caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
-        document.getElementById('maintenanceOverlay').style.display='none';
         return;
       }
-      document.getElementById('maintenanceOverlay').style.display='none';
+      document.getElementById('maintenanceOverlay').style.display='block';
+      fetch('/api/settings/public').then(function(r){return r.json()}).then(function(d){
+        if(d.maintenance_mode==='1'){
+          document.getElementById('maintenanceOverlay').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px"><div><h1 style="color:#d4a853;font-size:1.5rem;margin-bottom:12px">'+(d.maintenance_title||'Bakım Modu')+'</h1><p style="color:#aaa;font-size:.9rem;line-height:1.6">'+(d.maintenance_message||'Sitemiz şu an bakım modundadır.')+'</p></div></div>';
+        } else {
+          document.getElementById('maintenanceOverlay').style.display='none';
+        }
+      }).catch(function(){ document.getElementById('maintenanceOverlay').style.display='none'; });
     })();
   </script>
 
