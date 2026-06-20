@@ -55,7 +55,8 @@
     { "source": "/api/(.*)", "destination": "/api/index.js" }
   ],
   "routes": [
-    { "src": "/((?!admin/|api/|images/|fonts/).*)", "dest": "/api/index.js" },
+    { "src": "^/$", "dest": "/api/index.js" },
+    { "src": "^/collection$", "dest": "/collection.html" },
     { "handle": "filesystem" },
     { "src": "^/admin$", "dest": "/admin/index.html" },
     { "src": "^/admin/([^\\.]+)$", "dest": "/admin/$1.html" }
