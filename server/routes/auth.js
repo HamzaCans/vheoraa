@@ -2,7 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { getDb } = require('../db');
-const { generateToken } = require('../middleware/auth');
+const { generateToken, authenticateToken } = require('../middleware/auth');
+const { logAdminAction, getClientIp, parseDeviceInfo } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
@@ -14,10 +15,6 @@ const limiter = rateLimit({
   message: { error: 'Çok fazla istek. 15 dakika bekleyin.' }
 });
 
-function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.socket?.remoteAddress || '';
-}
-
 router.post('/login', limiter, async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -26,7 +23,6 @@ router.post('/login', limiter, async (req, res) => {
     }
 
     const db = await getDb();
-
     const admin = await db.get('SELECT * FROM users WHERE username = ?', [username]);
     if (!admin) {
       return res.status(401).json({ error: 'Kullanıcı adı veya şifre hatalı' });
@@ -35,16 +31,28 @@ router.post('/login', limiter, async (req, res) => {
     if (!valid) {
       return res.status(401).json({ error: 'Kullanıcı adı veya şifre hatalı' });
     }
-    const token = generateToken(admin.id);
+    const token = generateToken(admin.id, admin.username);
     const ua = req.headers['user-agent'] || '';
+    const ip = getClientIp(req);
+    const info = parseDeviceInfo(ua);
     await db.run(
-      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info) VALUES (?, ?, ?, ?, ?, ?)',
-      [admin.id, admin.username, 'login', getClientIp(req), ua, '']
+      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [admin.id, admin.username, 'login', ip, ua, info.display, info.model || '']
     );
     return res.json({ token, role: 'admin', username: admin.username });
   } catch (err) {
     console.error('[Login Error]', err);
     res.status(500).json({ error: 'Giriş sırasında hata oluştu' });
+  }
+});
+
+router.post('/logout', authenticateToken, async (req, res) => {
+  try {
+    try { await logAdminAction(req, 'logout'); } catch (_) {}
+    res.json({ message: 'Başarıyla çıkış yapıldı' });
+  } catch (err) {
+    console.error('[Logout Error]', err);
+    res.status(500).json({ error: 'Çıkış sırasında hata oluştu' });
   }
 });
 

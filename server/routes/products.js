@@ -4,6 +4,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { logAdminAction } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
@@ -90,15 +91,21 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    const { name, category, description, price, is_featured, badge } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : '';
+    let { name, category, description, price, is_featured, badge, image_data } = req.body;
+    const image = image_data || '';
 
     if (!name || !category) {
       return res.status(400).json({ error: 'Ürün adı ve kategori gerekli' });
     }
+
+    name = String(name).substring(0, 200);
+    category = String(category).substring(0, 100);
+    description = String(description || '').substring(0, 5000);
+    price = String(price || '').substring(0, 50);
+    badge = String(badge || '').substring(0, 100);
 
     const now = new Date().toISOString();
     const result = await db.run(
@@ -106,6 +113,8 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [name, category, description || '', price || '', image, is_featured === '1' ? 1 : 0, badge || '', now, now]
     );
+
+    try { logAdminAction(req, `create_product: ${name}`); } catch (_) {}
 
     const product = await db.get('SELECT * FROM products WHERE id = ?', [result.lastInsertRowid]);
     res.json(productPublic(product));
@@ -115,7 +124,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
   }
 });
 
-router.put('/:id', authenticateToken, upload.single('image'), async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
     const existing = await db.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
@@ -123,8 +132,14 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
       return res.status(404).json({ error: 'Ürün bulunamadı' });
     }
 
-    const { name, category, description, price, is_featured, badge } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : existing.image;
+    let { name, category, description, price, is_featured, badge, image_data } = req.body;
+    const image = image_data !== undefined ? image_data : existing.image;
+
+    if (name !== undefined) name = String(name).substring(0, 200);
+    if (category !== undefined) category = String(category).substring(0, 100);
+    if (description !== undefined) description = String(description).substring(0, 5000);
+    if (price !== undefined) price = String(price).substring(0, 50);
+    if (badge !== undefined) badge = String(badge).substring(0, 100);
 
     const now = new Date().toISOString();
     await db.run(
@@ -143,6 +158,8 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
       ]
     );
 
+    try { logAdminAction(req, `update_product: ${req.params.id} - ${name || existing.name}`); } catch (_) {}
+
     const product = await db.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
     res.json(productPublic(product));
   } catch (err) {
@@ -154,10 +171,12 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
+    const existing = await db.get('SELECT name FROM products WHERE id = ?', [req.params.id]);
     const result = await db.run('DELETE FROM products WHERE id = ?', [req.params.id]);
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Ürün bulunamadı' });
     }
+    try { logAdminAction(req, `delete_product: ${req.params.id} - ${existing?.name || 'unknown'}`); } catch (_) {}
     res.json({ message: 'Ürün silindi' });
   } catch (err) {
     console.error('[Products Error]', err);

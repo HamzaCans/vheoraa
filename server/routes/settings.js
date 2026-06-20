@@ -4,6 +4,8 @@ const { authenticateToken } = require('../middleware/auth');
 const { logAdminAction } = require('../middleware/adminLogger');
 const router = express.Router();
 
+function safeLog(req, action) { try { logAdminAction(req, action); } catch (_) {} }
+
 router.get('/admin/settings', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
@@ -44,7 +46,7 @@ router.put('/admin/settings', authenticateToken, async (req, res) => {
     for (const row of rows) {
       settings[row.key] = row.value;
     }
-    logAdminAction(req, `update_settings: ${keys.join(', ')}`);
+    safeLog(req, `update_settings: ${keys.join(', ')}`);
     res.json({ message: 'Ayarlar güncellendi', settings });
   } catch (err) {
     console.error('[Settings Error]', err);
@@ -77,7 +79,7 @@ router.post('/settings/bypass-token', authenticateToken, async (req, res) => {
       "INSERT INTO settings (key, value) VALUES ('maintenance_bypass_token', ?) ON CONFLICT(key) DO UPDATE SET value = ?",
       [token, token]
     );
-    logAdminAction(req, 'generated_bypass_token');
+    safeLog(req, 'generated_bypass_token');
     res.setHeader('Set-Cookie', 'vheora_bypass=' + token + ';path=/;max-age=604800;SameSite=None;Secure');
     res.json({ token });
   } catch (err) {
@@ -90,7 +92,7 @@ router.delete('/settings/bypass-token', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
     await db.run("DELETE FROM settings WHERE key = 'maintenance_bypass_token'");
-    logAdminAction(req, 'cleared_bypass_token');
+    safeLog(req, 'cleared_bypass_token');
     res.setHeader('Set-Cookie', 'vheora_bypass=;path=/;max-age=0;SameSite=None;Secure');
     res.json({ message: 'Bypass token silindi' });
   } catch (err) {

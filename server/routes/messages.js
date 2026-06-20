@@ -2,16 +2,27 @@ const express = require('express');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { sendEmailNotification } = require('../mailer');
+const { logAdminAction } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
 router.post('/contact', async (req, res) => {
   try {
     const db = await getDb();
-    const { first_name, last_name, email, subject, message } = req.body;
+    let { first_name, last_name, email, subject, message } = req.body;
 
     if (!first_name || !last_name || !email || !message) {
       return res.status(400).json({ error: 'Ad, soyad, e-posta ve mesaj gerekli' });
+    }
+
+    first_name = String(first_name).substring(0, 100);
+    last_name = String(last_name).substring(0, 100);
+    email = String(email).substring(0, 254);
+    subject = String(subject || '').substring(0, 200);
+    message = String(message).substring(0, 5000);
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Geçersiz e-posta adresi' });
     }
 
     const now = new Date().toISOString();
@@ -43,10 +54,17 @@ router.post('/contact', async (req, res) => {
 router.post('/quote', async (req, res) => {
   try {
     const db = await getDb();
-    const { phone, product_name } = req.body;
+    let { phone, product_name } = req.body;
 
     if (!phone) {
       return res.status(400).json({ error: 'Telefon numarası gerekli' });
+    }
+
+    phone = String(phone).substring(0, 20);
+    product_name = String(product_name || '').substring(0, 200);
+
+    if (!/^\+?[\d\s\-()]{7,20}$/.test(phone)) {
+      return res.status(400).json({ error: 'Geçersiz telefon numarası' });
     }
 
     const now = new Date().toISOString();
@@ -75,11 +93,16 @@ router.post('/quote', async (req, res) => {
 router.post('/testimonial', async (req, res) => {
   try {
     const db = await getDb();
-    const { name, location, text, rating } = req.body;
+    let { name, location, text, rating } = req.body;
 
     if (!name || !text) {
       return res.status(400).json({ error: 'Ad ve yorum gerekli' });
     }
+
+    name = String(name).substring(0, 100);
+    location = String(location || '').substring(0, 100);
+    text = String(text).substring(0, 2000);
+    rating = Math.min(5, Math.max(1, parseInt(rating) || 5));
 
     const now = new Date().toISOString();
     await db.run(
@@ -210,6 +233,7 @@ router.put('/admin/messages/:id/read', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
     await db.run('UPDATE messages SET is_read = 1 WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `mark_message_read: ${req.params.id}`); } catch (_) {}
     res.json({ message: 'Okundu olarak işaretlendi' });
   } catch (err) {
     console.error('[Messages Error]', err);
@@ -220,7 +244,9 @@ router.put('/admin/messages/:id/read', authenticateToken, async (req, res) => {
 router.delete('/admin/messages/:id', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
+    const msg = await db.get('SELECT email FROM messages WHERE id = ?', [req.params.id]);
     await db.run('DELETE FROM messages WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `delete_message: ${req.params.id} - ${msg?.email || 'unknown'}`); } catch (_) {}
     res.json({ message: 'Mesaj silindi' });
   } catch (err) {
     console.error('[Messages Error]', err);
@@ -243,6 +269,7 @@ router.put('/admin/testimonials/:id/approve', authenticateToken, async (req, res
   try {
     const db = await getDb();
     await db.run('UPDATE testimonials SET is_approved = 1 WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `approve_testimonial: ${req.params.id}`); } catch (_) {}
     res.json({ message: 'Yorum onaylandı' });
   } catch (err) {
     console.error('[Testimonials Error]', err);
@@ -253,7 +280,9 @@ router.put('/admin/testimonials/:id/approve', authenticateToken, async (req, res
 router.delete('/admin/testimonials/:id', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
+    const t = await db.get('SELECT name FROM testimonials WHERE id = ?', [req.params.id]);
     await db.run('DELETE FROM testimonials WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `delete_testimonial: ${req.params.id} - ${t?.name || 'unknown'}`); } catch (_) {}
     res.json({ message: 'Yorum silindi' });
   } catch (err) {
     console.error('[Testimonials Error]', err);
@@ -268,22 +297,22 @@ router.get('/admin/stats', authenticateToken, async (req, res) => {
     const productCount = (await db.get('SELECT COUNT(*) as c FROM products')).c;
     const messageCount = (await db.get('SELECT COUNT(*) as c FROM messages')).c;
     const testimonialCount = (await db.get('SELECT COUNT(*) as c FROM testimonials')).c;
-    const approvedCount = (await db.get('SELECT COUNT(*) as c FROM testimonials WHERE is_approved = 1')).c;
-    const unreadCount = (await db.get('SELECT COUNT(*) as c FROM messages WHERE is_read = 0')).c;
+    const approvedCount = (await db.get("SELECT COUNT(*) as c FROM testimonials WHERE is_approved = 1")).c;
+    const unreadCount = (await db.get("SELECT COUNT(*) as c FROM messages WHERE is_read = 0")).c;
     const contactCount = (await db.get("SELECT COUNT(*) as c FROM messages WHERE type = 'contact'")).c;
     const quoteCount = (await db.get("SELECT COUNT(*) as c FROM messages WHERE type = 'quote'")).c;
 
     const monthlyMessages = await db.all(`
-      SELECT ${process.env.DATABASE_URL ? "to_char(created_at, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
+      SELECT ${process.env.DATABASE_URL ? "to_char(created_at::timestamp, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
       FROM messages
-      WHERE created_at >= ${process.env.DATABASE_URL ? "NOW() - INTERVAL '6 months'" : "date('now', '-6 months')"}
+      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "date(created_at) >= date('now', '-6 months')"}
       GROUP BY month ORDER BY month
     `);
 
     const monthlyTestimonials = await db.all(`
-      SELECT ${process.env.DATABASE_URL ? "to_char(created_at, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
+      SELECT ${process.env.DATABASE_URL ? "to_char(created_at::timestamp, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
       FROM testimonials
-      WHERE created_at >= ${process.env.DATABASE_URL ? "NOW() - INTERVAL '6 months'" : "date('now', '-6 months')"}
+      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "date(created_at) >= date('now', '-6 months')"}
       GROUP BY month ORDER BY month
     `);
 
@@ -300,7 +329,7 @@ router.get('/admin/stats', authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error('[Stats Error]', err);
-    res.status(500).json({ error: 'İstatistikler yüklenirken hata oluştu' });
+    res.status(500).json({ error: err.message || 'İstatistikler yüklenirken hata oluştu' });
   }
 });
 

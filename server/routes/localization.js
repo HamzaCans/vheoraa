@@ -1,6 +1,7 @@
 const express = require('express');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { logAdminAction } = require('../middleware/adminLogger');
 const router = express.Router();
 
 router.get('/languages', async (req, res) => {
@@ -28,10 +29,13 @@ router.get('/admin/languages', authenticateToken, async (req, res) => {
 router.post('/admin/languages', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    const { code, name, flag, is_default, is_active } = req.body;
+    let { code, name, flag, is_default, is_active } = req.body;
     if (!code || !name) {
       return res.status(400).json({ error: 'Dil kodu ve adı gerekli' });
     }
+    code = String(code).substring(0, 10).toLowerCase();
+    name = String(name).substring(0, 100);
+    flag = String(flag || '').substring(0, 10);
     if (is_default) {
       await db.run('UPDATE languages SET is_default = 0');
     }
@@ -40,6 +44,7 @@ router.post('/admin/languages', authenticateToken, async (req, res) => {
       [code.toLowerCase(), name, flag || '', is_default ? 1 : 0, is_active !== undefined ? (is_active ? 1 : 0) : 1]
     );
     const lang = await db.get('SELECT * FROM languages WHERE id = ?', [result.lastInsertRowid]);
+    try { logAdminAction(req, `create_language: ${code} - ${name}`); } catch (_) {}
     res.json(lang);
   } catch (err) {
     console.error('[Languages Error]', err);
@@ -72,6 +77,7 @@ router.put('/admin/languages/:id', authenticateToken, async (req, res) => {
       ]
     );
     const lang = await db.get('SELECT * FROM languages WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `update_language: ${req.params.id} - ${lang.code}`); } catch (_) {}
     res.json(lang);
   } catch (err) {
     console.error('[Languages Error]', err);
@@ -91,6 +97,7 @@ router.delete('/admin/languages/:id', authenticateToken, async (req, res) => {
     }
     await db.run('DELETE FROM translations WHERE lang_code = ?', [existing.code]);
     await db.run('DELETE FROM languages WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `delete_language: ${req.params.id} - ${existing.code}`); } catch (_) {}
     res.json({ message: 'Dil silindi' });
   } catch (err) {
     console.error('[Languages Error]', err);
@@ -120,15 +127,19 @@ router.get('/admin/translations', authenticateToken, async (req, res) => {
 router.post('/admin/translations', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    const { lang_code, key, value } = req.body;
+    let { lang_code, key, value } = req.body;
     if (!lang_code || !key) {
       return res.status(400).json({ error: 'Dil kodu ve anahtar gerekli' });
     }
+    lang_code = String(lang_code).substring(0, 10);
+    key = String(key).substring(0, 200);
+    value = String(value || '').substring(0, 5000);
     const result = await db.run(
       'INSERT INTO translations (lang_code, key, value) VALUES (?, ?, ?) ON CONFLICT(lang_code, key) DO UPDATE SET value = ?',
       [lang_code, key, value || '', value || '']
     );
     const row = await db.get('SELECT * FROM translations WHERE id = ?', [result.lastInsertRowid]);
+    try { logAdminAction(req, `create_translation: ${lang_code}/${key}`); } catch (_) {}
     res.json(row);
   } catch (err) {
     console.error('[Translations Error]', err);
@@ -143,12 +154,16 @@ router.put('/admin/translations', authenticateToken, async (req, res) => {
     if (!Array.isArray(translations)) {
       return res.status(400).json({ error: 'Çeviri dizisi gerekli' });
     }
+    if (translations.length > 500) {
+      return res.status(400).json({ error: 'Çok fazla çeviri' });
+    }
     for (const t of translations) {
       await db.run(
         'INSERT INTO translations (lang_code, key, value) VALUES (?, ?, ?) ON CONFLICT(lang_code, key) DO UPDATE SET value = ?',
         [t.lang_code, t.key, t.value || '', t.value || '']
       );
     }
+    try { logAdminAction(req, `update_translations: ${translations.length} adet`); } catch (_) {}
     res.json({ message: `${translations.length} çeviri güncellendi` });
   } catch (err) {
     console.error('[Translations Error]', err);
@@ -160,6 +175,7 @@ router.delete('/admin/translations/:id', authenticateToken, async (req, res) => 
   try {
     const db = await getDb();
     await db.run('DELETE FROM translations WHERE id = ?', [req.params.id]);
+    try { logAdminAction(req, `delete_translation: ${req.params.id}`); } catch (_) {}
     res.json({ message: 'Çeviri silindi' });
   } catch (err) {
     console.error('[Translations Error]', err);

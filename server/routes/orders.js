@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { logAdminAction } = require('../middleware/adminLogger');
 
 router.get('/orders/track', async (req, res) => {
   try {
@@ -87,9 +88,21 @@ router.get('/orders/:id', async (req, res) => {
 
 router.post('/orders', async (req, res) => {
   try {
-    const { customer_name, customer_email, customer_phone, shipping_address, city, district, notes, items, carrier, tracking_no } = req.body;
+    let { customer_name, customer_email, customer_phone, shipping_address, city, district, notes, items, carrier, tracking_no } = req.body;
     if (!customer_name) return res.status(400).json({ error: 'Müşteri adı gerekli' });
     if (!items || !items.length) return res.status(400).json({ error: 'En az bir ürün gerekli' });
+
+    customer_name = String(customer_name).substring(0, 200);
+    customer_email = String(customer_email || '').substring(0, 254);
+    customer_phone = String(customer_phone || '').substring(0, 20);
+    shipping_address = String(shipping_address || '').substring(0, 500);
+    city = String(city || '').substring(0, 100);
+    district = String(district || '').substring(0, 100);
+    notes = String(notes || '').substring(0, 1000);
+    carrier = String(carrier || '').substring(0, 100);
+    tracking_no = String(tracking_no || '').substring(0, 100);
+
+    if (items.length > 50) return res.status(400).json({ error: 'Çok fazla ürün' });
 
     const db = await getDb();
     const orderNo = generateOrderNo();
@@ -109,11 +122,7 @@ router.post('/orders', async (req, res) => {
       );
     }
 
-    await db.run(
-      `INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.user?.id || 0, req.user?.username || 'admin', 'create_order', req.ip || '', req.headers['user-agent'] || '', '', new Date().toISOString()]
-    );
+    try { logAdminAction(req, `create_order: ${orderNo}`); } catch (_) {}
 
     res.json({ success: true, id: orderId, order_no: orderNo });
   } catch (err) {
@@ -124,11 +133,26 @@ router.post('/orders', async (req, res) => {
 
 router.put('/orders/:id', async (req, res) => {
   try {
-    const { customer_name, customer_email, customer_phone, shipping_address, city, district, notes, status, carrier, tracking_no, items } = req.body;
+    let { customer_name, customer_email, customer_phone, shipping_address, city, district, notes, status, carrier, tracking_no, items } = req.body;
     const db = await getDb();
 
     const existing = await db.get('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!existing) return res.status(404).json({ error: 'Sipariş bulunamadı' });
+
+    const allowedStatuses = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered', 'cancelled'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Geçersiz sipariş durumu' });
+    }
+
+    if (customer_name !== undefined) customer_name = String(customer_name).substring(0, 200);
+    if (customer_email !== undefined) customer_email = String(customer_email).substring(0, 254);
+    if (customer_phone !== undefined) customer_phone = String(customer_phone).substring(0, 20);
+    if (shipping_address !== undefined) shipping_address = String(shipping_address).substring(0, 500);
+    if (city !== undefined) city = String(city).substring(0, 100);
+    if (district !== undefined) district = String(district).substring(0, 100);
+    if (notes !== undefined) notes = String(notes).substring(0, 1000);
+    if (carrier !== undefined) carrier = String(carrier).substring(0, 100);
+    if (tracking_no !== undefined) tracking_no = String(tracking_no).substring(0, 100);
 
     await db.run(
       `UPDATE orders SET
@@ -164,11 +188,7 @@ router.put('/orders/:id', async (req, res) => {
     }
 
     if (status && status !== existing.status) {
-      await db.run(
-        `INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [req.user?.id || 0, req.user?.username || 'admin', 'update_order_status', req.ip || '', req.headers['user-agent'] || '', '', new Date().toISOString()]
-      );
+      try { logAdminAction(req, `update_order_status: ${existing.order_no} → ${status}`); } catch (_) {}
     }
 
     res.json({ success: true });
@@ -187,11 +207,7 @@ router.delete('/orders/:id', async (req, res) => {
     await db.run('DELETE FROM order_items WHERE order_id = ?', [req.params.id]);
     await db.run('DELETE FROM orders WHERE id = ?', [req.params.id]);
 
-    await db.run(
-      `INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.user?.id || 0, req.user?.username || 'admin', 'delete_order', req.ip || '', req.headers['user-agent'] || '', '', new Date().toISOString()]
-    );
+    try { logAdminAction(req, `delete_order: ${existing.order_no}`); } catch (_) {}
 
     res.json({ success: true });
   } catch (err) {

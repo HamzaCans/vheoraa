@@ -2,6 +2,18 @@ const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { logAdminAction } = require('../middleware/adminLogger');
+
+router.get('/products', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const products = await db.all('SELECT * FROM products ORDER BY created_at DESC');
+    res.json(products);
+  } catch (err) {
+    console.error('[STOCK] Admin products error:', err);
+    res.status(500).json({ error: 'Ürünler alınamadı' });
+  }
+});
 
 router.get('/products/low-stock', authenticateToken, async (req, res) => {
   try {
@@ -68,12 +80,7 @@ router.put('/products/:id/stock', authenticateToken, async (req, res) => {
       [req.params.id, type, type === 'out' ? -qty : qty, product.stock, newStock, note || '', req.user?.username || 'admin', new Date().toISOString()]
     );
 
-    const logDb = await getDb();
-    await logDb.run(
-      `INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.user?.id || 0, req.user?.username || 'admin', 'stock_adjustment', req.ip || '', req.headers['user-agent'] || '', '', new Date().toISOString()]
-    );
+    try { logAdminAction(req, `stock_adjustment: ${product.name} (${type}, ${qty})`); } catch (_) {}
 
     res.json({ success: true, stock: newStock, stock_before: product.stock, type, quantity: qty });
   } catch (err) {
