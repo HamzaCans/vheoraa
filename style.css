@@ -659,7 +659,7 @@ section[id] {
   left: -10%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(79, 195, 247, 0.03) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(13, 58, 53, 0.03) 0%, transparent 70%);
   animation: pulse-glow 8s ease-in-out 2s infinite;
 }
 
@@ -681,19 +681,17 @@ section[id] {
 .hero .container {
   position: relative;
   z-index: 2;
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
   min-height: 100vh;
-  padding-top: calc(var(--nav-offset) + 80px);
+  padding-top: 100px;
   padding-bottom: 60px;
 }
 
-.hero .hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 700px;
-  padding-top: 0;
-  padding-left: 0;
+.hero-content {
+  max-width: 580px;
 }
 
 .hero-badge {
@@ -868,6 +866,36 @@ section[id] {
   z-index: 2;
 }
 
+.hero-image-placeholder {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 4px;
+  background: linear-gradient(160deg, #082420 0%, #0D3A35 40%, #276152 100%);
+  position: relative;
+  z-index: 2;
+}
+
+.about-image-placeholder {
+  width: 100%;
+  border-radius: 4px;
+  aspect-ratio: 4/5;
+  background: linear-gradient(145deg, #276152, #0D3A35);
+  position: relative;
+  z-index: 1;
+}
+
+.about-image-accent-placeholder {
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  width: 60%;
+  aspect-ratio: 4/5;
+  border-radius: 4px;
+  border: 2px solid rgba(13, 58, 53, 0.2);
+  background: linear-gradient(145deg, #0D3A35, #276152);
+  z-index: 2;
+}
+
 .hero-image-wrapper::before {
   content: '';
   position: absolute;
@@ -993,321 +1021,6 @@ section[id] {
   color: var(--color-gray);
 }
 
-/* ---------- HERO — Full-Screen Cartier Style ---------- */
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(135deg, #082420 0%, #0D3A35 40%, #276152 100%);
-}
-.hero-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: brightness(0.6);
-}
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(13,58,53,0.25) 0%, rgba(13,58,53,0.55) 100%);
-  z-index: 1;
-}
-.hero-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: rgba(251,246,240,0.8);
-  margin-bottom: 28px;
-  border: 1px solid rgba(251,246,240,0.25);
-  padding: 8px 24px;
-  animation: fadeInUp 1s 0.3s both;
-}
-.hero .hero-title {
-  color: #FBF6F0;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.15);
-}
-.hero .hero-title .italic {
-  color: rgba(251,246,240,0.75);
-}
-.hero .hero-description {
-  color: rgba(251,246,240,0.75);
-}
-.hero .hero-buttons .btn-primary {
-  background: rgba(251,246,240,0.95);
-  color: #0D3A35;
-}
-.hero .hero-buttons .btn-primary:hover {
-  background: #FBF6F0;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-}
-
-/* ---------- CATEGORY NAVIGATION — Cartier Strip ---------- */
-.category-nav {
-  background: #FBF6F0;
-  border-bottom: 1px solid rgba(13,58,53,0.1);
-  padding: 0;
-  position: relative;
-  z-index: 5;
-}
-.category-track {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.category-track::-webkit-scrollbar {
-  display: none;
-}
-.category-link {
-  flex-shrink: 0;
-  padding: 20px 36px;
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  position: relative;
-  transition: color var(--transition-fast);
-  white-space: nowrap;
-}
-.category-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
-  background: var(--gradient-gold);
-  transition: width var(--transition-base);
-}
-.category-link:hover {
-  color: var(--color-gold-light);
-}
-.category-link:hover::after {
-  width: 100%;
-}
-
-/* ---------- COLLECTION HEROES — Large Banners ---------- */
-.collection-heroes {
-  padding: 60px 0 0;
-  background: #F0EAE2;
-}
-.collection-heroes .container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 0 var(--container-padding);
-  max-width: var(--container-width);
-  margin: 0 auto;
-}
-.collection-hero-item {
-  position: relative;
-  overflow: hidden;
-  border-radius: 4px;
-  aspect-ratio: 4/5;
-  display: block;
-  cursor: pointer;
-  background: linear-gradient(135deg, #082420, #276152);
-}
-.collection-hero-item:nth-child(2) {
-  background: linear-gradient(135deg, #276152, #0D3A35);
-}
-.collection-hero-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.collection-hero-item:hover img {
-  transform: scale(1.06);
-}
-.collection-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(13,58,53,0.05) 0%, rgba(13,58,53,0.45) 100%);
-  transition: background var(--transition-base);
-  pointer-events: none;
-}
-.collection-hero-item:hover .collection-hero-overlay {
-  background: linear-gradient(180deg, rgba(13,58,53,0.1) 0%, rgba(13,58,53,0.55) 100%);
-}
-.collection-hero-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 40px 36px;
-  z-index: 2;
-}
-.collection-hero-label {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 300;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #FBF6F0;
-  margin-bottom: 12px;
-}
-.collection-hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(251,246,240,0.8);
-  transition: color var(--transition-fast);
-}
-.collection-hero-item:hover .collection-hero-cta {
-  color: #FBF6F0;
-}
-
-/* ---------- HERITAGE — Brand Story ---------- */
-.heritage {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  min-height: 600px;
-  background: var(--color-dark-surface);
-}
-.heritage-image {
-  overflow: hidden;
-  position: relative;
-  background: linear-gradient(135deg, #276152, #0D3A35);
-}
-.heritage-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  min-height: 600px;
-}
-.heritage-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 80px 60px;
-}
-.heritage-text {
-  font-size: 1rem;
-  color: var(--color-gray);
-  line-height: 1.9;
-  margin-bottom: 20px;
-}
-.heritage-stats {
-  display: flex;
-  gap: 48px;
-  margin-top: 40px;
-  padding-top: 32px;
-  border-top: var(--border-subtle);
-}
-.heritage-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.heritage-stat-number {
-  font-family: var(--font-display);
-  font-size: 2.2rem;
-  font-weight: 300;
-  background: var(--gradient-gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-}
-.heritage-stat-label {
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--color-gray);
-}
-
-/* ---------- SERVICES — Minimal Icons ---------- */
-.services {
-  padding: var(--section-padding);
-  background: #FBF6F0;
-  position: relative;
-}
-
-.services-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
-}
-.service-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 48px 24px;
-  background: #FFFFFF;
-  border: 1px solid rgba(13,58,53,0.06);
-  border-radius: 4px;
-  transition: all var(--transition-base);
-}
-.service-item:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
-  border-color: rgba(13,58,53,0.12);
-}
-.service-icon {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-.service-title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 400;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--color-gold);
-}
-
-/* ---------- CONTACT — Minimal Cartier Style ---------- */
-.contact-inner {
-  text-align: center;
-  max-width: 640px;
-  margin: 0 auto;
-}
-.contact-inner .section-label {
-  justify-content: center;
-}
-.contact-text {
-  font-size: 1rem;
-  color: var(--color-gray);
-  line-height: 1.8;
-  margin-bottom: 40px;
-}
-.contact-details-row {
-  display: flex;
-  justify-content: center;
-  gap: 48px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-.contact-detail-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.9rem;
-  color: var(--color-gray);
-}
-.contact-detail-icon {
-  font-size: 1.1rem;
-}
-.contact-inner .contact-socials {
-  justify-content: center;
-}
 
 /* ---------- SHOWCASE / COLLECTION STRIP ---------- */
 .showcase {
@@ -3019,15 +2732,6 @@ body.menu-open {
     gap: 12px;
   }
 
-  .services-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .service-item {
-    padding: 32px 16px;
-  }
-
   .service-card {
     padding: 24px 16px;
     text-align: center;
@@ -3087,57 +2791,6 @@ body.menu-open {
 
   .product-card:hover .product-card-inner {
     transform: none;
-  }
-
-  /* Cartier Sections Mobile */
-  .category-link {
-    padding: 16px 24px;
-    font-size: 0.65rem;
-  }
-
-  .collection-heroes .container {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .collection-hero-item {
-    aspect-ratio: 3/4;
-  }
-
-  .collection-hero-content {
-    padding: 24px 20px;
-  }
-
-  .collection-hero-label {
-    font-size: 0.9rem;
-  }
-
-  .heritage {
-    grid-template-columns: 1fr;
-  }
-
-  .heritage-image img {
-    min-height: 300px;
-    max-height: 400px;
-  }
-
-  .heritage-content {
-    padding: 48px 24px;
-  }
-
-  .heritage-stats {
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-
-  .heritage-stat-number {
-    font-size: 1.8rem;
-  }
-
-  .contact-details-row {
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
   }
 
   .testimonials-grid {
@@ -3668,23 +3321,6 @@ body.menu-open {
   .featured-grid {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-
-  .services-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .service-item {
-    padding: 24px 12px;
-  }
-
-  .heritage-stats {
-    gap: 16px;
-  }
-
-  .heritage-stat-number {
-    font-size: 1.5rem;
   }
 
   .product-image {
