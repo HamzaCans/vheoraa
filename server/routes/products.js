@@ -42,7 +42,8 @@ function productPublic(p) {
     description: p.description, price: p.price,
     gram: p.gram, labor_cost: p.labor_cost || 2500,
     image: p.image, images: images, is_featured: p.is_featured,
-    badge: p.badge, created_at: p.created_at,
+    badge: p.badge, sort_order: p.sort_order || 0,
+    created_at: p.created_at,
     stock_status
   };
 }
@@ -58,7 +59,7 @@ router.get('/', async (req, res) => {
       sql += ' WHERE category = ?';
       params.push(category);
     }
-    sql += ' ORDER BY created_at DESC';
+    sql += ' ORDER BY sort_order ASC, created_at DESC';
 
     const products = await db.all(sql, params);
     res.json(products.map(productPublic));
@@ -72,7 +73,7 @@ router.get('/featured', async (req, res) => {
   try {
     const db = await getDb();
     const products = await db.all(
-      'SELECT * FROM products WHERE is_featured = 1 ORDER BY created_at DESC LIMIT 6'
+      'SELECT * FROM products WHERE is_featured = 1 ORDER BY sort_order ASC, created_at DESC LIMIT 6'
     );
     res.json(products.map(productPublic));
   } catch (err) {
@@ -98,7 +99,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    let { name, category, description, price, is_featured, badge, gram, labor_cost, image_data, images_data } = req.body;
+    let { name, category, description, price, is_featured, badge, gram, labor_cost, sort_order, image_data, images_data } = req.body;
     var images = [];
     if (Array.isArray(images_data) && images_data.length) {
       images = images_data.map(function(img) { return String(img).substring(0, 5000000); }).slice(0, 10);
@@ -118,12 +119,13 @@ router.post('/', authenticateToken, async (req, res) => {
     badge = String(badge || '').substring(0, 100);
     gram = String(gram || '').substring(0, 50);
     labor_cost = parseInt(labor_cost) || 2500;
+    sort_order = parseInt(sort_order) || 0;
 
     const now = new Date().toISOString();
     const result = await db.run(
-      `INSERT INTO products (name, category, description, price, image, images, is_featured, badge, gram, labor_cost, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, category, description || '', price || '', image, JSON.stringify(images), is_featured === '1' ? 1 : 0, badge || '', gram || '', labor_cost, now, now]
+      `INSERT INTO products (name, category, description, price, image, images, is_featured, badge, gram, labor_cost, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, category, description || '', price || '', image, JSON.stringify(images), is_featured === '1' ? 1 : 0, badge || '', gram || '', labor_cost, sort_order, now, now]
     );
 
     try { logAdminAction(req, `create_product: ${name}`); } catch (_) {}
@@ -144,7 +146,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Ürün bulunamadı' });
     }
 
-    let { name, category, description, price, is_featured, badge, gram, labor_cost, image_data, images_data } = req.body;
+    let { name, category, description, price, is_featured, badge, gram, labor_cost, sort_order, image_data, images_data } = req.body;
     var images = existing.images ? JSON.parse(existing.images || '[]') : (existing.image ? [existing.image] : []);
     if (images_data !== undefined) {
       if (Array.isArray(images_data) && images_data.length) {
@@ -164,11 +166,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (badge !== undefined) badge = String(badge || '').substring(0, 100);
     if (gram !== undefined) gram = String(gram || '').substring(0, 50);
     if (labor_cost !== undefined) labor_cost = parseInt(labor_cost) || 2500;
+    if (sort_order !== undefined) sort_order = parseInt(sort_order) || 0;
 
     const now = new Date().toISOString();
     await db.run(
       `UPDATE products SET name = ?, category = ?, description = ?, price = ?, image = ?, images = ?,
-       is_featured = ?, badge = ?, gram = ?, labor_cost = ?, updated_at = ? WHERE id = ?`,
+       is_featured = ?, badge = ?, gram = ?, labor_cost = ?, sort_order = ?, updated_at = ? WHERE id = ?`,
       [
         name || existing.name,
         category || existing.category,
@@ -180,6 +183,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
         badge !== undefined ? badge : existing.badge,
         gram !== undefined ? gram : (existing.gram || ''),
         labor_cost !== undefined ? labor_cost : (existing.labor_cost || 2500),
+        sort_order !== undefined ? sort_order : (existing.sort_order || 0),
         now,
         req.params.id
       ]

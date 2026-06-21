@@ -276,6 +276,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (_) {}
 
+  // ========== DİNAMİK ÖNE ÇIKAN ÜRÜNLER ==========
+  async function loadFeaturedProducts() {
+    const grid = document.getElementById('featuredGrid');
+    if (!grid) return;
+    try {
+      const res = await fetch(`${API_URL}/api/products/featured`);
+      if (!res.ok) return;
+      const products = await res.json();
+      if (!products.length) return;
+      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      grid.innerHTML = products.map((p, i) => {
+        const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
+        const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
+        const badge = p.badge ? `<span class="product-badge">${p.badge}</span>` : '';
+        const catLabel = catLabels[p.category] || p.category;
+        return `
+        <div class="product-card reveal staggered" style="--reveal-delay: ${(i + 1) * 0.1}s">
+          <div class="product-card-inner">
+            <div class="product-image">
+              <img class="blur-up" src="${imgSrc}" alt="${p.name}" width="300" height="300" loading="lazy" decoding="async">
+              ${badge}
+            </div>
+            <div class="product-info">
+              <div class="product-category">${catLabel}</div>
+              <h3 class="product-name">${p.name}</h3>
+              <button class="product-price-btn open-quote" data-product="${p.name}">Teklif Al</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      grid.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+      grid.querySelectorAll('.open-quote').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const modal = document.getElementById('quoteModal');
+          const nameEl = document.getElementById('modalProductName');
+          if (modal && nameEl) {
+            nameEl.textContent = btn.getAttribute('data-product');
+            modal.classList.add('active');
+          }
+        });
+      });
+    } catch (_) {}
+  }
+  loadFeaturedProducts();
+
   // ========== CANLI ALTIN FİYATİ ==========
   let currentGoldPrice = 0;
 

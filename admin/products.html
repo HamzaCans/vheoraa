@@ -71,6 +71,10 @@
               <option value="1">Evet</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Sıra</label>
+            <input type="number" id="prodSortOrder" placeholder="0" value="0" min="0">
+          </div>
         </div>
         <div class="form-group">
           <label>Görseller (maks. 10)</label>
@@ -220,6 +224,7 @@
         document.getElementById('prodGram').value = product.gram || '';
         document.getElementById('prodBadge').value = product.badge || '';
         document.getElementById('prodFeatured').value = product.is_featured ? '1' : '0';
+        document.getElementById('prodSortOrder').value = product.sort_order || 0;
         var imgs = product.images && product.images.length ? product.images : (product.image ? [product.image] : []);
         imgs.forEach(function(src) {
           var img = document.createElement('img');
@@ -237,6 +242,7 @@
         document.getElementById('prodGram').value = '';
         document.getElementById('prodBadge').value = '';
         document.getElementById('prodFeatured').value = '0';
+        document.getElementById('prodSortOrder').value = '0';
       }
       document.getElementById('modalOverlay').classList.add('active');
     }
@@ -256,7 +262,8 @@
         labor_cost: document.getElementById('prodLaborCost').value,
         gram: document.getElementById('prodGram').value,
         badge: document.getElementById('prodBadge').value,
-        is_featured: document.getElementById('prodFeatured').value
+        is_featured: document.getElementById('prodFeatured').value,
+        sort_order: document.getElementById('prodSortOrder').value
       };
       var fileInput = document.getElementById('prodImages');
       if (fileInput.files.length > 0) {
@@ -306,7 +313,7 @@
           container.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';
           return;
         }
-        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>İşçilik</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
+        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>İşçilik</th><th>Rozet</th><th>Sıra</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
           products.map(function(p) {
             var imgSrc = p.images && p.images.length ? p.images[0] : (p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>');
             var imgCount = p.images && p.images.length ? p.images.length : (p.image ? 1 : 0);
@@ -320,6 +327,7 @@
               '<td>' + (p.gram || '-') + '</td>' +
               '<td>' + (p.labor_cost ? p.labor_cost.toLocaleString('tr-TR') + ' ₺' : '-') + '</td>' +
               '<td>' + (p.badge || '-') + '</td>' +
+              '<td>' + (p.sort_order || 0) + '</td>' +
               '<td>' + (p.is_featured ? '\u2605' : '-') + '</td>' +
               '<td style="text-align:right;">' +
               '<button class="btn btn-sm btn-primary" onclick=\'openModal(' + JSON.stringify(p) + ')\'>\u270F\uFE0F</button> ' +
