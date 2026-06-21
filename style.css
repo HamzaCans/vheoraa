@@ -1169,17 +1169,22 @@ section[id] {
   border-radius: 4px;
   position: relative;
   z-index: 1;
-  border: 3px solid #0D3A35;
-  box-shadow: 0 0 0 6px rgba(13, 58, 53, 0.12), 0 20px 60px rgba(13, 58, 53, 0.15);
-  animation: aboutFramePulse 4s ease-in-out infinite;
+  border: 2px solid #0D3A35;
+  outline: 3px solid #276152;
+  outline-offset: 4px;
+  animation: frameSlide 3s ease-in-out infinite;
 }
 
-@keyframes aboutFramePulse {
+@keyframes frameSlide {
   0%, 100% {
-    box-shadow: 0 0 0 6px rgba(13, 58, 53, 0.12), 0 20px 60px rgba(13, 58, 53, 0.15);
+    outline-color: #276152;
+    outline-offset: 4px;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(13, 58, 53, 0.08), 0 24px 70px rgba(13, 58, 53, 0.2);
+    outline-color: #B1B7AB;
+    outline-offset: 7px;
+    transform: scale(1.005);
   }
 }
 
