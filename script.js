@@ -321,6 +321,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   loadFeaturedProducts();
 
+  // ========== DİNAMİK SHOWCASE (KAYAN BANT) ==========
+  async function loadShowcase() {
+    const track = document.getElementById('showcaseTrack');
+    if (!track) return;
+    try {
+      const res = await fetch(`${API_URL}/api/products`);
+      if (!res.ok) return;
+      const products = await res.json();
+      if (!products.length) return;
+      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      function renderItems(items) {
+        return items.map(p => {
+          const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
+          const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
+          const catLabel = catLabels[p.category] || p.category;
+          return `<div class="showcase-item">
+            <img src="${imgSrc}" alt="${p.name}" width="280" height="340" loading="lazy" decoding="async">
+            <div class="showcase-item-overlay">
+              <div class="showcase-item-name">${p.name}</div>
+              <div class="showcase-item-category">${catLabel}</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      track.innerHTML = renderItems(products) + renderItems(products);
+    } catch (_) {}
+  }
+  loadShowcase();
+
   // ========== CANLI ALTIN FİYATİ ==========
   let currentGoldPrice = 0;
 
