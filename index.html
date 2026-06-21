@@ -31,7 +31,6 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://translate.google.com">
   <link rel="preload" href="style.css" as="style">
   <link rel="preload" href="script.js" as="script">
   <link rel="preload" href="images/hero_collection.webp" as="image" type="image/webp" fetchpriority="high">
@@ -132,17 +131,26 @@
 
   <!-- ========== NAVIGATION ========== -->
   <nav class="navbar" id="navbar">
+    <div class="gold-ticker" id="goldTicker">
+      <div class="gold-ticker-inner">
+        <span class="gold-ticker-icon">💰</span>
+        <span class="gold-ticker-label" data-i18n="gold.ticker">Has Altın</span>
+        <span class="gold-ticker-value" id="goldTickerValue">—</span>
+        <span class="gold-ticker-unit">₺/g</span>
+        <span class="gold-ticker-source" id="goldTickerSource">AKOD</span>
+      </div>
+    </div>
     <div class="container">
       <a href="#hero" class="nav-logo notranslate">
         VHEORA
         <span>VHEORA | JEWELRY</span>
       </a>
       <div class="nav-links" id="navLinks">
-        <a href="#hero">Ana Sayfa</a>
-        <a href="#about">Hakkımızda</a>
-        <a href="#services">Hizmetler</a>
-        <a href="#collection">Koleksiyon</a>
-        <a href="#testimonials">Referanslar</a>
+        <a href="#hero" data-i18n="nav.home">Ana Sayfa</a>
+        <a href="#about" data-i18n="nav.about">Hakkımızda</a>
+        <a href="#services" data-i18n="nav.services">Hizmetler</a>
+        <a href="#collection" data-i18n="nav.collection">Koleksiyon</a>
+        <a href="#testimonials" data-i18n="nav.references">Referanslar</a>
         
         <!-- Language Selector Dropdown -->
         <div class="lang-selector">
@@ -159,7 +167,7 @@
           </div>
         </div>
 
-        <a href="#contact" class="nav-cta">İletişim</a>
+        <a href="#contact" class="nav-cta" data-i18n="nav.contact">İletişim</a>
       </div>
       <button class="menu-toggle" id="menuToggle" aria-label="Menüyü aç/kapat" aria-expanded="false" aria-controls="navLinks">
         <span></span>
@@ -177,24 +185,24 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="dot"></span>
-          Yeni Koleksiyon 2026
+          <span data-i18n="hero.badge">Yeni Koleksiyon 2026</span>
         </div>
-        <h1 class="hero-title">
+        <h1 class="hero-title" data-i18n="hero.title">
           <span class="line">Zamansız</span>
           <span class="line gold-text">Zarafet,</span>
           <span class="line"><span class="italic">Benzersiz</span> İşçilik</span>
         </h1>
-        <p class="hero-description">
+        <p class="hero-description" data-i18n="hero.description">
           Her bir parça, yüzyıllık kuyumculuk geleneğimizin ve modern tasarım anlayışımızın 
           mükemmel uyumunu yansıtır. VHEORA ile zamansız güzelliği keşfedin.
         </p>
         <div class="hero-buttons">
           <a href="collection.html" class="btn-primary">
-            Koleksiyonu Keşfet
+            <span data-i18n="hero.cta">Koleksiyonu Keşfet</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
           <a href="#about" class="btn-secondary">
-            Hikayemiz
+            <span data-i18n="hero.story">Hikayemiz</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7.8H7.8"/></svg>
           </a>
         </div>
@@ -207,18 +215,18 @@
           </picture>
         </div>
         <div class="hero-float-card card-1">
-          <div class="float-card-label">Sertifikalı</div>
-          <div class="float-card-value">GIA Pırlanta</div>
+          <div class="float-card-label" data-i18n="hero.certified">Sertifikalı</div>
+          <div class="float-card-value" data-i18n="hero.gia">GIA Pırlanta</div>
         </div>
         <div class="hero-float-card card-2">
-          <div class="float-card-label">Global</div>
-          <div class="float-card-value">45+ Ülke</div>
+          <div class="float-card-label" data-i18n="hero.global">Global</div>
+          <div class="float-card-value" data-i18n="hero.countries">45+ Ülke</div>
         </div>
       </div>
     </div>
     <div class="hero-scroll-indicator">
       <div class="scroll-mouse"></div>
-      <span class="scroll-text">Kaydır</span>
+      <span class="scroll-text" data-i18n="hero.scroll">Kaydır</span>
     </div>
   </section>
 
@@ -293,35 +301,35 @@
         <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Özel Tasarım Yüzük" width="300" height="375" class="about-image-accent" loading="lazy" decoding="async"></picture>
         <div class="about-experience-badge">
           <span class="number">25</span>
-          <span class="label">Yıllık Deneyim</span>
+          <span class="label" data-i18n="about.experience">Yıllık Deneyim</span>
         </div>
       </div>
       <div class="about-content reveal-right">
-        <div class="section-label">Hakkımızda</div>
-        <h2 class="section-title">
+        <div class="section-label" data-i18n="about.label">Hakkımızda</div>
+        <h2 class="section-title" data-i18n="about.title">
           Zarafeti <span class="gold">Yeniden</span> Tanımlıyoruz
         </h2>
         <div class="gold-divider"></div>
-        <p class="about-text">
+        <p class="about-text" data-i18n="about.text1">
           VHEORA, 25 yılı aşkın tecrübesiyle kuyumculuk sanatını modern tasarımla buluşturan global bir lüks marka. 
           Her parçamız, uzman kuyumcularımızın ellerinde doğar ve yalnızca en kaliteli değerli taşlar ve metaller kullanılarak hayat bulur.
         </p>
-        <p class="about-text">
+        <p class="about-text" data-i18n="about.text2">
           Antalya'dan dünyaya açılan yolculuğumuzda, 45'ten fazla ülkede zarafet ve kalite arayanlarla buluşuyoruz. 
           GIA sertifikalı pırlantalarımız ve 585 ayar (14K) altın işçiliğimizle, her anınızı değerli kılıyoruz.
         </p>
         <div class="about-stats">
           <div class="stat-item">
             <div class="stat-number" data-count="45">0</div>
-            <div class="stat-label">Ülke</div>
+            <div class="stat-label" data-i18n="stat.countries">Ülke</div>
           </div>
           <div class="stat-item">
             <div class="stat-number" data-count="7589">0</div>
-            <div class="stat-label">Mutlu Müşteri</div>
+            <div class="stat-label" data-i18n="stat.customers">Mutlu Müşteri</div>
           </div>
           <div class="stat-item">
             <div class="stat-number" data-count="250">0</div>
-            <div class="stat-label">Koleksiyon</div>
+            <div class="stat-label" data-i18n="stat.collections">Koleksiyon</div>
           </div>
         </div>
       </div>
@@ -332,40 +340,40 @@
   <section class="services" id="services">
     <div class="container">
       <div class="services-header reveal">
-        <div class="section-label">Hizmetlerimiz</div>
-        <h2 class="section-title">
+        <div class="section-label" data-i18n="services.label">Hizmetlerimiz</div>
+        <h2 class="section-title" data-i18n="services.title">
           Sizin İçin <span class="gold">Özel</span> Hizmetler
         </h2>
-        <p class="section-subtitle">
+        <p class="section-subtitle" data-i18n="services.subtitle">
           Kuyumculuk deneyiminizi eksiksiz ve unutulmaz kılmak için sunduğumuz premium hizmetler.
         </p>
       </div>
       <div class="services-grid">
         <a href="custom-design.html" class="service-card reveal" style="transition-delay: 0.1s; text-decoration: none; display: block;">
           <div class="service-icon">💎</div>
-          <h3 class="service-title">Kişiye Özel Tasarım</h3>
-          <p class="service-description">
+          <h3 class="service-title" data-i18n="services.card1.title">Kişiye Özel Tasarım</h3>
+          <p class="service-description" data-i18n="services.card1.desc">
             Hayallerinizi sanatla buluşturuyoruz. Uzman tasarımcılarımız eşliğinde, sadece size özel olan ve hikayenizi anlatan benzersiz mücevherler tasarlıyoruz.
           </p>
         </a>
         <div class="service-card reveal" style="transition-delay: 0.2s">
           <div class="service-icon">🔍</div>
-          <h3 class="service-title">GIA Sertifikalı Uzmanlık</h3>
-          <p class="service-description">
+          <h3 class="service-title" data-i18n="services.card2.title">GIA Sertifikalı Uzmanlık</h3>
+          <p class="service-description" data-i18n="services.card2.desc">
             Dünya standartlarında şeffaflık. Her bir taşımız, GIA sertifikalı uzmanlarımız tarafından titizlikle incelenir ve gerçek değeriyle belgelenir.
           </p>
         </div>
         <div class="service-card reveal" style="transition-delay: 0.3s">
           <div class="service-icon">✨</div>
-          <h3 class="service-title">Restorasyon & Koruma</h3>
-          <p class="service-description">
+          <h3 class="service-title" data-i18n="services.card3.title">Restorasyon & Koruma</h3>
+          <p class="service-description" data-i18n="services.card3.desc">
             Değerli anılarınızı geleceğe taşıyoruz. Profesyonel bakım ve restorasyon hizmetlerimizle, takılarınızın ilk günkü ışıltısını ömür boyu korumasını sağlıyoruz.
           </p>
         </div>
         <div class="service-card reveal" style="transition-delay: 0.4s">
           <div class="service-icon">🌍</div>
-          <h3 class="service-title">Kusursuz Global Lojistik</h3>
-          <p class="service-description">
+          <h3 class="service-title" data-i18n="services.card4.title">Kusursuz Global Lojistik</h3>
+          <p class="service-description" data-i18n="services.card4.desc">
             Sınırları aşan güven. 45'ten fazla ülkeye, tam sigortalı ve VIP paketleme standartlarıyla, kapınıza kadar uzanan güvenli teslimat sağlıyoruz.
           </p>
         </div>
@@ -378,12 +386,12 @@
     <div class="container">
       <div class="featured-header reveal">
         <div>
-          <div class="section-label">Koleksiyonumuz</div>
-          <h2 class="section-title">
+          <div class="section-label" data-i18n="collection.label">Koleksiyonumuz</div>
+          <h2 class="section-title" data-i18n="collection.title">
             Öne Çıkan <span class="gold">Parçalar</span>
           </h2>
         </div>
-        <a href="#contact" class="btn-secondary">
+        <a href="#contact" class="btn-secondary" data-i18n="collection.viewAll">
           Tümünü Gör
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
@@ -392,8 +400,8 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.1s">
           <div class="product-card-inner">
             <div class="product-image">
-              <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img src="images/gold_diamond_ring.png" alt="Sonsuz Çiçek Pırlanta Yüzük" width="300" height="300" loading="lazy" decoding="async"></picture>
-              <span class="product-badge">Yeni</span>
+              <picture><source srcset="images/gold_diamond_ring.webp" type="image/webp"><img class="blur-up" src="images/gold_diamond_ring.png" alt="Sonsuz Çiçek Pırlanta Yüzük" width="300" height="300" loading="lazy" decoding="async"></picture>
+              <span class="product-badge" data-i18n="badge.new">Yeni</span>
             </div>
             <div class="product-info">
               <div class="product-category">Pırlanta Yüzük</div>
@@ -405,8 +413,8 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.2s">
           <div class="product-card-inner">
             <div class="product-image">
-              <picture><source srcset="images/diamond_necklace.webp" type="image/webp"><img src="images/diamond_necklace.png" alt="Göksel Damla Kolye" width="300" height="300" loading="lazy" decoding="async"></picture>
-              <span class="product-badge">Çok Satan</span>
+              <picture><source srcset="images/diamond_necklace.webp" type="image/webp"><img class="blur-up" src="images/diamond_necklace.png" alt="Göksel Damla Kolye" width="300" height="300" loading="lazy" decoding="async"></picture>
+              <span class="product-badge" data-i18n="badge.bestseller">Çok Satan</span>
             </div>
             <div class="product-info">
               <div class="product-category">Pırlanta Kolye</div>
@@ -418,8 +426,8 @@
         <div class="product-card reveal staggered" style="--reveal-delay: 0.3s">
           <div class="product-card-inner">
             <div class="product-image">
-              <picture><source srcset="images/gold_earrings.webp" type="image/webp"><img src="images/gold_earrings.png" alt="Şafak Damlaları Küpe" width="300" height="300" loading="lazy" decoding="async"></picture>
-              <span class="product-badge">Sınırlı Seri</span>
+              <picture><source srcset="images/gold_earrings.webp" type="image/webp"><img class="blur-up" src="images/gold_earrings.png" alt="Şafak Damlaları Küpe" width="300" height="300" loading="lazy" decoding="async"></picture>
+              <span class="product-badge" data-i18n="badge.limited">Sınırlı Seri</span>
             </div>
             <div class="product-info">
               <div class="product-category">Altın Küpe</div>
@@ -436,8 +444,8 @@
   <section class="testimonials" id="testimonials">
     <div class="container">
       <div class="testimonials-header reveal">
-        <div class="section-label">Referanslar</div>
-        <h2 class="section-title">
+        <div class="section-label" data-i18n="testimonials.label">Referanslar</div>
+        <h2 class="section-title" data-i18n="testimonials.title">
           Müşterilerimiz <span class="gold">Ne Diyor?</span>
         </h2>
       </div>
@@ -462,11 +470,11 @@
   <section class="share-experience" id="share-experience">
     <div class="container">
       <div class="share-header reveal">
-        <div class="section-label">Geri Bildirim</div>
-        <h2 class="section-title">
+        <div class="section-label" data-i18n="share.label">Geri Bildirim</div>
+        <h2 class="section-title" data-i18n="share.title">
           Deneyimlerini <span class="gold">Paylaş</span>
         </h2>
-        <p class="section-subtitle">
+        <p class="section-subtitle" data-i18n="share.subtitle">
           VHEORA ile olan yolculuğunuzu anlatın, diğer mücevher severlere ilham olun.
         </p>
       </div>
@@ -475,17 +483,17 @@
           <form id="shareForm" class="luxury-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="revFirstName">Ad</label>
+                <label for="revFirstName" data-i18n="form.firstName">Ad</label>
                 <input type="text" id="revFirstName" placeholder="Adınız" required>
               </div>
               <div class="form-group">
-                <label for="revLastName">Soyad</label>
+                <label for="revLastName" data-i18n="form.lastName">Soyad</label>
                 <input type="text" id="revLastName" placeholder="Soyadınız" required>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="revCountry">Ülke</label>
+                <label for="revCountry" data-i18n="form.country">Ülke</label>
                 <select id="revCountry" required>
                   <option value="" disabled selected>Ülke Seçin</option>
                   <option value="Türkiye">Türkiye</option>
@@ -497,15 +505,15 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="revCity">Şehir</label>
+                <label for="revCity" data-i18n="form.city">Şehir</label>
                 <input type="text" id="revCity" placeholder="Şehir" required>
               </div>
             </div>
             <div class="form-group">
-              <label for="revComment">Deneyiminiz</label>
+              <label for="revComment" data-i18n="form.experience">Deneyiminiz</label>
               <textarea id="revComment" placeholder="Mücevheriniz ve hizmetimiz hakkındaki düşünceleriniz..." required></textarea>
             </div>
-            <button type="submit" class="form-submit">
+            <button type="submit" class="form-submit" data-i18n="form.submitReview">
               Yorumu Gönder
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
@@ -528,7 +536,7 @@
                 </defs>
               </svg>
             </div>
-            <p class="share-visual-text">Her bir yorum, mükemmelliğe attığımız bir adım.</p>
+            <p class="share-visual-text" data-i18n="share.visualText">Her bir yorum, mükemmelliğe attığımız bir adım.</p>
             <div class="share-visual-stars">★★★★★</div>
           </div>
         </div>
@@ -540,11 +548,11 @@
   <section class="contact" id="contact">
     <div class="container">
       <div class="contact-info reveal-left">
-        <div class="section-label">İletişim</div>
-        <h2 class="section-title">
+        <div class="section-label" data-i18n="contact.label">İletişim</div>
+        <h2 class="section-title" data-i18n="contact.title">
           Bizimle <span class="gold">İletişime</span> Geçin
         </h2>
-        <p class="contact-text">
+        <p class="contact-text" data-i18n="contact.text">
           Özel tasarım talepleriniz, koleksiyon bilgisi veya herhangi bir sorunuz için bizimle 
           iletişime geçmekten çekinmeyin. Uzman ekibimiz size yardımcı olmaktan mutluluk duyacaktır.
         </p>
@@ -552,28 +560,28 @@
           <div class="contact-item">
             <div class="contact-item-icon">📍</div>
             <div>
-              <div class="contact-item-label">Adres</div>
+              <div class="contact-item-label" data-i18n="contact.address">Adres</div>
               <div class="contact-item-value">Muratpaşa, Antalya, Türkiye</div>
             </div>
           </div>
           <div class="contact-item">
             <div class="contact-item-icon">📧</div>
             <div>
-              <div class="contact-item-label">E-Posta</div>
+              <div class="contact-item-label" data-i18n="contact.email">E-Posta</div>
               <div class="contact-item-value">vheora.co@gmail.com</div>
             </div>
           </div>
           <div class="contact-item">
             <div class="contact-item-icon">📱</div>
             <div>
-              <div class="contact-item-label">Telefon</div>
+              <div class="contact-item-label" data-i18n="contact.phone">Telefon</div>
               <div class="contact-item-value">+90 (551) 020 7299</div>
             </div>
           </div>
           <div class="contact-item">
             <div class="contact-item-icon">🕐</div>
             <div>
-              <div class="contact-item-label">Çalışma Saatleri</div>
+              <div class="contact-item-label" data-i18n="contact.hours">Çalışma Saatleri</div>
               <div class="contact-item-value">Pzt - Cmt: 10:00 — 20:00<br>Pazar: Randevuyla</div>
             </div>
           </div>
@@ -592,26 +600,26 @@
           <div class="form-row">
             <div class="form-group float-label">
               <input type="text" id="firstName" placeholder=" " required>
-              <label for="firstName">Ad</label>
+              <label for="firstName" data-i18n="form.firstName">Ad</label>
             </div>
             <div class="form-group float-label">
               <input type="text" id="lastName" placeholder=" " required>
-              <label for="lastName">Soyad</label>
+              <label for="lastName" data-i18n="form.lastName">Soyad</label>
             </div>
           </div>
           <div class="form-group float-label">
             <input type="email" id="email" placeholder=" " required autocomplete="email" inputmode="email">
-            <label for="email">E-Posta</label>
+            <label for="email" data-i18n="form.email">E-Posta</label>
           </div>
           <div class="form-group float-label">
             <input type="text" id="subject" placeholder=" ">
-            <label for="subject">Konu</label>
+            <label for="subject" data-i18n="form.subject">Konu</label>
           </div>
           <div class="form-group float-label">
             <textarea id="message" placeholder=" " required></textarea>
-            <label for="message">Mesajınız</label>
+            <label for="message" data-i18n="form.message">Mesajınız</label>
           </div>
-          <button type="submit" class="form-submit">
+          <button type="submit" class="form-submit" data-i18n="contact.send">
             Mesaj Gönder
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
@@ -629,7 +637,7 @@
             VHEORA
             <span>VHEORA | JEWELRY</span>
           </a>
-          <p class="footer-brand-text">
+          <p class="footer-brand-text" data-i18n="footer.brandText">
             Zamansız zarafet ve benzersiz işçilik ile global kuyumculuk deneyimi. 
             Her parçamızda mükemmelliği yaşayın.
           </p>
@@ -643,17 +651,17 @@
           </div>
         </div>
         <div class="footer-col">
-          <h4 class="footer-heading">Hızlı Linkler</h4>
+          <h4 class="footer-heading" data-i18n="footer.quickLinks">Hızlı Linkler</h4>
           <div class="footer-links">
-            <a href="#hero">Ana Sayfa</a>
-            <a href="#about">Hakkımızda</a>
-            <a href="#services">Hizmetler</a>
-            <a href="#collection">Koleksiyon</a>
-            <a href="#contact">İletişim</a>
+            <a href="#hero" data-i18n="nav.home">Ana Sayfa</a>
+            <a href="#about" data-i18n="nav.about">Hakkımızda</a>
+            <a href="#services" data-i18n="nav.services">Hizmetler</a>
+            <a href="#collection" data-i18n="nav.collection">Koleksiyon</a>
+            <a href="#contact" data-i18n="nav.contact">İletişim</a>
           </div>
         </div>
         <div class="footer-col">
-          <h4 class="footer-heading">Koleksiyonlar</h4>
+          <h4 class="footer-heading" data-i18n="footer.collections">Koleksiyonlar</h4>
           <div class="footer-links">
             <a href="collection.html#yuzukler">Pırlanta Yüzükler</a>
             <a href="collection.html#bileklikler">Altın Bileklikler</a>
@@ -663,7 +671,7 @@
           </div>
         </div>
         <div class="footer-col">
-          <h4 class="footer-heading">Destek</h4>
+          <h4 class="footer-heading" data-i18n="footer.support">Destek</h4>
           <div class="footer-links">
             <a href="#" data-support="sss">SSS</a>
             <a href="#" data-support="kargo">Kargo & İade</a>
@@ -676,7 +684,7 @@
       </div>
       <div class="footer-bottom">
         <p class="footer-copyright">
-          © 2026 <a href="#hero">VHEORA</a>. Tüm hakları saklıdır.
+          © 2026 <a href="#hero">VHEORA</a>. <span data-i18n="footer.copyright">Tüm hakları saklıdır.</span>
         </p>
         <div class="footer-legal">
           <a href="legal.html#gizlilik">Gizlilik Politikası</a>
@@ -690,20 +698,7 @@
     </div>
   </footer>
 
-  <!-- Google Translate Element (Hidden) -->
-  <div id="google_translate_element" style="display:none"></div>
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'tr',
-        includedLanguages: 'tr,en,de,ru,fr,ar',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false
-      }, 'google_translate_element');
-      document.dispatchEvent(new CustomEvent('googleTranslateReady'));
-    }
-  </script>
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
+  <!-- Google Translate Element (Hidden) — replaced by custom i18n -->
 
   <script src="script.js" defer></script>
 

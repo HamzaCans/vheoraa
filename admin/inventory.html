@@ -146,6 +146,7 @@
     document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
     function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
     function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html" class="active"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
 
     function filterProducts() { renderTable(); }
     function refreshPage() { loadInventory(); }

@@ -55,6 +55,21 @@
     </div>
 
     <div class="settings-section">
+      <h3 class="section-heading">💰 Altın Fiyatlandırma</h3>
+      <p class="section-desc">Ürün fiyatlarında kullanılan sabit işçilik maliyetini (marj) ayarlayın. Fiyat formülü: (Has Altın + Marj) × Gram.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="goldMargin">İşçilik Maliyeti (₺)</label>
+          <input type="number" id="goldMargin" placeholder="2500" min="0" step="100">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <p style="color:var(--text-muted);font-size:.75rem;line-height:1.5;">Has Altın fiyatı + bu değer, ürünün gramı ile çarpılarak satış fiyatı hesaplanır. Örn: 6343 + 2500 = 8843 ₺/gr</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <h3 class="section-heading">🕐 Zaman Dilimi</h3>
       <p class="section-desc">Admin panelindeki loglar, siparişler ve tarih gösterimleri için kullanılacak zaman dilimi.</p>
       <div class="form-row">
@@ -188,6 +203,7 @@
     document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
     function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
     function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html" class="active"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
 
     function updateTimezonePreview() {
       var tz = document.getElementById('timezone').value;
@@ -227,6 +243,7 @@
         document.getElementById('siteContactEmail').value = data.site_contact_email || '';
         document.getElementById('siteContactPhone').value = data.site_contact_phone || '';
         document.getElementById('siteContactHours').value = data.site_contact_hours || '';
+        document.getElementById('goldMargin').value = data.gold_margin || '2500';
         updateTimezonePreview();
         var serverToken = data.maintenance_bypass_token;
         if (serverToken) {
@@ -268,7 +285,8 @@
             site_contact_address: document.getElementById('siteContactAddress').value,
             site_contact_email: document.getElementById('siteContactEmail').value,
             site_contact_phone: document.getElementById('siteContactPhone').value,
-            site_contact_hours: document.getElementById('siteContactHours').value
+            site_contact_hours: document.getElementById('siteContactHours').value,
+            gold_margin: document.getElementById('goldMargin').value
           })
         });
         var data = await res.json();

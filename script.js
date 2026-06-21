@@ -276,6 +276,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (_) {}
 
+  // ========== CANLI ALTIN FİYATİ ==========
+  let currentGoldPrice = 0;
+
+  async function fetchGoldPrice() {
+    try {
+      const res = await fetch(`${API_URL}/api/gold-price`);
+      if (!res.ok) return;
+      const data = await res.json();
+      currentGoldPrice = data.hasAltin || 0;
+      const tickerVal = document.getElementById('goldTickerValue');
+      const tickerSrc = document.getElementById('goldTickerSource');
+      if (tickerVal && currentGoldPrice > 0) {
+        tickerVal.textContent = currentGoldPrice.toLocaleString('tr-TR');
+        if (tickerSrc && data.source) tickerSrc.textContent = data.source;
+      }
+      document.querySelectorAll('.calc-gold-price').forEach(el => {
+        const gram = parseFloat(el.getAttribute('data-gram'));
+        const laborCost = parseInt(el.getAttribute('data-labor-cost')) || 2500;
+        if (gram && currentGoldPrice > 0) {
+          const fiyat = Math.round((currentGoldPrice + laborCost) * gram);
+          el.textContent = fiyat.toLocaleString('tr-TR') + ' ₺';
+        }
+      });
+    } catch (_) {}
+  }
+
+  fetchGoldPrice();
+  setInterval(fetchGoldPrice, 60000);
+
   // ========== NAVBAR SCROLL EFFECT & SCROLL SPY ==========
   const navbar = document.getElementById('navbar');
   const navLinks = document.getElementById('navLinks');
@@ -1043,29 +1072,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ========== IMAGE LAZY LOADING WITH BLUR-UP ==========
-  const images = document.querySelectorAll('img[loading="lazy"]');
-  images.forEach(img => {
+  function initBlurUp(img) {
+    if (img.classList.contains('loaded')) return;
     if (img.complete) {
       img.classList.add('loaded');
     } else {
-      img.addEventListener('load', () => {
-        img.classList.add('loaded');
-      });
-      img.addEventListener('error', () => {
-        img.classList.add('loaded');
-      });
+      img.addEventListener('load', () => img.classList.add('loaded'));
+      img.addEventListener('error', () => img.classList.add('loaded'));
     }
-  });
+  }
 
-  // Eager images too
-  document.querySelectorAll('img[loading="eager"]').forEach(img => {
-    if (img.complete) img.classList.add('loaded');
-    else img.addEventListener('load', () => img.classList.add('loaded'));
-  });
+  // Apply to existing images
+  document.querySelectorAll('img.blur-up').forEach(initBlurUp);
 
-  // ========== LANGUAGE SWITCHER LOGIC ==========
+  // MutationObserver for dynamically added images (collection page, etc.)
+  const blurUpObserver = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === 1) {
+          if (node.tagName === 'IMG' && node.classList.contains('blur-up')) initBlurUp(node);
+          if (node.querySelectorAll) node.querySelectorAll('img.blur-up').forEach(initBlurUp);
+        }
+      });
+    });
+  });
+  blurUpObserver.observe(document.body, { childList: true, subtree: true });
+
+  // ========== CUSTOM i18n TRANSLATION SYSTEM ==========
   const langBtn = document.getElementById('langBtn');
   const langDropdown = document.getElementById('langDropdown');
+  const SUPPORTED_LANGS = ['tr', 'en', 'de', 'ru', 'fr', 'ar'];
+  let currentTranslations = {};
+  let currentLang = 'tr';
 
   function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -1074,74 +1112,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     return null;
   }
 
-  function clearGoogleTranslateCookies() {
-    const expire = 'expires=Thu, 01 Jan 1970 00:00:00 UTC';
-    document.cookie = `googtrans=; ${expire}; path=/`;
-    const host = window.location.hostname;
-    if (host && !host.startsWith('localhost') && !host.startsWith('127.')) {
-      document.cookie = `googtrans=; ${expire}; path=/; domain=${host}`;
-      document.cookie = `googtrans=; ${expire}; path=/; domain=.${host}`;
-    }
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + (days || 365) * 864e5).toUTCString();
+    document.cookie = `${name}=${value};expires=${expires};path=/;SameSite=Lax`;
   }
 
-  function setGoogleTranslateCookie(langCode) {
-    const value = `/tr/${langCode}`;
-    document.cookie = `googtrans=${value}; path=/`;
-    const host = window.location.hostname;
-    if (host && !host.startsWith('localhost') && !host.startsWith('127.')) {
-      document.cookie = `googtrans=${value}; path=/; domain=${host}`;
-    }
-  }
-
-  function triggerGoogleCombo(langCode, attempt = 0) {
-    const combo = document.querySelector('.goog-te-combo');
-    if (combo) {
-      combo.value = langCode;
-      combo.dispatchEvent(new Event('change'));
-      return true;
-    }
-    if (attempt < 25) {
-      setTimeout(() => triggerGoogleCombo(langCode, attempt + 1), 250);
-    }
-    return false;
-  }
-
-  function changeGoogleTranslateLanguage(langCode) {
-    if (langCode === 'tr') {
-      clearGoogleTranslateCookies();
-      const combo = document.querySelector('.goog-te-combo');
-      if (combo) {
-        combo.value = 'tr';
-        combo.dispatchEvent(new Event('change'));
-      }
-      window.location.reload();
+  async function loadTranslations(lang) {
+    if (lang === 'tr') {
+      currentTranslations = {};
+      currentLang = 'tr';
+      applyTranslations();
+      document.documentElement.setAttribute('lang', 'tr');
       return;
     }
-
-    setGoogleTranslateCookie(langCode);
-    triggerGoogleTranslate(langCode);
-  }
-
-  function triggerGoogleTranslate(langCode) {
-    if (!triggerGoogleCombo(langCode)) {
-      // Widget not ready yet; cookie will apply on next load
-      window.location.reload();
+    try {
+      const res = await fetch(`${API_URL}/api/translations/${lang}`);
+      if (!res.ok) throw new Error('Failed');
+      currentTranslations = await res.json();
+      currentLang = lang;
+      applyTranslations();
+      document.documentElement.setAttribute('lang', lang);
+    } catch (e) {
+      currentTranslations = {};
+      currentLang = 'tr';
+      applyTranslations();
     }
   }
 
-  function applySavedLanguage() {
-    const savedLangCookie = getCookie('googtrans');
-    if (!savedLangCookie) return;
+  function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (currentLang === 'tr') {
+        if (el.hasAttribute('data-i18n-original')) {
+          el.textContent = el.getAttribute('data-i18n-original');
+          el.removeAttribute('data-i18n-original');
+        }
+      } else if (currentTranslations[key]) {
+        if (!el.hasAttribute('data-i18n-original')) {
+          el.setAttribute('data-i18n-original', el.textContent);
+        }
+        el.textContent = currentTranslations[key];
+      }
+    });
+  }
 
-    const langCode = savedLangCookie.split('/').pop();
-    if (!langCode || langCode === 'tr') return;
-
-    const activeLangLink = document.querySelector(`.lang-dropdown a[data-lang="${langCode}"]`);
-    if (activeLangLink && langBtn) {
-      langBtn.innerHTML = `🌐 ${activeLangLink.textContent.split(' - ')[0]}`;
+  function detectAndApplyBrowserLanguage() {
+    const saved = getCookie('vheora_lang');
+    if (saved) return;
+    const browserLangs = navigator.languages || [navigator.language || navigator.userLanguage || ''];
+    for (let i = 0; i < browserLangs.length; i++) {
+      const code = browserLangs[i].toLowerCase().split('-')[0].split('_')[0];
+      if (SUPPORTED_LANGS.includes(code) && code !== 'tr') {
+        setCookie('vheora_lang', code);
+        updateLangUI(code);
+        loadTranslations(code);
+        return;
+      }
     }
+  }
 
-    triggerGoogleCombo(langCode);
+  function updateLangUI(lang) {
+    if (!langBtn) return;
+    const labels = { tr: 'TR', en: 'EN', de: 'DE', ru: 'RU', fr: 'FR', ar: 'AR' };
+    langBtn.innerHTML = `🌐 ${labels[lang] || 'TR'}`;
+  }
+
+  function changeLanguage(lang) {
+    setCookie('vheora_lang', lang);
+    updateLangUI(lang);
+    loadTranslations(lang);
   }
 
   if (langBtn && langDropdown) {
@@ -1159,25 +1198,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         e.stopPropagation();
         const selectedLang = item.getAttribute('data-lang');
-        const selectedLangText = item.textContent.split(' - ')[0];
-
-        langBtn.innerHTML = `🌐 ${selectedLangText}`;
         langDropdown.classList.remove('active');
-        changeGoogleTranslateLanguage(selectedLang);
+        changeLanguage(selectedLang);
       });
     });
   }
 
-  document.addEventListener('googleTranslateReady', applySavedLanguage);
-
-  const savedLangCookie = getCookie('googtrans');
-  if (savedLangCookie) {
-    const langCode = savedLangCookie.split('/').pop();
-    const activeLangLink = document.querySelector(`.lang-dropdown a[data-lang="${langCode}"]`);
-    if (activeLangLink && langBtn) {
-      langBtn.innerHTML = `🌐 ${activeLangLink.textContent.split(' - ')[0]}`;
-    }
+  // Init saved language
+  const savedLang = getCookie('vheora_lang');
+  if (savedLang && savedLang !== 'tr') {
+    updateLangUI(savedLang);
+    loadTranslations(savedLang);
   }
+  detectAndApplyBrowserLanguage();
 
   // ========== BUTTON RIPPLE EFFECT ==========
   document.querySelectorAll('.btn-primary, .btn-secondary, .form-submit, .btn-quote-submit').forEach(btn => {

@@ -112,8 +112,7 @@
         .product-img img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            padding: 30px;
+            object-fit: cover;
             transition: transform 0.6s ease;
         }
         .product-item:hover .product-img img {
@@ -158,6 +157,51 @@
             background: var(--color-gold);
             color: var(--color-dark);
         }
+        .product-price-tag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(212,168,83,0.12), rgba(212,168,83,0.04));
+            border: 1px solid rgba(212,168,83,0.25);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-family: var(--font-display);
+        }
+        .product-price-tag .price-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-gold);
+        }
+        .product-price-tag .price-currency {
+            font-size: 0.7rem;
+            color: var(--color-gold);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .product-price-tag .price-gram {
+            font-size: 0.65rem;
+            color: var(--color-white-soft);
+            opacity: 0.6;
+            margin-left: 4px;
+        }
+        .product-gold-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            padding: 4px 10px;
+            background: rgba(212,168,83,0.85);
+            color: #050505;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 3px;
+            z-index: 2;
+            backdrop-filter: blur(4px);
+        }
 
         @media (max-width: 768px) {
             .filter-container { top: 76px; }
@@ -173,7 +217,7 @@
                 <span>FINE JEWELRY</span>
             </a>
             <div class="nav-links">
-                <a href="index.html">Ana Sayfa</a>
+                <a href="index.html" data-i18n="col.nav.home">Ana Sayfa</a>
                 <a href="index.html" class="nav-cta">Geri Dön</a>
             </div>
         </div>
@@ -181,7 +225,7 @@
 
     <header class="collection-header">
         <div class="container">
-            <h1>Koleksiyonumuz</h1>
+            <h1 data-i18n="col.nav.collection">Koleksiyonumuz</h1>
             <p class="section-subtitle" style="margin: 0 auto;">Aradığınız zarafeti kategorilere göre filtreleyin.</p>
         </div>
     </header>
@@ -189,12 +233,12 @@
     <div class="filter-container">
         <div class="container">
             <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">Tümü</button>
-                <button class="filter-btn" data-filter="yuzuk">Yüzükler</button>
-                <button class="filter-btn" data-filter="bileklik">Bileklikler</button>
-                <button class="filter-btn" data-filter="kolye">Kolyeler</button>
-                <button class="filter-btn" data-filter="kupe">Küpeler</button>
-                <button class="filter-btn" data-filter="set">Set Takılar</button>
+                <button class="filter-btn active" data-filter="all" data-i18n="col.filter.all">Tümü</button>
+                <button class="filter-btn" data-filter="yuzuk" data-i18n="col.filter.ring">Yüzükler</button>
+                <button class="filter-btn" data-filter="bileklik" data-i18n="col.filter.bracelet">Bileklikler</button>
+                <button class="filter-btn" data-filter="kolye" data-i18n="col.filter.necklace">Kolyeler</button>
+                <button class="filter-btn" data-filter="kupe" data-i18n="col.filter.earring">Küpeler</button>
+                <button class="filter-btn" data-filter="set" data-i18n="col.filter.set">Set Takılar</button>
             </div>
         </div>
     </div>
@@ -220,29 +264,29 @@
         <div class="quote-container">
             <button class="quote-close" id="quoteClose">&times;</button>
             <div class="quote-header">
-                <h2>Teklif Al</h2>
+                <h2 data-i18n="col.modal.title">Teklif Al</h2>
                 <p class="quote-product-name" id="modalProductName">Ürün Adı</p>
             </div>
             <div class="quote-form" id="quoteFormContent">
                 <div class="quote-form-row">
-                    <input type="text" id="quoteFirstName" placeholder="Adınız" required>
-                    <input type="text" id="quoteLastName" placeholder="Soyadınız" required>
+                    <input type="text" id="quoteFirstName" placeholder="Adınız" data-i18n="col.modal.firstName" required>
+                    <input type="text" id="quoteLastName" placeholder="Soyadınız" data-i18n="col.modal.lastName" required>
                 </div>
-                <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (05xx...)" required>
-                <input type="email" id="quoteEmail" placeholder="E-Posta (isteğe bağlı)">
+                <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (05xx...)" data-i18n="col.modal.phone" required>
+                <input type="email" id="quoteEmail" placeholder="E-Posta (isteğe bağlı)" data-i18n="col.modal.email">
                 <div class="quote-notice">
                     <span>📋</span>
                     <p>Bilgilerinizi gönderdiğinizde ekibimiz en kısa sürede sizinle iletişime geçecektir.</p>
                 </div>
-                <button id="sendQuote" class="btn-quote-submit">
+                <button id="sendQuote" class="btn-quote-submit" data-i18n="col.modal.submit">
                     <span>Teklif Gönder</span>
                 </button>
             </div>
             <div class="quote-success" id="quoteSuccess" style="display:none">
                 <div class="quote-success-icon">✓</div>
-                <h3>Talebiniz Alındı!</h3>
+                <h3 data-i18n="col.modal.success">Talebiniz Alındı!</h3>
                 <p>En kısa sürede sizinle iletişime geçeceğiz.</p>
-                <button class="btn-quote-submit" onclick="document.getElementById('quoteModal').classList.remove('active')">Kapat</button>
+                <button class="btn-quote-submit" onclick="document.getElementById('quoteModal').classList.remove('active')" data-i18n="col.modal.close">Kapat</button>
             </div>
         </div>
     </div>
@@ -251,23 +295,25 @@
     <script>
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Load products from API
             const productGrid = document.getElementById('productGrid');
             let allProducts = [];
+            let goldPrice = 0;
 
             try {
                 const res = await fetch(`${API_URL}/api/products`);
                 allProducts = await res.json();
-            } catch(e) {
-                // Fallback to static images if API not available
-            }
+            } catch(e) {}
 
-            // Map categories
+            try {
+                const gRes = await fetch(`${API_URL}/api/gold-price`);
+                const gData = await gRes.json();
+                goldPrice = gData.hasAltin || 0;
+            } catch(e) {}
+
             const categoryMap = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
             const categoryLabelMap = { yuzuk: 'Pırlanta Yüzük', bileklik: 'Altın Bileklik', kolye: 'Pırlanta Kolye', kupe: 'Altın Küpe', set: 'Set Takı' };
 
             if (allProducts.length === 0) {
-                // Default products if API empty
                 allProducts = [
                     { id: 1, name: 'Sonsuzluk Tektaş', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
                     { id: 2, name: 'Prenses Kesim', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
@@ -285,23 +331,55 @@
                 return '<span class="stock-badge out">Tükendi</span>';
             }
 
+            function calculatePrice(gram, laborCost) {
+                if (!gram || !goldPrice) return null;
+                var g = parseFloat(String(gram).replace(',', '.').replace(/[^0-9.]/g, ''));
+                if (!g || isNaN(g)) return null;
+                var lc = parseInt(laborCost) || 2500;
+                return Math.round((goldPrice + lc) * g);
+            }
+
+            function priceTag(product) {
+                var fiyat = calculatePrice(product.gram, product.labor_cost);
+                if (!fiyat) return '';
+                return '<div class="product-price-tag">' +
+                    '<span class="price-value">' + fiyat.toLocaleString('tr-TR') + '</span>' +
+                    '<span class="price-currency">₺</span>' +
+                    '<span class="price-gram">(' + product.gram + 'g)</span>' +
+                    '</div>';
+            }
+
+            function goldBadge(gram) {
+                if (!gram || !goldPrice) return '';
+                return '<span class="product-gold-badge">' + gram + 'g</span>';
+            }
+
             function renderProducts(filter) {
                 const filtered = filter === 'all' ? allProducts : allProducts.filter(p => p.category === filter);
                 productGrid.innerHTML = filtered.map(p => `
                     <div class="product-item" data-category="${p.category}" data-product-id="${p.id || ''}">
-                        <div class="product-img">${stockBadge(p.stock_status)}<img src="${p.image ? (p.image.startsWith('data:') || p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
+                        <div class="product-img">${stockBadge(p.stock_status)}${goldBadge(p.gram)}<img class="blur-up" src="${p.image ? (p.image.startsWith('data:') || p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
                         <div class="product-content">
                             <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
                             <h3 class="product-title">${p.name}</h3>
-                            <button class="product-cta open-quote" data-product="${p.name}">Teklif Al</button>
+                            ${priceTag(p)}
+                            <button class="product-cta open-quote" data-product="${p.name}" data-i18n="col.product.quote">Teklif Al</button>
                         </div>
                     </div>
                 `).join('');
+
+                productGrid.querySelectorAll('.open-quote').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        currentProduct = btn.getAttribute('data-product');
+                        productNameEl.textContent = currentProduct;
+                        formContent.style.display = '';
+                        successContent.style.display = 'none';
+                        modal.classList.add('active');
+                    });
+                });
             }
 
-            // Filter Logic
             const filterBtns = document.querySelectorAll('.filter-btn');
-
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     filterBtns.forEach(b => b.classList.remove('active'));
@@ -312,7 +390,6 @@
 
             renderProducts('all');
 
-            // Modal Logic
             const modal = document.getElementById('quoteModal');
             const overlay = document.getElementById('quoteOverlay');
             const closeBtn = document.getElementById('quoteClose');
@@ -323,19 +400,7 @@
             const lastNameInput = document.getElementById('quoteLastName');
             const phoneInput = document.getElementById('quotePhone');
             const emailInput = document.getElementById('quoteEmail');
-            const openBtns = document.querySelectorAll('.open-quote');
-            
             let currentProduct = '';
-
-            openBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentProduct = btn.getAttribute('data-product');
-                    productNameEl.textContent = currentProduct;
-                    formContent.style.display = '';
-                    successContent.style.display = 'none';
-                    modal.classList.add('active');
-                });
-            });
 
             const closeModal = () => {
                 modal.classList.remove('active');

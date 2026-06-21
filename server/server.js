@@ -16,6 +16,7 @@ const settingsRoutes = require('./routes/settings');
 const localizationRoutes = require('./routes/localization');
 const stockRoutes = require('./routes/stock');
 const orderRoutes = require('./routes/orders');
+const goldPriceRoutes = require('./routes/goldPrice');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -90,8 +91,8 @@ app.use('/api/', apiLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/admin', strictLimiter);
 
-app.use(express.json({ limit: '500kb' }));
-app.use(express.urlencoded({ extended: true, limit: '500kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 function sanitize(obj) {
   if (typeof obj === 'string') {
@@ -243,6 +244,7 @@ app.use('/api', settingsRoutes);
 app.use('/api', localizationRoutes);
 app.use('/api/admin', stockRoutes);
 app.use('/api/admin', orderRoutes);
+app.use('/api', goldPriceRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

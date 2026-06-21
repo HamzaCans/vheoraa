@@ -174,6 +174,13 @@ async function initSchema(driver) {
       quantity INTEGER NOT NULL DEFAULT 1,
       unit_price REAL NOT NULL DEFAULT 0,
       FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS gold_prices (
+      id ${process.env.DATABASE_URL ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+      source TEXT NOT NULL DEFAULT 'AKOD',
+      has_altin REAL NOT NULL,
+      raw_data TEXT DEFAULT '',
+      created_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
     )`
   ];
 
@@ -195,7 +202,8 @@ async function runMigrations(driver) {
     `ALTER TABLE admin_logs ADD COLUMN browser TEXT DEFAULT ''`,
     `ALTER TABLE admin_logs ADD COLUMN os TEXT DEFAULT ''`,
     `ALTER TABLE visitor_logs ADD COLUMN device_type TEXT DEFAULT ''`,
-    `ALTER TABLE products ADD COLUMN gram TEXT DEFAULT ''`
+    `ALTER TABLE products ADD COLUMN gram TEXT DEFAULT ''`,
+    `ALTER TABLE products ADD COLUMN labor_cost INTEGER DEFAULT 2500`
   ];
   for (const sql of migrations) {
     try {
@@ -203,6 +211,15 @@ async function runMigrations(driver) {
     } catch (e) {
       // Column already exists — ignore
     }
+  }
+
+  try {
+    const gm = await driver.get("SELECT value FROM settings WHERE key = 'gold_margin'");
+    if (!gm) {
+      await driver.run("INSERT INTO settings (key, value) VALUES ('gold_margin', '2500')");
+    }
+  } catch (e) {
+    // settings table may not exist yet
   }
 }
 
@@ -253,7 +270,8 @@ async function seedIfEmpty(driver) {
       ['site_contact_address', ''],
       ['site_contact_email', ''],
       ['site_contact_phone', ''],
-      ['site_contact_hours', '']
+      ['site_contact_hours', ''],
+      ['gold_margin', '2500']
     ];
     for (const [key, value] of defaultSettings) {
       await driver.run('INSERT INTO settings (key, value) VALUES (?, ?)', [key, value]);
@@ -268,6 +286,19 @@ async function seedIfEmpty(driver) {
     await driver.run('INSERT INTO languages (code, name, flag, is_default, is_active) VALUES (?, ?, ?, ?, ?)', ['ru', 'Русский', '🇷🇺', 0, 1]);
     await driver.run('INSERT INTO languages (code, name, flag, is_default, is_active) VALUES (?, ?, ?, ?, ?)', ['fr', 'Français', '🇫🇷', 0, 1]);
     await driver.run('INSERT INTO languages (code, name, flag, is_default, is_active) VALUES (?, ?, ?, ?, ?)', ['ar', 'العربية', '🇸🇦', 0, 1]);
+  }
+
+  const translationCount = await driver.get('SELECT COUNT(*) as c FROM translations');
+  if (translationCount.c === '0' || translationCount.c === 0) {
+    const { translations } = require('./translations_seed');
+    for (const [lang, keys] of Object.entries(translations)) {
+      for (const [key, value] of Object.entries(keys)) {
+        await driver.run(
+          'INSERT INTO translations (lang_code, key, value) VALUES (?, ?, ?) ON CONFLICT(lang_code, key) DO UPDATE SET value = ?',
+          [lang, key, value, value]
+        );
+      }
+    }
   }
 }
 

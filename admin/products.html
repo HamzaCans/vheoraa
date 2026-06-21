@@ -51,8 +51,8 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Fiyat / Referans</label>
-            <input type="text" id="prodPrice" placeholder="Örn: Talep üzerine">
+            <label>İşçilik Fiyatı (₺)</label>
+            <input type="number" id="prodLaborCost" placeholder="2500" value="2500" min="0" step="50">
           </div>
           <div class="form-group">
             <label>Gram</label>
@@ -167,12 +167,40 @@
     document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');
     function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
     function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html" class="active"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
 
     function readFileAsDataURL(file) {
       return new Promise(function(resolve) {
-        var r = new FileReader();
-        r.onload = function() { resolve(r.result); };
-        r.readAsDataURL(file);
+        if (!file.type.startsWith('image/')) {
+          var r = new FileReader();
+          r.onload = function() { resolve(r.result); };
+          r.readAsDataURL(file);
+          return;
+        }
+        var img = new Image();
+        var url = URL.createObjectURL(file);
+        img.onload = function() {
+          var maxW = 800, maxH = 800;
+          var w = img.width, h = img.height;
+          if (w > maxW || h > maxH) {
+            var ratio = Math.min(maxW / w, maxH / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          URL.revokeObjectURL(url);
+        };
+        img.onerror = function() {
+          var r = new FileReader();
+          r.onload = function() { resolve(r.result); };
+          r.readAsDataURL(file);
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
       });
     }
 
@@ -183,7 +211,7 @@
         document.getElementById('prodName').value = product.name;
         document.getElementById('prodCategory').value = product.category;
         document.getElementById('prodDescription').value = product.description || '';
-        document.getElementById('prodPrice').value = product.price || '';
+        document.getElementById('prodLaborCost').value = product.labor_cost || 2500;
         document.getElementById('prodGram').value = product.gram || '';
         document.getElementById('prodBadge').value = product.badge || '';
         document.getElementById('prodFeatured').value = product.is_featured ? '1' : '0';
@@ -193,7 +221,7 @@
         document.getElementById('prodName').value = '';
         document.getElementById('prodCategory').value = '';
         document.getElementById('prodDescription').value = '';
-        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodLaborCost').value = '2500';
         document.getElementById('prodGram').value = '';
         document.getElementById('prodBadge').value = '';
         document.getElementById('prodFeatured').value = '0';
@@ -213,7 +241,7 @@
         name: document.getElementById('prodName').value,
         category: document.getElementById('prodCategory').value,
         description: document.getElementById('prodDescription').value,
-        price: document.getElementById('prodPrice').value,
+        labor_cost: document.getElementById('prodLaborCost').value,
         gram: document.getElementById('prodGram').value,
         badge: document.getElementById('prodBadge').value,
         is_featured: document.getElementById('prodFeatured').value
@@ -260,7 +288,7 @@
           container.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';
           return;
         }
-        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>Fiyat</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
+        container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>İşçilik</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
           products.map(function(p) {
             var imgSrc = p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>';
             var catColors = { yuzuk: '#d4a853', bileklik: '#e07c4f', kolye: '#5cb3e0', kupe: '#b07cd4', set: '#5ce0a0' };
@@ -271,7 +299,7 @@
               '<td style="font-weight:500;">' + p.name + '</td>' +
               '<td><span class="badge" style="background:' + catColor + '15;color:' + catColor + ';">' + catLabel + '</span></td>' +
               '<td>' + (p.gram || '-') + '</td>' +
-              '<td>' + (p.price || '-') + '</td>' +
+              '<td>' + (p.labor_cost ? p.labor_cost.toLocaleString('tr-TR') + ' ₺' : '-') + '</td>' +
               '<td>' + (p.badge || '-') + '</td>' +
               '<td>' + (p.is_featured ? '\u2605' : '-') + '</td>' +
               '<td style="text-align:right;">' +

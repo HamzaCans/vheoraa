@@ -31,6 +31,41 @@
       <div class="stat-card" style="border-left:3px solid #66bb6a;"><div class="stat-card-value" id="statTodayVisitors">-</div><div class="stat-card-label" style="color:#66bb6a;">Bugünkü Ziyaretçi</div></div>
       <div class="stat-card" style="border-left:3px solid #ab47bc;"><div class="stat-card-value" id="statUniqueIps">-</div><div class="stat-card-label" style="color:#ab47bc;">Tekil IP</div></div>
     </div>
+    <div class="gold-price-section" id="goldPriceSection">
+      <div class="gold-price-header">
+        <div class="gold-price-icon">💰</div>
+        <div class="gold-price-info">
+          <div class="gold-price-label">Canlı Altın Fiyatı</div>
+          <div class="gold-price-source" id="goldPriceSource">Kaynak: Yükleniyor...</div>
+        </div>
+        <div class="gold-price-value" id="goldPriceValue">—</div>
+        <div class="gold-price-unit">₺/gram</div>
+      </div>
+      <div class="gold-price-details">
+        <div class="gold-price-detail">
+          <span class="gold-detail-label">Fiyat Formülü</span>
+          <span class="gold-detail-value">(Has Altın + İşçilik) × Ürün Gramı</span>
+        </div>
+        <div class="gold-price-detail">
+          <span class="gold-detail-label">İşçilik</span>
+          <span class="gold-detail-value">Ürün bazlı (varsayılan: 2.500 ₺)</span>
+        </div>
+        <div class="gold-price-detail">
+          <span class="gold-detail-label">Son Güncelleme</span>
+          <span class="gold-detail-value" id="goldPriceTime">—</span>
+        </div>
+      </div>
+      <div class="gold-price-chart-wrapper">
+        <h4 class="gold-chart-title">📈 Son 24 Saat Fiyat Grafiği</h4>
+        <canvas id="goldPriceChart" height="180"></canvas>
+      </div>
+      <div class="gold-price-table-wrapper">
+        <h4 class="gold-chart-title">📋 3 Saatlik Fiyat Logları</h4>
+        <div id="goldPriceLogs" class="gold-price-logs">
+          <p class="empty-state">Yükleniyor...</p>
+        </div>
+      </div>
+    </div>
     <div class="charts-row">
       <div class="chart-card">
         <h3 class="chart-title">Aylık Mesajlar</h3>
@@ -124,6 +159,7 @@
     document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menüyü aç/kapat">\u2630</button>');
     function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
     function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html" class="active"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
     var messagesChart = null;
     var testimonialsChart = null;
     function renderChart(canvasId, labels, data, label, color) {
@@ -254,6 +290,69 @@
         URL.revokeObjectURL(url);
       } catch (err) { adminToast('Hata', 'Export başarısız', 'error'); }
     }
+    var goldPriceChart = null;
+    async function loadGoldPrice() {
+      try {
+        var token = getToken();
+        var headers = { 'Authorization': 'Bearer ' + token };
+        var data = await fetchJSON(API + '/api/admin/gold-prices?hours=24', { headers: headers });
+        if (data && data.current) {
+          document.getElementById('goldPriceValue').textContent = data.current.hasAltin ? data.current.hasAltin.toLocaleString('tr-TR') : '—';
+          document.getElementById('goldPriceSource').textContent = 'Kaynak: ' + (data.current.source || 'Bilinmiyor');
+          document.getElementById('goldPriceTime').textContent = data.current.timestamp ? new Date(data.current.timestamp).toLocaleString('tr-TR', { timeZone: userTimezone }) : '—';
+        }
+        if (data && data.history && data.history.length) {
+          var labels = data.history.reverse().map(function(h) {
+            return h.created_at ? new Date(h.created_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
+          });
+          var chartData = data.history.map(function(h) { return h.has_altin || 0; });
+          if (goldPriceChart) goldPriceChart.destroy();
+          var ctx = document.getElementById('goldPriceChart');
+          if (ctx && typeof Chart !== 'undefined') {
+            goldPriceChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'Has Altın (₺/g)',
+                  data: chartData,
+                  borderColor: 'rgba(212, 168, 83, 0.9)',
+                  backgroundColor: 'rgba(212, 168, 83, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                  pointBackgroundColor: 'rgba(212, 168, 83, 1)',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 2,
+                  pointRadius: 4,
+                  borderWidth: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { ticks: { color: '#8a8a9a', callback: function(v) { return v.toLocaleString('tr-TR'); } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                  x: { ticks: { color: '#8a8a9a', maxTicksLimit: 8 }, grid: { display: false } }
+                }
+              }
+            });
+          }
+          var logsHtml = '<table><thead><tr><th>Tarih</th><th>Saat</th><th>Kaynak</th><th>Fiyat (₺/g)</th></tr></thead><tbody>';
+          data.history.forEach(function(h) {
+            var d = h.created_at ? new Date(h.created_at.replace(' ','T')) : null;
+            logsHtml += '<tr><td>' + (d ? d.toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (d ? d.toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '-') + '</td><td><span class="badge badge-gold">' + (h.source || 'AKOD') + '</span></td><td style="font-weight:600;color:var(--gold);">' + (h.has_altin ? h.has_altin.toLocaleString('tr-TR') : '-') + '</td></tr>';
+          });
+          logsHtml += '</tbody></table>';
+          document.getElementById('goldPriceLogs').innerHTML = logsHtml;
+        } else {
+          document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Henüz fiyat kaydı yok</p>';
+        }
+      } catch(e) {
+        console.warn('Gold price error:', e);
+        document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Altın fiyatı yüklenemedi</p>';
+      }
+    }
     async function loadLatestActivity() {
       try {
         var logs = await fetchJSON(API + '/api/admin/logs?limit=5', { headers: { 'Authorization': 'Bearer ' + getToken() } });
@@ -279,6 +378,7 @@
       await loadTimezone();
       loadDashboard();
       loadLatestActivity();
+      loadGoldPrice();
     }
     init();
 </script>

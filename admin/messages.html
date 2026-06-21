@@ -1,32 +1,189 @@
-<!DOCTYPE html><html lang="tr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  <title>VHEORA | ADMIN</title>  <link rel="icon" type="image/png" href="../favicon.png">  <link rel="stylesheet" href="admin.css?v=7">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></head><body>  <aside class="sidebar" id="sidebar"></aside>  <main class="main-content">    <div class="page-header">      <div>        <h1 class="page-title">Mesajlar</h1>        <p class="page-subtitle">Iletisim ve teklif talepleri.</p>      </div>      <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSV Export</button>    </div>    <div class="tabs" id="messageTabs">      <button class="tab-btn active" data-type="all">Tumu</button>      <button class="tab-btn" data-type="contact">İletişim</button>      <button class="tab-btn" data-type="quote">Teklif</button>      <button class="tab-btn" data-type="unread">Okunmamis</button>    </div>    <div class="table-container" id="messagesContainer">      <p class="empty-state">Yukleniyor...</p>    </div>  </main>  <div class="admin-toast-container" id="adminToast"></div>  <div class="confirm-overlay" id="confirmOverlay">    <div class="confirm-modal">      <h3 id="confirmTitle">Emin misiniz?</h3>      <p id="confirmText">Bu işlem geri alınamaz.</p>      <div class="confirm-actions">        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>        <button class="btn btn-danger" id="confirmBtn">Sil</button>      </div>    </div>  </div>  <script>    function adminToast(title, msg, type = 'success', duration = 3500) {      const c = document.getElementById('adminToast'); if (!c) return;      const t = document.createElement('div'); t.className = 'admin-toast';      const icons = { success: '?', error: '?', info: '?' };      t.innerHTML = `<div class="admin-toast-icon ${type}">${icons[type]}</div><div class="admin-toast-body"><div class="admin-toast-title">${title}</div><div class="admin-toast-msg">${msg}</div></div>`;      c.appendChild(t);      setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 250); }, duration);    }    let confirmResolve = null;    function showConfirm(title, text, btnText = 'Sil') {      return new Promise((resolve) => {        document.getElementById('confirmTitle').textContent = title;        document.getElementById('confirmText').textContent = text;        document.getElementById('confirmBtn').textContent = btnText;        document.getElementById('confirmOverlay').classList.add('active');        confirmResolve = resolve;      });    }    function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(false); confirmResolve = null; } }    document.getElementById('confirmBtn').addEventListener('click', () => { document.getElementById('confirmOverlay').classList.remove('active'); if (confirmResolve) { confirmResolve(true); confirmResolve = null; } });    document.getElementById('confirmOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeConfirm(); });    const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';    let currentFilter = 'all';    function getToken() {      const t = localStorage.getItem('vheora_token');      if (!t) window.location.href = '/admin/';      return t;    }    async function logout() { try { await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+localStorage.getItem('vheora_token')}}); } catch(e) {} localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; }    document.getElementById('sidebar').innerHTML = '      <div class="sidebar-logo">VHEORA</div>\n            <div class="sidebar-sub">Admin Panel</div>\n            <nav class="sidebar-nav">\n              <div class="sidebar-category">Genel</div>\n              <a href="/admin/dashboard.html" class="sidebar-link">\uD83D\uDCCA Dashboard</a>\n              <div class="sidebar-category">İçerik Yönetimi</div>\n              <a href="/admin/products.html" class="sidebar-link">\uD83D\uDC8E \u00DCr\u00FCnler</a>\n              <a href="/admin/inventory.html" class="sidebar-link">\uD83D\uDCE6 Stok</a>\n              <a href="/admin/testimonials.html" class="sidebar-link">\u2B50 Yorumlar</a>\n              <div class="sidebar-category">Sipariş Yönetimi</div>\n              <a href="/admin/orders.html" class="sidebar-link">\uD83D\uDCE6 Sipari\u015Fler</a>\n              <div class="sidebar-category">İletişim</div>\n              <a href="/admin/messages.html" class="sidebar-link active">\u2709\uFE0F Mesajlar</a>\n              <div class="sidebar-category">Sistem</div>\n              <a href="/admin/settings.html" class="sidebar-link">\u2699\uFE0F Ayarlar</a>\n              <a href="/admin/logs.html" class="sidebar-link">\uD83D\uDCCB Loglar</a>\n              <div style="flex:1"></div>\n              <a href="/" class="sidebar-link">\uD83C\uDF10 Siteye Git</a>\n            </nav>\n            <button class="sidebar-logout" onclick="logout()">\uD83D\uDEAA \u00C7\u0131k\u0131\u015F Yap</button>';    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Men\u00FCy\u00FC a\u00E7/kapat">\u2630</button>');    function toggleSidebar() {      document.body.classList.toggle('sidebar-open');    }    function closeSidebar() {      document.body.classList.remove('sidebar-open');    }    document.querySelectorAll('.tab-btn').forEach(btn => {      btn.addEventListener('click', () => {        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));        btn.classList.add('active');        currentFilter = btn.dataset.type;        loadMessages();      });    });    async function markAsRead(id, btn) {
-      var token = getToken();
-      await btnAction(btn, 'Okunuyor', 'Okundu', async function() {
-        await fetch(API + '/api/admin/messages/' + id + '/read', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
-        loadMessages();
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VHEORA | ADMIN</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="admin.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Mesajlar</h1>
+        <p class="page-subtitle">İletişim ve teklif talepleri.</p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="exportCSV()">📊 CSV Export</button>
+    </div>
+    <div class="tabs-scroll">
+      <div class="tabs" id="messageTabs">
+        <button class="tab-btn active" data-type="all">📋 Tümü</button>
+        <button class="tab-btn" data-type="contact">✉️ İletişim</button>
+        <button class="tab-btn" data-type="quote">💰 Teklif</button>
+        <button class="tab-btn" data-type="unread">🔴 Okunmamış</button>
+      </div>
+    </div>
+    <div class="table-container" id="messagesContainer">
+      <p class="empty-state">Yükleniyor...</p>
+    </div>
+  </main>
+  <div class="admin-toast-container" id="adminToast"></div>
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <h3 id="confirmTitle">Emin misiniz?</h3>
+      <p id="confirmText">Bu işlem geri alınamaz.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-cancel" onclick="closeConfirm()">İptal</button>
+        <button class="btn btn-danger" id="confirmBtn">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var currentFilter = 'all';
+
+    function getToken() {
+      var t = localStorage.getItem('vheora_token');
+      if (!t) { window.location.href = '/admin/'; return null; }
+      return t;
+    }
+
+    function adminToast(title, msg, type, duration) {
+      type = type || 'success'; duration = duration || 3500;
+      var c = document.getElementById('adminToast'); if (!c) return;
+      var t = document.createElement('div'); t.className = 'admin-toast';
+      var icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
+      c.appendChild(t);
+      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
+    }
+
+    var confirmResolve = null;
+    function showConfirm(title, text, btnText) {
+      btnText = btnText || 'Sil';
+      return new Promise(function(resolve) {
+        confirmResolve = resolve;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        document.getElementById('confirmBtn').textContent = btnText;
+        document.getElementById('confirmOverlay').classList.add('active');
       });
     }
+    function closeConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) confirmResolve(false);
+      confirmResolve = null;
+    }
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.remove('active');
+      if (confirmResolve) confirmResolve(true);
+      confirmResolve = null;
+    });
+
+    document.getElementById('sidebar').innerHTML = '<div class="sidebar-logo">VHEORA</div><div class="sidebar-sub">Admin Panel</div><nav class="sidebar-nav"><div class="sidebar-category">Genel</div><a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a><div class="sidebar-category">İçerik Yönetimi</div><a href="/admin/products.html" class="sidebar-link">💎 Ürünler</a><a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a><a href="/admin/testimonials.html" class="sidebar-link">⭐ Yorumlar</a><div class="sidebar-category">Sipariş Yönetimi</div><a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a><div class="sidebar-category">İletişim</div><a href="/admin/messages.html" class="sidebar-link active">✉️ Mesajlar</a><div class="sidebar-category">Sistem</div><a href="/admin/settings.html" class="sidebar-link">⚙️ Ayarlar</a><a href="/admin/logs.html" class="sidebar-link">📋 Loglar</a><div style="flex:1"></div><a href="/" class="sidebar-link">🌐 Siteye Git</a></nav><button class="sidebar-logout" onclick="logout()">🚪 Çıkış Yap</button>';
+    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
+    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menüyü aç/kapat">☰</button>');
+    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html" class="active"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
+
+    function logout() {
+      try { fetch(API + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() } }); } catch(e) {}
+      localStorage.removeItem('vheora_token');
+      localStorage.removeItem('vheora_user');
+      window.location.href = '/admin/';
+    }
+
+    document.querySelectorAll('#messageTabs .tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#messageTabs .tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-type');
+        loadMessages();
+      });
+    });
+
+    function exportCSV() {
+      var token = getToken();
+      fetch(API + '/api/admin/messages', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var csv = 'Tarih,İsim,Email,Telefon,Konu,Tip,Durum\n';
+          data.forEach(function(m) {
+            csv += '"' + (m.created_at||'') + '","' + (m.first_name||'') + ' ' + (m.last_name||'') + '","' + (m.email||'') + '","' + (m.phone||'') + '","' + (m.subject||m.product_name||'') + '","' + (m.type||'') + '","' + (m.is_read?'Okundu':'Yeni') + '"\n';
+          });
+          var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+          var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mesajlar.csv'; a.click();
+        });
+    }
+
+    async function markRead(id, btn) {
+      var token = getToken();
+      btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> Okunuyor...';
+      try {
+        await fetch(API + '/api/admin/messages/' + id + '/read', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+        btn.innerHTML = '✓ Okundu'; btn.className = btn.className.replace('btn-primary','btn-success');
+        setTimeout(function() { loadMessages(); }, 1000);
+      } catch(e) { btn.innerHTML = '✗ Hata'; btn.disabled = false; }
+    }
+
     async function deleteMessage(id, btn) {
-      var confirmed = await showConfirm('Mesaj\u0131 Sil', 'Bu mesaj kal\u0131c\u0131 olarak silinecek.');
+      var confirmed = await showConfirm('Mesajı Sil', 'Bu mesaj kalıcı olarak silinecek.');
       if (!confirmed) return;
       var token = getToken();
-      await btnAction(btn, 'Siliniyor', 'Silindi', async function() {
-        await fetch(API + '/api/admin/messages/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-        loadMessages();
-      });
-    }
-    async function btnAction(btn, label, verb, actionFn) {
-      var origHTML = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="btn-spinner"></span> ' + label + '...';
+      btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> Siliniyor...';
       try {
-        await actionFn();
-        btn.innerHTML = '<span class="btn-check-icon">\u2713</span> ' + verb;
-        btn.className = btn.className.replace(/\b(?:btn-primary|btn-danger|btn-ghost)\b/g,'').trim() + ' btn-success';
-        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace('btn-success', 'btn-primary'); }, 2200);
-      } catch(e) {
-        btn.innerHTML = '\u2717 Hata';
-        btn.className += ' btn-error';
-        setTimeout(function() { btn.innerHTML = origHTML; btn.disabled = false; btn.className = btn.className.replace(/ btn-error/g,''); }, 2200);
+        await fetch(API + '/api/admin/messages/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        btn.innerHTML = '✓ Silindi'; btn.className = btn.className.replace('btn-danger','btn-success');
+        setTimeout(function() { loadMessages(); }, 1000);
+      } catch(e) { btn.innerHTML = '✗ Hata'; btn.disabled = false; }
+    }
+
+    async function loadMessages() {
+      var container = document.getElementById('messagesContainer');
+      var token = getToken();
+      try {
+        var url;
+        if (currentFilter === 'unread') {
+          url = API + '/api/admin/messages?type=unread';
+        } else {
+          url = currentFilter === 'all' ? API + '/api/admin/messages' : API + '/api/admin/messages?type=' + currentFilter;
+        }
+        var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        var messages = await res.json();
+        if (!messages.length) {
+          container.innerHTML = '<p class="empty-state">Henüz mesaj yok.</p>';
+          return;
+        }
+        var html = '<table><thead><tr><th>Tarih</th><th>İsim</th><th>İletişim</th><th>Konu</th><th>Detay</th><th>Tip</th><th>Durum</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>';
+        messages.forEach(function(m) {
+          var date = new Date(m.created_at);
+          html += '<tr style="' + (!m.is_read ? 'background:rgba(212,168,83,0.04);' : '') + '">';
+          html += '<td style="color:var(--text-muted);font-size:0.8rem;">' + date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'}) + '</td>';
+          html += '<td style="font-weight:' + (!m.is_read ? '600' : '400') + ';">' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td>';
+          html += '<td>' + (m.email || m.phone || '-') + '</td>';
+          html += '<td>' + (m.subject || m.product_name || '-') + '</td>';
+          html += '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);">' + (m.message || '').substring(0, 60) + ((m.message || '').length > 60 ? '...' : '') + '</td>';
+          html += '<td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td>';
+          html += '<td><span class="badge ' + (m.is_read ? 'badge-green' : 'badge-red') + '">' + (m.is_read ? 'Okundu' : 'Yeni') + '</span></td>';
+          html += '<td style="text-align:right;">';
+          if (!m.is_read) html += '<button class="btn btn-sm btn-primary" onclick="markRead(' + m.id + ', this)">👁️ Okundu</button> ';
+          html += '<button class="btn btn-sm btn-danger" onclick="deleteMessage(' + m.id + ', this)">🗑️ Sil</button>';
+          html += '</td></tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';
       }
     }
-    async function loadMessages() {      const container = document.getElementById('messagesContainer');      const token = getToken();      try {        let url;        if (currentFilter === 'unread') {          url = `${API}/api/admin/messages?type=unread`;        } else {          url = currentFilter === 'all' ? `${API}/api/admin/messages` : `${API}/api/admin/messages?type=${currentFilter}`;        }        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });        const messages = await res.json();        if (!messages.length) {          container.innerHTML = '<p class="empty-state">Henuz mesaj yok.</p>';          return;        }        container.innerHTML = `          <table>            <thead><tr><th>Tarih</th><th>Isim</th><th>İletişim</th><th>Konu/Urun</th><th>Detay</th><th>Tip</th><th>Durum</th><th style="text-align:right;">Islem</th></tr></thead>            <tbody>              ${messages.map(m => `                <tr style="${!m.is_read ? 'background:rgba(212,168,83,0.04);' : ''}">                  <td style="color:var(--text-muted);font-size:0.8rem;">${new Date(m.created_at).toLocaleDateString('tr-TR')} ${new Date(m.created_at).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</td>                  <td style="font-weight:${!m.is_read ? '600' : '400'};">${m.first_name || '-'} ${m.last_name || ''}</td>                  <td>${m.email || m.phone || '-'}</td>                  <td>${m.subject || m.product_name || '-'}</td>                  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);">${(m.message || '').substring(0, 60)}${(m.message || '').length > 60 ? '...' : ''}</td>                  <td><span class="badge ${m.type === 'quote' ? 'badge-gold' : 'badge-green'}">${m.type === 'quote' ? 'Teklif' : 'Iletisim'}</span></td>                  <td><span class="badge ${m.is_read ? 'badge-green' : 'badge-red'}">${m.is_read ? 'Okundu' : 'Yeni'}</span></td>                  <td style="text-align:right;white-space:nowrap;">                    ${!m.is_read ? `<button class="btn btn-sm" style="background:var(--green);color:white;" onclick="markAsRead(${m.id}, this)">??</button>` : ''}                    <button class="btn btn-sm btn-danger" onclick="deleteMessage(${m.id}, this)">???</button>                  </td>                </tr>              `).join('')}            </tbody>          </table>        `;      } catch (err) {        container.innerHTML = '<p class="empty-state">Sunucuya baglanilamadi.</p>';      }    }    async function exportCSV() {      const token = getToken();      try {        const res = await fetch(`${API}/api/admin/messages`, { headers: { 'Authorization': `Bearer ${token}` } });        const messages = await res.json();        const headers = 'Tarih,Isim,E-posta,Telefon,Konu/Urun,Mesaj,Tip,Durum\n';        const rows = messages.map(m => {          const date = new Date(m.created_at).toLocaleDateString('tr-TR');          const name = `${m.first_name || ''} ${m.last_name || ''}`.trim();          const subject = (m.subject || m.product_name || '').replace(/,/g, ' ');          const msg = (m.message || '').replace(/,/g, ' ').replace(/\n/g, ' ');          const type = m.type === 'quote' ? 'Teklif' : 'Iletisim';          const status = m.is_read ? 'Okundu' : 'Yeni';          return `${date},${name},${m.email || ''},${m.phone || ''},${subject},${msg},${type},${status}`;        }).join('\n');        const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });        const a = document.createElement('a');        a.href = URL.createObjectURL(blob);        a.download = `vheora-mesajlar-${new Date().toISOString().slice(0,10)}.csv`;        a.click();      } catch (err) {        alert('Export basarisiz');      }    }    loadMessages();  </script></body></html>
+
+    loadMessages();
+  </script>
+</body>
+</html>
