@@ -1323,13 +1323,13 @@ section[id] {
 .service-card {
   position: relative;
   padding: 48px 32px;
-  background: linear-gradient(145deg, #FFFFFF 0%, #FBF6F0 100%);
-  border: 1px solid rgba(13, 58, 53, 0.12);
+  background: rgb(39, 97, 82);
+  border: 1px solid rgba(39, 97, 82, 0.6);
   border-radius: 12px;
   text-align: center;
   transition: all var(--transition-base);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .service-card::before {
@@ -1350,9 +1350,17 @@ section[id] {
 }
 
 .service-card:hover {
-  border-color: rgba(13, 58, 53, 0.4);
+  border-color: rgba(39, 97, 82, 0.9);
   transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(13, 58, 53, 0.1);
+  box-shadow: 0 20px 40px rgba(13, 58, 53, 0.25);
+}
+
+.service-title {
+  color: #FBF6F0;
+}
+
+.service-description {
+  color: rgba(251, 246, 240, 0.7);
 }
 
 .service-icon {
@@ -1379,13 +1387,13 @@ section[id] {
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 400;
-  color: var(--color-white);
+  color: #FBF6F0;
   margin-bottom: 16px;
 }
 
 .service-description {
   font-size: 0.9rem;
-  color: var(--color-gray);
+  color: rgba(251, 246, 240, 0.7);
   line-height: 1.7;
 }
 
