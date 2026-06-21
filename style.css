@@ -415,14 +415,14 @@ section[id] {
   align-items: center;
   padding: 25px 50px;
   background-color: #FBF6F0;
-  border-bottom: 1px solid #B1B7AB;
+  border-bottom: 1px solid rgba(13, 58, 53, 0.15);
   transition: all var(--transition-base);
 }
 
 .navbar.scrolled {
   padding: 14px 50px;
   background: #FBF6F0;
-  border-bottom: 1px solid #B1B7AB;
+  border-bottom: 1px solid rgba(13, 58, 53, 0.15);
   box-shadow: 0 2px 20px rgba(13, 58, 53, 0.04);
 }
 
@@ -1026,7 +1026,7 @@ section[id] {
 .showcase {
   padding: 80px 0;
   background: #F0EAE2;
-  border-top: var(--border-subtle);
+  border-top: 1px solid rgba(13, 58, 53, 0.12);
   border-bottom: var(--border-subtle);
   overflow: hidden;
   position: relative;
@@ -1253,7 +1253,7 @@ section[id] {
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   padding-top: 40px;
-  border-top: var(--border-subtle);
+  border-top: 1px solid rgba(13, 58, 53, 0.12);
 }
 
 .stat-item {
@@ -1324,7 +1324,7 @@ section[id] {
   position: relative;
   padding: 48px 32px;
   background: rgb(39, 97, 82);
-  border: 1px solid rgba(39, 97, 82, 0.6);
+  border: 1px solid rgba(251, 246, 240, 0.2);
   border-radius: 12px;
   text-align: center;
   transition: all var(--transition-base);
@@ -1350,7 +1350,7 @@ section[id] {
 }
 
 .service-card:hover {
-  border-color: rgba(39, 97, 82, 0.9);
+  border-color: rgba(251, 246, 240, 0.4);
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(13, 58, 53, 0.25);
 }
@@ -1420,8 +1420,8 @@ section[id] {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(145deg, #FFFFFF 0%, #FBF6F0 100%);
-  border: 1px solid rgba(13, 58, 53, 0.12);
+  background: #FFFFFF;
+  border: 1px solid rgba(13, 58, 53, 0.2);
   transition: all var(--transition-base);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
@@ -1491,7 +1491,7 @@ section[id] {
   position: relative;
   overflow: hidden;
   aspect-ratio: 1/1;
-  background: #F0EAE2;
+  background: #E8E2DA;
 }
 
 .product-image img {
@@ -1524,7 +1524,7 @@ section[id] {
 .product-info {
   padding: 24px;
   background: linear-gradient(to bottom, transparent, rgba(13, 58, 53, 0.03));
-  border-top: 1px solid rgba(13, 58, 53, 0.08);
+  border-top: 1px solid rgba(13, 58, 53, 0.15);
 }
 
 .product-category {
@@ -1611,7 +1611,7 @@ section[id] {
   padding: 32px 28px;
   background: var(--gradient-glass);
   backdrop-filter: blur(10px);
-  border: var(--border-subtle);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 12px;
   transition: all var(--transition-base);
   opacity: 1;
@@ -1637,8 +1637,8 @@ section[id] {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(245, 240, 235, 0.8);
-  border: 1px solid rgba(13, 58, 53, 0.3);
+  background: rgba(13, 58, 53, 0.08);
+  border: 1px solid rgba(13, 58, 53, 0.25);
   color: var(--color-gold);
   display: flex;
   align-items: center;
@@ -1666,8 +1666,8 @@ section[id] {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(13, 58, 53, 0.2);
-  border: 1px solid rgba(13, 58, 53, 0.3);
+  background: rgba(13, 58, 53, 0.35);
+  border: 1px solid rgba(13, 58, 53, 0.4);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
@@ -1857,7 +1857,7 @@ section[id] {
   min-height: 150px;
   padding: 14px 18px;
   background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 4px;
   color: var(--color-white);
   font-family: inherit;
@@ -1870,7 +1870,7 @@ section[id] {
   width: 100%;
   padding: 14px 18px;
   background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 4px;
   color: var(--color-white-soft);
   font-size: 0.95rem;
@@ -1878,7 +1878,7 @@ section[id] {
 }
 
 .luxury-form .form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(13, 58, 53, 0.35);
 }
 
 .luxury-form .form-group input:focus {
@@ -1898,7 +1898,7 @@ section[id] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%230D3A35' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 4px;
   color: var(--color-white-soft);
   font-size: 0.95rem;
@@ -2052,7 +2052,7 @@ section[id] {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 50%;
   color: var(--color-gray);
   font-size: 1rem;
@@ -2196,7 +2196,7 @@ section[id] {
 .form-group select {
   padding: 14px 18px;
   background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(13, 58, 53, 0.15);
   border-radius: 6px;
   color: var(--color-white);
   font-size: 0.95rem;
@@ -2214,7 +2214,7 @@ section[id] {
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(13, 58, 53, 0.4);
 }
 
 .form-group input:focus,
@@ -2269,7 +2269,7 @@ section[id] {
 .footer {
   padding: 60px 0 30px;
   background: var(--color-dark-surface);
-  border-top: var(--border-subtle);
+  border-top: 1px solid rgba(13, 58, 53, 0.12);
 }
 
 .footer-grid {
@@ -2336,7 +2336,7 @@ section[id] {
 .footer-bottom {
   position: relative;
   padding-top: 30px;
-  border-top: var(--border-subtle);
+  border-top: 1px solid rgba(13, 58, 53, 0.12);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2933,8 +2933,8 @@ body.menu-open {
   .contact-form-wrapper {
     order: 2;
     padding: 24px 16px;
-    background: linear-gradient(145deg, #FFFFFF 0%, #FBF6F0 100%);
-    border: 1px solid rgba(13,58,53,0.12);
+    background: #FFFFFF;
+    border: 1px solid rgba(13, 58, 53, 0.15);
     border-radius: 12px;
     position: relative;
     overflow: hidden;
@@ -3055,7 +3055,7 @@ body.menu-open {
     min-height: 48px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #B1B7AB;
+    border-bottom: 1px solid rgba(13, 58, 53, 0.15);
     color: #0D3A35;
   }
 
@@ -4007,7 +4007,7 @@ font {
 }
 
 .quote-form input::placeholder {
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(13, 58, 53, 0.4);
 }
 
 .quote-form input:focus {
@@ -4858,6 +4858,7 @@ font {
 /* --- SHARE EXPERIENCE --- */
 .share-form-container {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(13, 58, 53, 0.15);
 }
 .share-form-container:hover {
   border-color: rgba(13, 58, 53, 0.25);
