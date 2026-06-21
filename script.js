@@ -1614,8 +1614,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ========== MAGNETIC BUTTON EFFECT ==========
-  const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-  if (!isTouchDevice) {
+  const isTouchMagnetic = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  if (!isTouchMagnetic) {
     document.querySelectorAll('.social-link, .slider-btn, .lang-btn').forEach(btn => {
       btn.addEventListener('mousemove', (e) => {
         const rect = btn.getBoundingClientRect();
