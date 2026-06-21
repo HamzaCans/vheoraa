@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#F5F0EB">
+    <meta name="theme-color" content="#FBF6F0">
     <meta name="description" content="VHEORA'nın eşsiz koleksiyonunu keşfedin. Pırlanta yüzükler, altın bileklikler, kolyeler, küpeler ve set takılar.">
     <meta property="og:title" content="Koleksiyon | VHEORA — Luxury Jewelry">
     <meta property="og:description" content="GIA sertifikalı pırlanta ve 14K altın koleksiyonumuzu keşfedin.">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="dns-prefetch" href="https://translate.google.com">
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="preload" href="style.css" as="style">
@@ -40,14 +40,14 @@
         /* Filter Controls */
         .product-img { position: relative; }
         .stock-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; z-index: 2; }
-        .stock-badge.low { background: rgba(184,145,46,0.15); color: var(--color-gold); border: 1px solid rgba(184,145,46,0.3); }
+        .stock-badge.low { background: rgba(13,58,53,0.15); color: var(--color-gold); border: 1px solid rgba(13,58,53,0.3); }
         .stock-badge.out { background: rgba(255,68,68,0.15); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
 
         .filter-container {
             position: sticky;
             top: 88px;
             z-index: 100;
-            background: rgba(245, 240, 235, 0.92);
+            background: rgba(251, 246, 240, 0.92);
             backdrop-filter: blur(20px);
             padding: 20px 0;
             border-bottom: var(--border-subtle);
@@ -62,7 +62,7 @@
         .filter-btn {
             padding: 10px 25px;
             background: transparent;
-            border: 1px solid rgba(184, 145, 46, 0.3);
+            border: 1px solid rgba(13, 58, 53, 0.3);
             color: var(--color-charcoal);
             text-transform: uppercase;
             font-size: 0.75rem;
@@ -73,7 +73,7 @@
         }
         .filter-btn.active, .filter-btn:hover {
             background: var(--color-gold);
-            color: var(--color-white);
+            color: #FBF6F0;
             border-color: var(--color-gold);
             box-shadow: var(--shadow-gold);
         }
@@ -87,7 +87,7 @@
         }
         .product-item {
             background: var(--color-card);
-            border: 1px solid rgba(184, 145, 46, 0.12);
+            border: 1px solid rgba(13, 58, 53, 0.12);
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,14 +102,14 @@
         }
         .product-item:hover {
             transform: translateY(-8px);
-            border-color: rgba(184, 145, 46, 0.4);
-            box-shadow: 0 20px 40px rgba(184, 145, 46, 0.12);
+            border-color: rgba(13, 58, 53, 0.4);
+            box-shadow: 0 20px 40px rgba(13, 58, 53, 0.12);
         }
         .product-img {
             height: 350px;
             overflow: hidden;
             position: relative;
-            background: #EDE6DD;
+            background: #F0EAE2;
         }
         .product-img .carousel {
             display: flex;
@@ -136,8 +136,8 @@
             transform: translateY(-50%);
             width: 28px;
             height: 28px;
-            background: rgba(245,240,235,0.85);
-            border: 1px solid rgba(184,145,46,0.3);
+            background: rgba(251,246,240,0.85);
+            border: 1px solid rgba(13,58,53,0.3);
             border-radius: 50%;
             color: var(--color-gold);
             font-size: 0.75rem;
@@ -151,7 +151,7 @@
             backdrop-filter: blur(4px);
         }
         .product-item:hover .carousel-btn { opacity: 1; }
-        .carousel-btn:hover { background: rgba(184,145,46,0.2); }
+        .carousel-btn:hover { background: rgba(13,58,53,0.2); }
         .carousel-prev { left: 8px; }
         .carousel-next { right: 8px; }
         .carousel-dots {
@@ -244,8 +244,8 @@
         .product-content {
             padding: 25px;
             text-align: center;
-            background: linear-gradient(to bottom, transparent, rgba(184, 145, 46, 0.03));
-            border-top: 1px solid rgba(184, 145, 46, 0.08);
+            background: linear-gradient(to bottom, transparent, rgba(13, 58, 53, 0.03));
+            border-top: 1px solid rgba(13, 58, 53, 0.08);
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -293,7 +293,7 @@
         }
         .product-item:hover .product-cta {
             background: var(--color-gold);
-            color: var(--color-white);
+            color: #FBF6F0;
         }
         .product-price-tag {
             display: flex;
@@ -301,8 +301,8 @@
             justify-content: center;
             gap: 6px;
             padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(184,145,46,0.10), rgba(184,145,46,0.03));
-            border: 1px solid rgba(184,145,46,0.2);
+            background: linear-gradient(135deg, rgba(13,58,53,0.10), rgba(13,58,53,0.03));
+            border: 1px solid rgba(13,58,53,0.2);
             border-radius: 6px;
             margin-bottom: 12px;
             font-family: var(--font-body);
@@ -332,8 +332,8 @@
             bottom: 12px;
             right: 12px;
             padding: 4px 10px;
-            background: rgba(184,145,46,0.85);
-            color: #F5F0EB;
+            background: rgba(13,58,53,0.85);
+            color: #FBF6F0;
             font-size: 0.6rem;
             font-weight: 700;
             letter-spacing: 1px;
