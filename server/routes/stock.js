@@ -7,7 +7,7 @@ const { logAdminAction } = require('../middleware/adminLogger');
 router.get('/products', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
-    const products = await db.all('SELECT * FROM products ORDER BY created_at DESC');
+    const products = await db.all('SELECT * FROM products ORDER BY sort_order ASC, created_at DESC');
     res.json(products);
   } catch (err) {
     console.error('[STOCK] Admin products error:', err);
