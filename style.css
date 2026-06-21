@@ -861,6 +861,8 @@ section[id] {
 
 .hero-image-wrapper img {
   width: 100%;
+  height: auto;
+  object-fit: cover;
   border-radius: 4px;
   position: relative;
   z-index: 2;
@@ -921,48 +923,34 @@ section[id] {
   z-index: 0;
 }
 
-.hero-float-card {
+.hero-badge-circle {
   position: absolute;
-  z-index: 3;
-  padding: 16px 24px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  border: var(--border-gold);
-  border-radius: 8px;
-  animation: float 4s ease-in-out infinite;
-}
-
-.hero-float-card.card-1 {
-  bottom: 40px;
-  left: -40px;
-  animation-delay: 0s;
-}
-
-.hero-float-card.card-2 {
-  top: 60px;
+  bottom: -30px;
   right: -30px;
-  animation-delay: 1.5s;
+  width: 120px;
+  height: 120px;
+  background: #FBF6F0;
+  border: 3px solid #0D3A35;
+  outline: 2px solid #276152;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  animation: badgePulse 3s ease-in-out infinite;
 }
-
-.float-card-label {
-  font-size: 0.65rem;
-  font-weight: 400;
+.hero-badge-circle span {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.7rem;
   letter-spacing: 2px;
+  color: #0D3A35;
   text-transform: uppercase;
-  color: var(--color-gold);
-  margin-bottom: 4px;
+  text-align: center;
 }
-
-.float-card-value {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 300;
-  color: var(--color-white);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(13,58,53,0.2); }
+  50% { transform: scale(1.05); box-shadow: 0 8px 30px rgba(13,58,53,0.3); }
 }
 
 @keyframes fadeInUp {
@@ -3155,8 +3143,15 @@ body.menu-open {
     margin: 0 auto;
   }
 
-  .hero-float-card {
-    display: none;
+  .hero-badge-circle {
+    width: 90px;
+    height: 90px;
+    bottom: -20px;
+    right: -15px;
+  }
+  .hero-badge-circle span {
+    font-size: 0.55rem;
+    letter-spacing: 1px;
   }
 
   .hero-scroll-indicator {
