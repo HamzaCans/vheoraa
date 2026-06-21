@@ -73,8 +73,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Görsel</label>
-          <input type="file" id="prodImage" accept="image/*">
+          <label>Görseller (maks. 10)</label>
+          <input type="file" id="prodImages" accept="image/*" multiple>
+          <div id="imagePreviewList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" onclick="closeModal()">İptal</button>
@@ -205,6 +206,10 @@
     }
 
     function openModal(product) {
+      var previewList = document.getElementById('imagePreviewList');
+      var fileInput = document.getElementById('prodImages');
+      previewList.innerHTML = '';
+      fileInput.value = '';
       if (product) {
         document.getElementById('modalTitle').textContent = 'Ürün Düzenle';
         document.getElementById('editId').value = product.id;
@@ -215,6 +220,13 @@
         document.getElementById('prodGram').value = product.gram || '';
         document.getElementById('prodBadge').value = product.badge || '';
         document.getElementById('prodFeatured').value = product.is_featured ? '1' : '0';
+        var imgs = product.images && product.images.length ? product.images : (product.image ? [product.image] : []);
+        imgs.forEach(function(src) {
+          var img = document.createElement('img');
+          img.src = src;
+          img.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid rgba(212,168,83,0.3);';
+          previewList.appendChild(img);
+        });
       } else {
         document.getElementById('modalTitle').textContent = 'Yeni Ürün';
         document.getElementById('editId').value = '';
@@ -246,8 +258,14 @@
         badge: document.getElementById('prodBadge').value,
         is_featured: document.getElementById('prodFeatured').value
       };
-      var fileInput = document.getElementById('prodImage');
-      if (fileInput.files[0]) body.image_data = await readFileAsDataURL(fileInput.files[0]);
+      var fileInput = document.getElementById('prodImages');
+      if (fileInput.files.length > 0) {
+        var allImages = [];
+        for (var i = 0; i < Math.min(fileInput.files.length, 10); i++) {
+          allImages.push(await readFileAsDataURL(fileInput.files[i]));
+        }
+        body.images_data = allImages;
+      }
       var url = isEdit ? API + '/api/products/' + editId : API + '/api/products';
       var method = isEdit ? 'PUT' : 'POST';
       try {
@@ -290,12 +308,13 @@
         }
         container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ad</th><th>Kategori</th><th>Gram</th><th>İşçilik</th><th>Rozet</th><th>Öne Çıkan</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
           products.map(function(p) {
-            var imgSrc = p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>';
+            var imgSrc = p.images && p.images.length ? p.images[0] : (p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>');
+            var imgCount = p.images && p.images.length ? p.images.length : (p.image ? 1 : 0);
             var catColors = { yuzuk: '#d4a853', bileklik: '#e07c4f', kolye: '#5cb3e0', kupe: '#b07cd4', set: '#5ce0a0' };
             var catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
             var catColor = catColors[p.category] || '#d4a853';
             var catLabel = catLabels[p.category] || p.category;
-            return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb"></td>' +
+            return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb">' + (imgCount > 1 ? '<span style="position:relative;top:-40px;left:-10px;background:var(--color-gold);color:#000;font-size:0.55rem;padding:2px 5px;border-radius:8px;font-weight:700;">' + imgCount + '</span>' : '') + '</td>' +
               '<td style="font-weight:500;">' + p.name + '</td>' +
               '<td><span class="badge" style="background:' + catColor + '15;color:' + catColor + ';">' + catLabel + '</span></td>' +
               '<td>' + (p.gram || '-') + '</td>' +

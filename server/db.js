@@ -203,7 +203,8 @@ async function runMigrations(driver) {
     `ALTER TABLE admin_logs ADD COLUMN os TEXT DEFAULT ''`,
     `ALTER TABLE visitor_logs ADD COLUMN device_type TEXT DEFAULT ''`,
     `ALTER TABLE products ADD COLUMN gram TEXT DEFAULT ''`,
-    `ALTER TABLE products ADD COLUMN labor_cost INTEGER DEFAULT 2500`
+    `ALTER TABLE products ADD COLUMN labor_cost INTEGER DEFAULT 2500`,
+    `ALTER TABLE products ADD COLUMN images TEXT DEFAULT '[]'`
   ];
   for (const sql of migrations) {
     try {

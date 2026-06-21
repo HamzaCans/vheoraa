@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="dns-prefetch" href="https://translate.google.com">
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="preload" href="style.css" as="style">
@@ -109,14 +110,135 @@
             position: relative;
             background: #000;
         }
-        .product-img img {
+        .product-img .carousel {
+            display: flex;
             width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease;
+        }
+        .product-img .carousel img {
+            min-width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s ease;
+            cursor: pointer;
         }
-        .product-item:hover .product-img img {
-            transform: scale(1.1);
+        .product-img .carousel img.blur-up {
+            min-width: 100%;
+        }
+        .product-item:hover .product-img .carousel img {
+            transform: scale(1.05);
+        }
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(212,168,83,0.3);
+            border-radius: 50%;
+            color: var(--color-gold);
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+        }
+        .product-item:hover .carousel-btn { opacity: 1; }
+        .carousel-btn:hover { background: rgba(212,168,83,0.3); }
+        .carousel-prev { left: 8px; }
+        .carousel-next { right: 8px; }
+        .carousel-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 5;
+        }
+        .carousel-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .carousel-dot.active {
+            background: var(--color-gold);
+            transform: scale(1.3);
+        }
+
+        /* Lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-img {
+            max-width: 90vw;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        }
+        .lightbox-close:hover { background: rgba(212,168,83,0.3); }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-nav:hover { background: rgba(212,168,83,0.3); }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+        .lightbox-counter {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            margin-top: 16px;
+            letter-spacing: 2px;
         }
         .product-content {
             padding: 25px;
@@ -167,12 +289,13 @@
             border: 1px solid rgba(212,168,83,0.25);
             border-radius: 6px;
             margin-bottom: 12px;
-            font-family: var(--font-display);
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
         }
         .product-price-tag .price-value {
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--color-gold);
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
         }
         .product-price-tag .price-currency {
             font-size: 0.7rem;
@@ -291,6 +414,15 @@
         </div>
     </div>
 
+    <!-- ========== LIGHTBOX ========== -->
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#8249;</button>
+        <img class="lightbox-img" id="lightboxImg" src="" alt="">
+        <button class="lightbox-nav lightbox-next" id="lightboxNext">&#8250;</button>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+
     <script src="script.js" defer></script>
     <script>
 
@@ -356,17 +488,61 @@
 
             function renderProducts(filter) {
                 const filtered = filter === 'all' ? allProducts : allProducts.filter(p => p.category === filter);
-                productGrid.innerHTML = filtered.map(p => `
+                productGrid.innerHTML = filtered.map(p => {
+                    var imgs = p.images && p.images.length ? p.images : (p.image ? [p.image] : ['images/hero_collection.png']);
+                    var carouselImgs = imgs.map(src => {
+                        var s = src.startsWith('data:') || src.startsWith('http') || src.startsWith('/') || src.startsWith('images/') ? src : API_URL + src;
+                        return '<img class="blur-up" src="' + s + '" alt="' + p.name + '" loading="lazy">';
+                    }).join('');
+                    var dots = imgs.length > 1 ? '<div class="carousel-dots">' + imgs.map((_, i) => '<button class="carousel-dot' + (i === 0 ? ' active' : '') + '" data-idx="' + i + '"></button>').join('') + '</div>' : '';
+                    var navBtns = imgs.length > 1 ? '<button class="carousel-btn carousel-prev" data-dir="-1">&#8249;</button><button class="carousel-btn carousel-next" data-dir="1">&#8250;</button>' : '';
+                    return `
                     <div class="product-item" data-category="${p.category}" data-product-id="${p.id || ''}">
-                        <div class="product-img">${stockBadge(p.stock_status)}${goldBadge(p.gram)}<img class="blur-up" src="${p.image ? (p.image.startsWith('data:') || p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('images/') ? p.image : API_URL + p.image) : 'images/hero_collection.png'}" alt="${p.name}" width="300" height="350" loading="lazy"></div>
+                        <div class="product-img">${stockBadge(p.stock_status)}${goldBadge(p.gram)}<div class="carousel" data-current="0">${carouselImgs}</div>${navBtns}${dots}</div>
                         <div class="product-content">
                             <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
                             <h3 class="product-title">${p.name}</h3>
                             ${priceTag(p)}
                             <button class="product-cta open-quote" data-product="${p.name}" data-i18n="col.product.quote">Teklif Al</button>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
+
+                productGrid.querySelectorAll('.carousel-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var carousel = this.closest('.product-img').querySelector('.carousel');
+                        var imgs = carousel.querySelectorAll('img');
+                        var idx = parseInt(carousel.dataset.current) + parseInt(this.dataset.dir);
+                        if (idx < 0) idx = imgs.length - 1;
+                        if (idx >= imgs.length) idx = 0;
+                        carousel.style.transform = 'translateX(-' + (idx * 100) + '%)';
+                        carousel.dataset.current = idx;
+                        var dots = this.closest('.product-img').querySelectorAll('.carousel-dot');
+                        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                    });
+                });
+
+                productGrid.querySelectorAll('.carousel-dot').forEach(dot => {
+                    dot.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var carousel = this.closest('.product-img').querySelector('.carousel');
+                        var idx = parseInt(this.dataset.idx);
+                        carousel.style.transform = 'translateX(-' + (idx * 100) + '%)';
+                        carousel.dataset.current = idx;
+                        this.closest('.carousel-dots').querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+                    });
+                });
+
+                productGrid.querySelectorAll('.carousel img').forEach(img => {
+                    img.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var carousel = this.closest('.carousel');
+                        var allImgs = Array.from(carousel.querySelectorAll('img'));
+                        var startIdx = allImgs.indexOf(this);
+                        openLightbox(allImgs.map(i => i.src), startIdx);
+                    });
+                });
 
                 productGrid.querySelectorAll('.open-quote').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -457,6 +633,55 @@
                     btn.disabled = false;
                     btn.innerHTML = origHTML;
                 }
+            });
+
+            // ========== LIGHTBOX ==========
+            var lightbox = document.getElementById('lightbox');
+            var lightboxImg = document.getElementById('lightboxImg');
+            var lightboxCounter = document.getElementById('lightboxCounter');
+            var lightboxImages = [];
+            var lightboxIdx = 0;
+
+            function openLightbox(imgs, startIdx) {
+                lightboxImages = imgs;
+                lightboxIdx = startIdx || 0;
+                showLightboxImage();
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function showLightboxImage() {
+                lightboxImg.src = lightboxImages[lightboxIdx];
+                lightboxCounter.textContent = (lightboxIdx + 1) + ' / ' + lightboxImages.length;
+            }
+
+            document.getElementById('lightboxClose').addEventListener('click', function() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            document.getElementById('lightboxPrev').addEventListener('click', function() {
+                lightboxIdx = (lightboxIdx - 1 + lightboxImages.length) % lightboxImages.length;
+                showLightboxImage();
+            });
+
+            document.getElementById('lightboxNext').addEventListener('click', function() {
+                lightboxIdx = (lightboxIdx + 1) % lightboxImages.length;
+                showLightboxImage();
+            });
+
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (!lightbox.classList.contains('active')) return;
+                if (e.key === 'Escape') { lightbox.classList.remove('active'); document.body.style.overflow = ''; }
+                if (e.key === 'ArrowLeft') { lightboxIdx = (lightboxIdx - 1 + lightboxImages.length) % lightboxImages.length; showLightboxImage(); }
+                if (e.key === 'ArrowRight') { lightboxIdx = (lightboxIdx + 1) % lightboxImages.length; showLightboxImage(); }
             });
         });
     </script>
