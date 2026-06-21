@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
           const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
           const catLabel = catLabels[p.category] || p.category;
-          return `<div class="showcase-item">
+          return `<div class="showcase-item" data-product="${p.name}">
             <img src="${imgSrc}" alt="${p.name}" width="280" height="340" loading="lazy" decoding="async">
             <div class="showcase-item-overlay">
               <div class="showcase-item-name">${p.name}</div>
@@ -346,9 +346,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).join('');
       }
       track.innerHTML = renderItems(products) + renderItems(products);
+
+      track.querySelectorAll('.showcase-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const name = item.getAttribute('data-product');
+          const modal = document.getElementById('quoteModal');
+          const nameEl = document.getElementById('modalProductName');
+          if (modal && nameEl) {
+            nameEl.textContent = name;
+            modal.classList.add('active');
+          }
+        });
+      });
     } catch (_) {}
   }
   loadShowcase();
+
+  // Showcase arrow navigation + auto-scroll
+  const showcaseTrack = document.getElementById('showcaseTrack');
+  const showcaseLeft = document.getElementById('showcaseLeft');
+  const showcaseRight = document.getElementById('showcaseRight');
+  let showcasePos = 0;
+  let showcaseSpeed = 1;
+  if (showcaseTrack && showcaseLeft && showcaseRight) {
+    let showcaseAnimId = null;
+    const itemWidth = 320;
+
+    function autoScrollShowcase() {
+      showcasePos -= showcaseSpeed;
+      const maxScroll = showcaseTrack.scrollWidth / 2;
+      if (Math.abs(showcasePos) >= maxScroll) showcasePos = 0;
+      showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
+      showcaseAnimId = requestAnimationFrame(autoScrollShowcase);
+    }
+    autoScrollShowcase();
+
+    showcaseLeft.addEventListener('click', () => {
+      showcasePos += itemWidth;
+      showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
+    });
+    showcaseRight.addEventListener('click', () => {
+      showcasePos -= itemWidth;
+      showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
+    });
+
+    showcaseTrack.parentElement.addEventListener('mouseenter', () => {
+      showcaseSpeed = 0;
+    });
+    showcaseTrack.parentElement.addEventListener('mouseleave', () => {
+      showcaseSpeed = 1;
+    });
+  }
 
   // ========== CANLI ALTIN FİYATİ ==========
   let currentGoldPrice = 0;
@@ -1485,42 +1533,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ========== SHOWCASE TOUCH DRAG (Mobile) ==========
   const showcaseSection = document.querySelector('.showcase');
-  const showcaseTrack = document.getElementById('showcaseTrack');
   if (showcaseSection && showcaseTrack && window.innerWidth <= 768) {
     let isDragging = false;
     let startX = 0;
-    let scrollLeft = 0;
     let lastX = 0;
     let lastTime = 0;
     let velocity = 0;
-    let rafId = null;
+    let momentumId = null;
 
-    showcaseTrack.style.animation = 'none';
     showcaseTrack.style.cursor = 'grab';
 
     function momentumScroll() {
       if (Math.abs(velocity) > 0.5) {
-        showcaseSection.scrollLeft -= velocity;
+        showcasePos -= velocity;
+        showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
         velocity *= 0.95;
-        rafId = requestAnimationFrame(momentumScroll);
+        momentumId = requestAnimationFrame(momentumScroll);
       }
     }
 
     showcaseTrack.addEventListener('touchstart', (e) => {
       isDragging = true;
-      startX = e.touches[0].pageX - showcaseSection.offsetLeft;
-      scrollLeft = showcaseSection.scrollLeft;
+      startX = e.touches[0].pageX;
       lastX = startX;
       lastTime = Date.now();
       velocity = 0;
-      if (rafId) cancelAnimationFrame(rafId);
+      if (momentumId) cancelAnimationFrame(momentumId);
       showcaseTrack.style.cursor = 'grabbing';
     }, { passive: true });
 
     showcaseTrack.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       e.preventDefault();
-      const x = e.touches[0].pageX - showcaseSection.offsetLeft;
+      const x = e.touches[0].pageX;
       const now = Date.now();
       const dt = now - lastTime;
       if (dt > 0) {
@@ -1528,8 +1573,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       lastX = x;
       lastTime = now;
-      const walk = (x - startX) * 1.2;
-      showcaseSection.scrollLeft = scrollLeft - walk;
+      showcasePos += (x - startX) * 0.5;
+      showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
+      startX = x;
     }, { passive: false });
 
     showcaseTrack.addEventListener('touchend', () => {
@@ -1540,19 +1586,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showcaseSection.addEventListener('mousedown', (e) => {
       isDragging = true;
-      startX = e.pageX - showcaseSection.offsetLeft;
-      scrollLeft = showcaseSection.scrollLeft;
+      startX = e.pageX;
       lastX = startX;
       lastTime = Date.now();
       velocity = 0;
-      if (rafId) cancelAnimationFrame(rafId);
+      if (momentumId) cancelAnimationFrame(momentumId);
       showcaseTrack.style.cursor = 'grabbing';
     });
 
     showcaseSection.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       e.preventDefault();
-      const x = e.pageX - showcaseSection.offsetLeft;
+      const x = e.pageX;
       const now = Date.now();
       const dt = now - lastTime;
       if (dt > 0) {
@@ -1560,8 +1605,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       lastX = x;
       lastTime = now;
-      const walk = (x - startX) * 1.2;
-      showcaseSection.scrollLeft = scrollLeft - walk;
+      showcasePos += (x - startX) * 0.5;
+      showcaseTrack.style.transform = `translateX(${showcasePos}px)`;
+      startX = x;
     });
 
     showcaseSection.addEventListener('mouseup', () => {
