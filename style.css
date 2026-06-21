@@ -403,27 +403,27 @@ section[id] {
 .anim-delay-7 { animation-delay: 0.7s !important; }
 .anim-delay-8 { animation-delay: 0.8s !important; }
 
-/* ---------- Navigation ---------- */
+/* ---------- Navigation — Cartier Style ---------- */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 20px 0;
-  padding-top: max(20px, env(safe-area-inset-top));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 50px;
+  background-color: #FBF6F0;
+  border-bottom: 1px solid #B1B7AB;
   transition: all var(--transition-base);
 }
 
 .navbar.scrolled {
-  padding: 12px 0;
-  background: rgba(245, 240, 235, 0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
-  border-bottom: var(--border-gold);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+  padding: 14px 50px;
+  background: #FBF6F0;
+  border-bottom: 1px solid #B1B7AB;
+  box-shadow: 0 2px 20px rgba(13, 58, 53, 0.04);
 }
 
 /* Scroll Progress Bar */
@@ -443,6 +443,7 @@ section[id] {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .gold-ticker {
@@ -458,8 +459,8 @@ section[id] {
   align-items: center;
   gap: 6px;
   padding: 4px 14px;
-  background: rgba(13,58,53,0.12);
-  border: 1px solid rgba(13,58,53,0.25);
+  background: rgba(13,58,53,0.08);
+  border: 1px solid rgba(13,58,53,0.15);
   border-radius: 20px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -508,41 +509,42 @@ section[id] {
 }
 
 .nav-logo {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 300;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 24px;
   letter-spacing: 6px;
-  background: var(--gradient-gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0D3A35;
+  text-decoration: none;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 .nav-logo span {
   font-weight: 200;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   letter-spacing: 6px;
   display: block;
   text-align: center;
   margin-top: -4px;
-  background: linear-gradient(90deg, var(--color-gray), var(--color-white-soft));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #7A8A85;
 }
 
 .nav-links {
   display: flex;
-  gap: 40px;
+  gap: 0;
   align-items: center;
 }
 
 .nav-links a {
-  font-size: 0.78rem;
-  font-weight: 400;
-  letter-spacing: 3px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  font-size: 11px;
   text-transform: uppercase;
-  color: var(--color-white-soft);
+  letter-spacing: 3px;
+  color: #0D3A35;
+  text-decoration: none;
+  margin: 0 20px;
+  transition: color 0.3s ease;
   position: relative;
   padding: 4px 0;
 }
@@ -553,13 +555,13 @@ section[id] {
   bottom: -2px;
   left: 0;
   width: 0;
-  height: 1.5px;
-  background: var(--gradient-gold);
-  transition: width var(--transition-base);
+  height: 1px;
+  background: #C5A880;
+  transition: width 0.3s ease;
 }
 
 .nav-links a:hover {
-  color: var(--color-gold);
+  color: #C5A880;
 }
 
 .nav-links a:hover::after,
@@ -568,25 +570,26 @@ section[id] {
 }
 
 .nav-links a.active-link {
-  color: var(--color-gold);
+  color: #C5A880;
 }
 
 .nav-cta {
   padding: 10px 28px !important;
   background: transparent !important;
-  border: 1px solid var(--color-gold) !important;
-  color: var(--color-gold) !important;
+  border: 1px solid #0D3A35 !important;
+  color: #0D3A35 !important;
   border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.72rem !important;
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: 3px !important;
   text-transform: uppercase;
-  transition: all var(--transition-base) !important;
+  transition: all 0.3s ease !important;
 }
 
 .nav-cta:hover {
-  background: var(--color-gold) !important;
-  color: var(--color-dark) !important;
+  background: #0D3A35 !important;
+  color: #FBF6F0 !important;
 }
 
 .nav-cta::after {
@@ -610,8 +613,8 @@ section[id] {
 .menu-toggle span {
   display: block;
   width: 28px;
-  height: 2px;
-  background: var(--color-gold);
+  height: 1.5px;
+  background: #0D3A35;
   transition: all var(--transition-base);
   border-radius: 1px;
 }
@@ -2955,6 +2958,14 @@ body.menu-open {
     gap: 8px 16px;
   }
 
+  .navbar {
+    padding: 18px 20px;
+  }
+
+  .navbar.scrolled {
+    padding: 12px 20px;
+  }
+
   .nav-links {
     position: fixed;
     top: 0;
@@ -2968,10 +2979,8 @@ body.menu-open {
     align-items: stretch;
     gap: 0;
     padding: calc(80px + env(safe-area-inset-top)) 28px calc(32px + env(safe-area-inset-bottom));
-    background: rgba(245, 240, 235, 0.98);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-left: 1px solid rgba(13, 58, 53, 0.2);
+    background: #FBF6F0;
+    border-left: 1px solid #B1B7AB;
     transition: right 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1001;
     overflow-y: auto;
@@ -2984,13 +2993,17 @@ body.menu-open {
   }
 
   .nav-links a {
-    font-size: 0.95rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 3px;
     width: 100%;
     padding: 16px 0;
     min-height: 48px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid #B1B7AB;
+    color: #0D3A35;
   }
 
   .nav-links a::after {
@@ -3244,12 +3257,12 @@ body.menu-open {
   }
 
   .nav-logo {
-    font-size: 1.35rem;
-    letter-spacing: 2px;
+    font-size: 20px;
+    letter-spacing: 4px;
   }
 
   .nav-logo span {
-    font-size: 0.58rem;
+    font-size: 0.55rem;
     letter-spacing: 3px;
   }
 
@@ -4689,10 +4702,7 @@ font {
   50% { text-shadow: 0 0 16px rgba(13, 58, 53, 0.6); }
 }
 .nav-links a {
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-.nav-links a:hover {
-  transform: translateY(-2px);
+  transition: color 0.3s ease;
 }
 .lang-dropdown {
   opacity: 0;
@@ -4840,7 +4850,7 @@ font {
   transition: color 0.3s ease, transform 0.3s ease, padding-left 0.3s ease;
 }
 .footer-links a:hover {
-  color: var(--color-gold);
+  color: #C5A880;
   transform: translateX(4px);
   padding-left: 4px;
 }
