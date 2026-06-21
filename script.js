@@ -517,6 +517,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   revealElements.forEach(el => revealObserver.observe(el));
 
+  // Immediately reveal elements already in viewport on load
+  requestAnimationFrame(() => {
+    revealElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add('revealed');
+        revealObserver.unobserve(el);
+      }
+    });
+  });
+
   // MutationObserver for dynamically added reveal elements (collection page)
   const domObserver = new MutationObserver((mutations) => {
     mutations.forEach(mutation => {
