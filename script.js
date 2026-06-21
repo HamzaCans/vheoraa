@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ========== SCROLL REVEAL ANIMATIONS ==========
-  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-rotate, .reveal-blur, .line-draw, .char-rise');
 
   // ========== SHARE EXPERIENCE FORM ==========
   const shareForm = document.getElementById('shareForm');
@@ -496,8 +496,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   // Staggered reveal for grid children
-  document.querySelectorAll('.services-grid, .featured-grid, .about-stats').forEach(grid => {
-    const items = grid.querySelectorAll('.reveal');
+  document.querySelectorAll('.services-grid, .featured-grid, .about-stats, .testimonials-grid').forEach(grid => {
+    const items = grid.querySelectorAll('.reveal, .reveal-rotate, .reveal-blur');
     items.forEach((item, i) => {
       item.style.setProperty('--reveal-delay', `${i * 0.1}s`);
     });
@@ -516,6 +516,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   revealElements.forEach(el => revealObserver.observe(el));
+
+  // MutationObserver for dynamically added reveal elements (collection page)
+  const domObserver = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType !== 1) return;
+        const revealSel = '.reveal:not(.revealed), .reveal-left:not(.revealed), .reveal-right:not(.revealed), .reveal-scale:not(.revealed), .reveal-rotate:not(.revealed), .reveal-blur:not(.revealed), .line-draw:not(.revealed), .char-rise:not(.revealed)';
+        if (node.matches && node.matches(revealSel)) revealObserver.observe(node);
+        if (node.querySelectorAll) {
+          node.querySelectorAll(revealSel).forEach(el => revealObserver.observe(el));
+        }
+      });
+    });
+  });
+  domObserver.observe(document.body, { childList: true, subtree: true });
 
   // ========== PARALLAX SCROLL EFFECTS ==========
   if (window.innerWidth > 768) {
@@ -567,6 +582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    el.classList.add('counting');
     const duration = 2000;
     const step = target / (duration / 16);
     let current = 0;
@@ -576,6 +592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (current >= target) {
         current = target;
         clearInterval(timer);
+        el.classList.remove('counting');
       }
 
       if (target >= 1000) {
@@ -1574,6 +1591,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ========== ADMIN TOOLBAR ==========
   // Admin toolbar kaldırıldı
+
+  // ========== HERO SCROLL INDICATOR ==========
+  const heroScroll = document.querySelector('.hero-scroll-indicator');
+  if (heroScroll) {
+    heroScroll.style.cursor = 'pointer';
+    heroScroll.addEventListener('click', () => {
+      const target = document.querySelector('.about-section') || document.querySelector('.collection-showcase') || document.querySelector('#about');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // ========== MAGNETIC BUTTON EFFECT ==========
+  const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  if (!isTouchDevice) {
+    document.querySelectorAll('.social-link, .slider-btn, .lang-btn').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const existingTransform = window.getComputedStyle(btn).transform;
+        if (existingTransform && existingTransform !== 'none') {
+          btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+        } else {
+          btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+        }
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+  }
 
   // ========== CUSTOM CURSOR ==========
   // Removed - using native cursor

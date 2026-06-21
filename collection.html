@@ -365,8 +365,8 @@
 
     <header class="collection-header">
         <div class="container">
-            <h1 data-i18n="col.nav.collection">Koleksiyonumuz</h1>
-            <p class="section-subtitle" style="margin: 0 auto;">Aradığınız zarafeti kategorilere göre filtreleyin.</p>
+            <h1 class="reveal-rotate" data-i18n="col.nav.collection">Koleksiyonumuz</h1>
+            <p class="section-subtitle reveal-blur" style="margin: 0 auto;">Aradığınız zarafeti kategorilere göre filtreleyin.</p>
         </div>
     </header>
 
@@ -514,7 +514,7 @@
                     var dots = imgs.length > 1 ? '<div class="carousel-dots">' + imgs.map((_, i) => '<button class="carousel-dot' + (i === 0 ? ' active' : '') + '" data-idx="' + i + '"></button>').join('') + '</div>' : '';
                     var navBtns = imgs.length > 1 ? '<button class="carousel-btn carousel-prev" data-dir="-1">&#8249;</button><button class="carousel-btn carousel-next" data-dir="1">&#8250;</button>' : '';
                     return `
-                    <div class="product-item" data-category="${p.category}" data-product-id="${p.id || ''}">
+                    <div class="product-item reveal staggered" data-category="${p.category}" data-product-id="${p.id || ''}" style="--reveal-delay: ${Math.random() * 0.3}s">
                         <div class="product-img">${stockBadge(p.stock_status)}${goldBadge(p.gram)}<div class="carousel" data-current="0">${carouselImgs}</div>${navBtns}${dots}</div>
                         <div class="product-content">
                             <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
