@@ -998,6 +998,7 @@ section[id] {
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: linear-gradient(135deg, #082420 0%, #0D3A35 40%, #276152 100%);
 }
 .hero-bg img {
   width: 100%;
@@ -1113,6 +1114,10 @@ section[id] {
   aspect-ratio: 4/5;
   display: block;
   cursor: pointer;
+  background: linear-gradient(135deg, #082420, #276152);
+}
+.collection-hero-item:nth-child(2) {
+  background: linear-gradient(135deg, #276152, #0D3A35);
 }
 .collection-hero-item img {
   width: 100%;
@@ -1177,6 +1182,7 @@ section[id] {
 .heritage-image {
   overflow: hidden;
   position: relative;
+  background: linear-gradient(135deg, #276152, #0D3A35);
 }
 .heritage-image img {
   width: 100%;
