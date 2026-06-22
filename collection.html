@@ -571,6 +571,11 @@
                         modal.classList.add('active');
                     });
                 });
+
+                if (typeof window._vheoraApplyTranslations === 'function') {
+                    var t = window._vheoraGetCurrentTranslations ? window._vheoraGetCurrentTranslations() : {};
+                    if (t && Object.keys(t).length) window._vheoraApplyTranslations();
+                }
             }
 
             const filterBtns = document.querySelectorAll('.filter-btn');

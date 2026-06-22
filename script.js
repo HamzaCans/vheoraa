@@ -1293,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentLang = 'tr';
       applyTranslations();
       document.documentElement.setAttribute('lang', 'tr');
+      document.documentElement.setAttribute('dir', 'ltr');
       return;
     }
     try {
@@ -1302,10 +1303,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentLang = lang;
       applyTranslations();
       document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
     } catch (e) {
       currentTranslations = {};
       currentLang = 'tr';
       applyTranslations();
+      document.documentElement.setAttribute('dir', 'ltr');
     }
   }
 

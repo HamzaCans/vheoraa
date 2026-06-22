@@ -67,6 +67,12 @@
   box-sizing: border-box;
 }
 
+/* i18n: Prevent text overflow in translated content */
+h1, h2, h3, h4, h5, h6, p, a, span, li, td, th, label, button, div {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
@@ -638,7 +644,7 @@ section[id] {
   display: flex;
   align-items: center;
   background: var(--gradient-hero);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .hero::before {
@@ -1587,7 +1593,7 @@ section[id] {
   padding: var(--section-padding);
   background: #F0EAE2;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .testimonials::before {
@@ -3532,7 +3538,7 @@ body.menu-open {
   border: 1px solid rgba(13,58,53,0.2);
   border-radius: 16px;
   padding: 40px 32px 32px;
-  width: min(90vw, 380px);
+  width: min(90vw, 420px);
   text-align: center;
   transform: translateY(20px) scale(0.95);
   transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
@@ -4474,7 +4480,7 @@ font {
   line-height: 1.7;
 }
 .sss-item.open .sss-answer {
-  max-height: 300px;
+  max-height: 600px;
   padding: 4px 24px 16px;
 }
 
@@ -4748,7 +4754,7 @@ font {
   .featured-section,
   .contact-section,
   .footer {
-    overflow: hidden;
+    overflow-x: hidden;
   }
 }
 
@@ -4991,4 +4997,242 @@ font {
 }
 .btn-secondary:hover {
   box-shadow: 0 0 20px rgba(13, 58, 53, 0.1);
+}
+
+/* ==========================================
+   i18n — Translation-safe layout fixes
+   ========================================== */
+
+/* --- Text overflow protection --- */
+.product-name,
+.product-category,
+.showcase-item-name,
+.showcase-item-category,
+.service-title,
+.service-description,
+.testimonial-text,
+.testimonial-name,
+.testimonial-location,
+.footer-brand-text,
+.footer-links a,
+.contact-item-value,
+.contact-item-label,
+.quote-product-name,
+.quote-notice,
+.sss-question,
+.sss-answer,
+.kargo-card h4,
+.kargo-card p,
+.bakim-card h4,
+.bakim-card p,
+.tracking-result,
+.track-info,
+.stat-label,
+.section-label,
+.hero-description,
+.about-text,
+.contact-text,
+.section-subtitle {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* --- Hero --- */
+.hero-content {
+  max-width: min(580px, 100%);
+}
+.hero-description {
+  max-width: min(460px, 100%);
+}
+.hero-badge {
+  white-space: nowrap;
+}
+.hero-buttons {
+  flex-wrap: wrap;
+}
+
+/* --- Product badges --- */
+.product-badge {
+  max-width: calc(100% - 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Section max-width safety --- */
+.section-subtitle,
+.services-header,
+.share-header .section-subtitle {
+  max-width: min(600px, 100%);
+}
+.about-content {
+  max-width: min(520px, 100%);
+}
+.contact-info {
+  max-width: min(480px, 100%);
+}
+.footer-brand-text {
+  max-width: min(300px, 100%);
+}
+.share-visual-text {
+  max-width: min(220px, 100%);
+}
+
+/* --- Flex-wrap safety --- */
+.footer-bottom {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-legal {
+  flex-wrap: wrap;
+}
+.testimonial-author {
+  min-width: 0;
+}
+.testimonial-author > * {
+  min-width: 0;
+}
+
+/* --- Showcase text overflow --- */
+.showcase-item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.showcase-item-category {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Buttons — allow wrapping for long translations --- */
+.btn-primary,
+.btn-secondary {
+  text-align: center;
+}
+
+/* --- Stat labels — shorter letter-spacing on mobile --- */
+@media (max-width: 768px) {
+  .stat-label {
+    letter-spacing: 1px;
+    font-size: 0.65rem;
+  }
+  .section-label {
+    letter-spacing: 2px;
+    font-size: 0.7rem;
+  }
+  .hero-badge {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+  }
+  .footer-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+  .nav-links a {
+    letter-spacing: 1.5px;
+  }
+  .loader-sub {
+    letter-spacing: 3px;
+  }
+  .product-price-btn {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+  }
+}
+
+/* ==========================================
+   RTL — Arabic language support
+   ========================================== */
+[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+[dir="rtl"] .nav-links a::after {
+  left: auto;
+  right: 0;
+}
+[dir="rtl"] .footer-heading::after {
+  left: auto;
+  right: 0;
+}
+[dir="rtl"] .iade-list li {
+  padding-left: 0;
+  padding-right: 24px;
+}
+[dir="rtl"] .iade-list li::before {
+  left: auto;
+  right: 0;
+}
+[dir="rtl"] .form-group select,
+[dir="rtl"] .luxury-form select,
+[dir="rtl"] #revCountry {
+  background-position: left 16px center;
+  padding-right: 18px;
+  padding-left: 40px;
+}
+[dir="rtl"] .footer-links a:hover {
+  padding-left: 0;
+  padding-right: 8px;
+}
+[dir="rtl"] .contact-item:hover {
+  transform: translateX(-4px);
+}
+[dir="rtl"] .footer-links a:hover {
+  transform: translateX(-4px);
+}
+[dir="rtl"] .sss-question {
+  text-align: right;
+}
+[dir="rtl"] .form-group.float-label label {
+  left: auto;
+  right: 18px;
+}
+[dir="rtl"] .nav-links {
+  right: -100%;
+  left: auto;
+}
+[dir="rtl"] .nav-links.active {
+  right: 0;
+  left: auto;
+}
+[dir="rtl"] .quote-close {
+  right: auto;
+  left: 24px;
+}
+[dir="rtl"] .order-track-close {
+  right: auto;
+  left: 20px;
+}
+[dir="rtl"] .support-close {
+  right: auto;
+  left: 24px;
+}
+[dir="rtl"] .showcase-arrow-left {
+  left: auto;
+  right: 16px;
+}
+[dir="rtl"] .showcase-arrow-right {
+  right: auto;
+  left: 16px;
+}
+[dir="rtl"] .float-wa {
+  right: auto;
+  left: 20px;
+}
+[dir="rtl"] .float-wa-tooltip {
+  right: auto;
+  left: 72px;
+}
+[dir="rtl"] .float-wa-tooltip::after {
+  right: auto;
+  left: -6px;
+  border-left: none;
+  border-right: 6px solid transparent;
+}
+[dir="rtl"] .footer-links a {
+  text-align: right;
 }
