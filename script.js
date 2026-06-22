@@ -299,7 +299,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       grid.innerHTML = products.map((p, i) => {
         const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
         const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
-        const badge = p.badge ? `<span class="product-badge">${p.badge}</span>` : '';
+        const badgeMap = { 'Yeni': 'badge.new', 'Çok Satan': 'badge.bestseller', 'Sınırlı Seri': 'badge.limited', 'Yeni Koleksiyon': 'badge.new' };
+        const badgeI18n = badgeMap[p.badge] || '';
+        const badge = p.badge ? `<span class="product-badge"${badgeI18n ? ' data-i18n="' + badgeI18n + '"' : ''}>${p.badge}</span>` : '';
         const catLabel = catLabels[p.category] || p.category;
         const catI18n = `cat.${p.category}`;
         return `
