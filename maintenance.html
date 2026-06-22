@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0f">
+  <meta name="theme-color" content="#0D3A35">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,21 +13,21 @@
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html{width:100%;height:100%;overflow:hidden;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:manipulation}
-    body{background:#0a0a0f;color:#f5f5f5;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;width:100%;height:100%;height:100dvh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:fixed;inset:0;touch-action:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{background:#0D3A35;color:#FBF6F0;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;width:100%;height:100%;height:100dvh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:fixed;inset:0;touch-action:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
     .sparkles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-    .sparkle{position:absolute;width:2px;height:2px;background:#d4a853;border-radius:50%;animation:sparkle 4s ease-in-out infinite;opacity:0}
+    .sparkle{position:absolute;width:2px;height:2px;background:#D4A853;border-radius:50%;animation:sparkle 4s ease-in-out infinite;opacity:0}
     @keyframes sparkle{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:.5;transform:translateY(-30px)}}
 
     .content{position:relative;z-index:1;text-align:center;width:100%;max-width:700px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:clamp(20px,5vh,40px) clamp(20px,5vw,24px) clamp(12px,3vh,24px)}
 
     .header{flex-shrink:0}
-    .logo{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.2rem,8vw,3.8rem);font-weight:700;letter-spacing:clamp(4px,2.5vw,12px);background:linear-gradient(135deg,#d4a853,#f0c27f,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;line-height:1.1}
-    .logo-sub{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(.65rem,2.2vw,.8rem);letter-spacing:clamp(3px,2vw,8px);text-transform:uppercase;color:#8a8a9a;line-height:1}
+    .logo{font-family:'Montserrat',sans-serif;font-size:clamp(2.2rem,8vw,3.8rem);font-weight:200;letter-spacing:clamp(4px,2.5vw,12px);color:#D4A853;margin-bottom:4px;line-height:1.1}
+    .logo-sub{font-family:'Montserrat',sans-serif;font-size:clamp(.65rem,2.2vw,.8rem);letter-spacing:clamp(3px,2vw,8px);text-transform:uppercase;color:#B1B7AB;font-weight:300;line-height:1}
 
     .diamond-outer{flex-shrink:0;width:clamp(130px,35vw,260px);height:clamp(130px,35vw,260px);position:relative;overflow:hidden;margin:clamp(8px,2vh,16px) 0}
     .diamond-container{position:absolute;top:50%;left:50%;width:120px;height:120px;transform:translate(-50%,-50%)}
@@ -38,33 +38,34 @@
     .orbit-3{width:258px;height:258px;animation:orbitSpin 25s linear infinite}
     @keyframes orbitSpin{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
 
-    .square-outer{position:absolute;top:50%;left:50%;width:144px;height:144px;transform:translate(-50%,-50%);border:1px solid rgba(212,168,83,.15);animation:squareSpinCW 18s linear infinite}
-    .square-inner{position:absolute;top:50%;left:50%;width:102px;height:102px;transform:translate(-50%,-50%);border:1.5px solid rgba(212,168,83,.28);animation:squareSpinCCW 12s linear infinite}
+    .square-outer{position:absolute;top:50%;left:50%;width:144px;height:144px;transform:translate(-50%,-50%);border:1px solid rgba(39,97,82,.4);animation:squareSpinCW 18s linear infinite}
+    .square-inner{position:absolute;top:50%;left:50%;width:102px;height:102px;transform:translate(-50%,-50%);border:1.5px solid rgba(177,183,171,.3);animation:squareSpinCCW 12s linear infinite}
     .square-micro{position:absolute;top:50%;left:50%;width:60px;height:60px;transform:translate(-50%,-50%);border:1px solid rgba(212,168,83,.2);animation:squareSpinCW 8s linear infinite}
     @keyframes squareSpinCW{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
     @keyframes squareSpinCCW{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(-360deg)}}
 
-    .star{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;color:#d4a853;animation:starPulse 3s ease-in-out infinite;filter:drop-shadow(0 0 15px rgba(212,168,83,.5)) drop-shadow(0 0 30px rgba(212,168,83,.25));line-height:1}
+    .star{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;color:#D4A853;animation:starPulse 3s ease-in-out infinite;filter:drop-shadow(0 0 15px rgba(212,168,83,.5)) drop-shadow(0 0 30px rgba(212,168,83,.25));line-height:1}
     @keyframes starPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
 
     .glow-center{position:absolute;top:50%;left:50%;width:96px;height:96px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(212,168,83,.18),rgba(212,168,83,.06) 40%,transparent 70%);border-radius:50%;animation:glowPulse 3s ease-in-out infinite}
     @keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
 
     .middle{flex:1 1 auto;width:100%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-    h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.5rem,6vw,2.6rem);font-weight:600;letter-spacing:clamp(.5px,1vw,1.5px);margin-bottom:clamp(8px,2vh,16px);color:#f5f5f5;line-height:1.2;text-align:center;word-wrap:break-word;overflow-wrap:break-word;max-width:100%;padding:0 8px}
-    .desc{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1rem,3.2vw,1.15rem);line-height:1.7;color:#9a9aaa;font-style:italic;max-width:460px;width:100%;margin:0 auto;text-align:center;word-wrap:break-word;overflow-wrap:break-word;padding:0 8px}
+    h1{font-family:'Montserrat',sans-serif;font-size:clamp(1.5rem,6vw,2.6rem);font-weight:200;letter-spacing:clamp(.5px,1vw,1.5px);margin-bottom:clamp(8px,2vh,16px);color:#FBF6F0;line-height:1.2;text-align:center;word-wrap:break-word;overflow-wrap:break-word;max-width:100%;padding:0 8px}
+    .desc{font-family:'Montserrat',sans-serif;font-size:clamp(.9rem,3vw,1.1rem);line-height:1.7;color:#B1B7AB;font-weight:300;max-width:460px;width:100%;margin:0 auto;text-align:center;word-wrap:break-word;overflow-wrap:break-word;padding:0 8px}
 
     .footer{flex-shrink:0}
-    .divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,#d4a853,transparent);margin:0 auto clamp(10px,2vh,24px)}
-    .status{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(.75rem,2.5vw,.9rem);letter-spacing:clamp(2px,1vw,4px);text-transform:uppercase;color:#d4a853;opacity:.85}
-    .status-dot{display:inline-block;width:8px;height:8px;background:#f0c27f;border-radius:50%;margin-right:8px;vertical-align:middle;animation:statusBlink 2s ease-in-out infinite}
-    @keyframes statusBlink{0%,100%{opacity:1;box-shadow:0 0 8px rgba(240,194,127,.6)}50%{opacity:.25;box-shadow:none}}
+    .divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,#D4A853,transparent);margin:0 auto clamp(10px,2vh,24px)}
+    .status{font-family:'Montserrat',sans-serif;font-size:clamp(.75rem,2.5vw,.9rem);letter-spacing:clamp(2px,1vw,4px);text-transform:uppercase;color:#D4A853;font-weight:400;opacity:.85}
+    .status-dot{display:inline-block;width:8px;height:8px;background:#D4A853;border-radius:50%;margin-right:8px;vertical-align:middle;animation:statusBlink 2s ease-in-out infinite}
+    @keyframes statusBlink{0%,100%{opacity:1;box-shadow:0 0 8px rgba(212,168,83,.6)}50%{opacity:.25;box-shadow:none}}
     .footer-email{margin-top:clamp(8px,2vh,20px);padding-bottom:env(safe-area-inset-bottom,0)}
-    .footer-email a{color:rgba(212,168,83,.5);text-decoration:none;font-family:'Inter',sans-serif;font-size:clamp(.7rem,2.2vw,.85rem);letter-spacing:2px;transition:color .3s}
+    .footer-email a{color:rgba(177,183,171,.6);text-decoration:none;font-family:'Montserrat',sans-serif;font-size:clamp(.7rem,2.2vw,.85rem);letter-spacing:2px;font-weight:300;transition:color .3s}
+    .footer-email a:hover{color:#D4A853}
 
     .social-links{display:flex;gap:clamp(14px,3vw,22px);justify-content:center;margin-top:clamp(20px,4vh,36px);margin-bottom:clamp(8px,2vh,16px);flex-shrink:0}
-    .social-btn{display:flex;align-items:center;justify-content:center;width:clamp(40px,10vw,48px);height:clamp(40px,10vw,48px);border:1px solid rgba(212,168,83,.2);border-radius:50%;background:rgba(212,168,83,.05);color:#d4a853;text-decoration:none;transition:all .3s ease}
-    .social-btn:hover,.social-btn:active{background:rgba(212,168,83,.15);border-color:rgba(212,168,83,.45);transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,168,83,.12)}
+    .social-btn{display:flex;align-items:center;justify-content:center;width:clamp(40px,10vw,48px);height:clamp(40px,10vw,48px);border:1px solid rgba(39,97,82,.4);border-radius:50%;background:rgba(39,97,82,.1);color:#B1B7AB;text-decoration:none;transition:all .3s ease}
+    .social-btn:hover,.social-btn:active{background:rgba(39,97,82,.25);border-color:#D4A853;color:#D4A853;transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,58,53,.3)}
     .social-icon{width:clamp(17px,4vw,20px);height:clamp(17px,4vw,20px)}
     .social-icon svg{width:100%;height:100%;fill:currentColor}
 
@@ -80,7 +81,7 @@
       .star{font-size:1.8rem}
       .glow-center{width:80px;height:80px}
       h1{font-size:clamp(1.3rem,5.5vw,2rem);margin-bottom:8px}
-      .desc{font-size:clamp(.9rem,3.2vw,1.05rem);line-height:1.65}
+      .desc{font-size:clamp(.85rem,3vw,1rem);line-height:1.65}
       .status{letter-spacing:1.5px}
     }
 
@@ -128,7 +129,7 @@
     @media(prefers-reduced-motion:reduce){
       .sparkle,.orbit,.square-outer,.square-inner,.square-micro,.star,.glow-center,.status-dot{animation:none!important}
       .star{opacity:.9}
-      .status-dot{opacity:1;box-shadow:0 0 8px rgba(240,194,127,.6)}
+      .status-dot{opacity:1;box-shadow:0 0 8px rgba(212,168,83,.6)}
     }
   </style>
 </head>
@@ -155,7 +156,7 @@
     </div>
 
     <div class="middle">
-      <h1 id="maintenanceTitle">Yakın Hizmetinizdeyiz</h1>
+      <h1 id="maintenanceTitle">Yakında Hizmetinizdeyiz</h1>
       <p class="desc" id="maintenanceMessage">VHEORA olarak sizi büyüleyecek yeni koleksiyonumuz üzerinde titizlikle çalışıyoruz. Zamansız zarafeti yeniden keşfetmek için bizi takip edin.</p>
     </div>
 
@@ -197,7 +198,7 @@
         s.style.animationDuration=(3+Math.random()*3)+'s';
         c.appendChild(s);
       }
-      var api=window.location.origin.indexOf('localhost')>-1&&window.location.port!=='3001'?'http://localhost:3001':'';
+      var api=window.location.hostname==='vheora.com'||window.location.hostname==='www.vheora.com'?'https://vheora.vercel.app':(window.location.origin.indexOf('localhost')>-1&&window.location.port!=='3001'?'http://localhost:3001':'');
       fetch(api+'/api/settings/public').then(function(r){return r.json()}).then(function(d){
         var t=document.getElementById('maintenanceTitle');
         var m=document.getElementById('maintenanceMessage');

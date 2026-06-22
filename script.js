@@ -6,7 +6,17 @@
 const isFile = window.location.protocol === 'file:';const isLocal = ['localhost','127.0.0.1','::1'].includes(window.location.hostname);const API_URL = (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
 
 // ========== BAKIM MODU KONTROLÜ ==========
-// Server-side handles maintenance check via middleware + cookie + redirect.
+(function checkMaintenance() {
+  var bypass = document.cookie.split(';').find(function(c){ return c.trim().startsWith('vheora_bypass='); });
+  if (bypass) return;
+  var apiBase = window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
+  if (!apiBase) return;
+  fetch(apiBase + '/api/settings/public').then(function(r){ return r.json(); }).then(function(d){
+    if (d.maintenance_mode === '1') {
+      window.location.href = apiBase + '/maintenance.html';
+    }
+  }).catch(function(){});
+})();
 
 // ========== PINCH ZOOM ENGELLE ==========
 document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
