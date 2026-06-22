@@ -3,7 +3,7 @@
    Animations, Particles & Interactivity
    ======================================== */
 
-const isFile = window.location.protocol === 'file:';const isLocal = ['localhost','127.0.0.1','::1'].includes(window.location.hostname);const API_URL = (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : '';
+const isFile = window.location.protocol === 'file:';const isLocal = ['localhost','127.0.0.1','::1'].includes(window.location.hostname);const API_URL = (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
 
 // ========== BAKIM MODU KONTROLÜ ==========
 // Server-side handles maintenance check via middleware + cookie + redirect.

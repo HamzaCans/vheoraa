@@ -57,7 +57,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: ['https://vheora.co', 'https://vheoraa.vercel.app', 'http://localhost:3001', 'http://localhost:3000'],
+  origin: ['https://vheora.co', 'https://www.vheora.com', 'https://vheora.com', 'https://vheoraa.vercel.app', 'http://localhost:3001', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
   maxAge: 86400

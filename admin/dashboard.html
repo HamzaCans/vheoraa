@@ -146,7 +146,7 @@
         return await res.json();
       } finally { clearTimeout(timeout); }
     }
-    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
     var userTimezone = 'Europe/Istanbul';
     function getToken() {
       var t = localStorage.getItem('vheora_token');

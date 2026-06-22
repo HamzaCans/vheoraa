@@ -1,4 +1,4 @@
-const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+const API = window.location.protocol === 'file:' ? 'http://localhost:3001' : window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
 
 function getToken() {
   const t = localStorage.getItem('vheora_token');
