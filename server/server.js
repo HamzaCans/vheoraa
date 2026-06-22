@@ -215,6 +215,8 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/settings/bypass-token') ||
     url.includes('/api/health') ||
     url.includes('/api/visit') ||
+    url.includes('/api/translations/') ||
+    url.includes('/api/languages') ||
     url.includes('/api/admin') ||
     url === '/sw.js' || url === '/manifest.json' ||
     url === '/favicon.png' ||
