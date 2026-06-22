@@ -228,12 +228,17 @@ async function runMigrations(driver) {
 async function seedIfEmpty(driver) {
   const count = await driver.get('SELECT COUNT(*) as c FROM users');
   if (count.c === '0' || count.c === 0) {
-    const adminUser = process.env.ADMIN_USERNAME || 'Hamzbkadmin';
-    const adminPass = process.env.ADMIN_PASSWORD || 'Vh_12345678';
-    const hashed = bcrypt.hashSync(adminPass, 10);
+    const adminUser = process.env.ADMIN_USERNAME;
+    const adminPass = process.env.ADMIN_PASSWORD;
+    if (!adminUser || !adminPass) {
+      console.error('[SECURITY] ADMIN_USERNAME / ADMIN_PASSWORD not set in env. Falling back to defaults — CHANGE THIS!');
+    }
+    const username = adminUser || 'Hamzbkadmin';
+    const password = adminPass || 'Vh_12345678';
+    const hashed = bcrypt.hashSync(password, 10);
     await driver.run(
       'INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, ?)',
-      [adminUser, 'vheora.co@gmail.com', hashed, new Date().toISOString()]
+      [username, 'vheora.co@gmail.com', hashed, new Date().toISOString()]
     );
 
     const seedTestimonials = [

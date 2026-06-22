@@ -6,6 +6,11 @@ const { logAdminAction } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
+function escapeHtml(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 router.post('/contact', async (req, res) => {
   try {
     const db = await getDb();
@@ -33,14 +38,14 @@ router.post('/contact', async (req, res) => {
     );
 
     sendEmailNotification({
-      subject: `VHEORA - Yeni İletişim Mesajı: ${subject || 'Genel'}`,
+      subject: `VHEORA - Yeni İletişim Mesajı: ${escapeHtml(subject || 'Genel')}`,
       html: `
         <h2>Yeni İletişim Mesajı</h2>
-        <p><strong>İsim:</strong> ${first_name} ${last_name}</p>
-        <p><strong>E-posta:</strong> ${email}</p>
-        <p><strong>Konu:</strong> ${subject || 'Genel'}</p>
+        <p><strong>İsim:</strong> ${escapeHtml(first_name)} ${escapeHtml(last_name)}</p>
+        <p><strong>E-posta:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Konu:</strong> ${escapeHtml(subject || 'Genel')}</p>
         <p><strong>Mesaj:</strong></p>
-        <p>${message}</p>
+        <p>${escapeHtml(message)}</p>
       `
     });
 
@@ -78,13 +83,13 @@ router.post('/quote', async (req, res) => {
     );
 
     sendEmailNotification({
-      subject: `VHEORA - Yeni Teklif Talebi: ${product_name || 'Belirtilmedi'}`,
+      subject: `VHEORA - Yeni Teklif Talebi: ${escapeHtml(product_name || 'Belirtilmedi')}`,
       html: `
         <h2>Yeni Teklif Talebi</h2>
-        <p><strong>Isim:</strong> ${first_name} ${last_name}</p>
-        <p><strong>Telefon:</strong> ${phone}</p>
-        ${email ? `<p><strong>E-posta:</strong> ${email}</p>` : ''}
-        <p><strong>Urun:</strong> ${product_name || 'Belirtilmedi'}</p>
+        <p><strong>Isim:</strong> ${escapeHtml(first_name)} ${escapeHtml(last_name)}</p>
+        <p><strong>Telefon:</strong> ${escapeHtml(phone)}</p>
+        ${email ? `<p><strong>E-posta:</strong> ${escapeHtml(email)}</p>` : ''}
+        <p><strong>Urun:</strong> ${escapeHtml(product_name || 'Belirtilmedi')}</p>
       `
     });
 
@@ -117,14 +122,14 @@ router.post('/testimonial', async (req, res) => {
     );
 
     sendEmailNotification({
-      subject: `VHEORA - Yeni Yorum: ${name}`,
+      subject: `VHEORA - Yeni Yorum: ${escapeHtml(name)}`,
       html: `
         <h2>Yeni Müşteri Yorumu</h2>
-        <p><strong>İsim:</strong> ${name}</p>
-        <p><strong>Lokasyon:</strong> ${location || '-'}</p>
+        <p><strong>İsim:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Lokasyon:</strong> ${escapeHtml(location || '-')}</p>
         <p><strong>Puan:</strong> ${'★'.repeat(rating || 5)}</p>
         <p><strong>Yorum:</strong></p>
-        <p>${text}</p>
+        <p>${escapeHtml(text)}</p>
         <p><a href="https://vheora.co/admin/testimonials.html">Yorumu onaylamak için tıklayın</a></p>
       `
     });

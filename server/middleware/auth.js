@@ -1,9 +1,35 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vheora-jwt-secret-2026';
+if (!process.env.JWT_SECRET) {
+  console.error('[SECURITY] JWT_SECRET environment variable is not set. Using fallback — set JWT_SECRET in Vercel env vars!');
+}
+const JWT_SECRET = process.env.JWT_SECRET || 'vheora-jwt-secret-change-in-production';
+
+const tokenBlacklist = new Set();
 
 function generateToken(userId, username) {
-  return jwt.sign({ id: userId, username: username || '' }, JWT_SECRET, { expiresIn: '24h' });
+  return jwt.sign(
+    { id: userId, username: username || '', jti: crypto.randomBytes(16).toString('hex') },
+    JWT_SECRET,
+    { expiresIn: '2h', issuer: 'vheora', audience: 'vheora-admin' }
+  );
+}
+
+function generateRefreshToken(userId, username) {
+  return jwt.sign(
+    { id: userId, username: username || '', type: 'refresh', jti: crypto.randomBytes(16).toString('hex') },
+    JWT_SECRET,
+    { expiresIn: '7d', issuer: 'vheora', audience: 'vheora-admin' }
+  );
+}
+
+function blacklistToken(token) {
+  tokenBlacklist.add(token);
+  if (tokenBlacklist.size > 1000) {
+    const first = tokenBlacklist.values().next().value;
+    tokenBlacklist.delete(first);
+  }
 }
 
 function authenticateToken(req, res, next) {
@@ -14,7 +40,11 @@ function authenticateToken(req, res, next) {
     return res.status(401).json({ error: 'Yetkilendirme gerekli' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  if (tokenBlacklist.has(token)) {
+    return res.status(403).json({ error: 'Token iptal edildi' });
+  }
+
+  jwt.verify(token, JWT_SECRET, { issuer: 'vheora', audience: 'vheora-admin' }, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: 'Geçersiz token' });
     }
@@ -24,4 +54,4 @@ function authenticateToken(req, res, next) {
   });
 }
 
-module.exports = { generateToken, authenticateToken, JWT_SECRET };
+module.exports = { generateToken, generateRefreshToken, authenticateToken, blacklistToken, JWT_SECRET };

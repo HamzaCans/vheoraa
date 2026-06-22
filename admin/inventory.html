@@ -74,7 +74,7 @@
   <div id="adminToast" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
 
   <script>
-    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : window.location.hostname === 'vheora.com' || window.location.hostname === 'www.vheora.com' ? 'https://vheora.vercel.app' : '';
+    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
     var allProducts = [];
     var editingStockProductId = null;
     function getToken() {

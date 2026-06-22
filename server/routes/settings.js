@@ -80,7 +80,7 @@ router.post('/settings/bypass-token', authenticateToken, async (req, res) => {
       [token, token]
     );
     safeLog(req, 'generated_bypass_token');
-    res.setHeader('Set-Cookie', 'vheora_bypass=aktif;path=/;max-age=86400;SameSite=Lax;Secure');
+    res.setHeader('Set-Cookie', `vheora_bypass=${token};path=/;max-age=86400;SameSite=Lax;Secure`);
     res.json({ token });
   } catch (err) {
     console.error('[Bypass Token Error]', err);

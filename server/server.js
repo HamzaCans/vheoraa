@@ -5,6 +5,7 @@ const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 
 const { getDb } = require('./db');
 const { logAdminAction, getClientIp, parseDeviceInfo } = require('./middleware/adminLogger');
@@ -21,7 +22,17 @@ const goldPriceRoutes = require('./routes/goldPrice');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const csrfSecret = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
+function csrfInit(req, res, next) {
+  if (!req.cookies?.csrf_token) {
+    const token = crypto.randomBytes(32).toString('hex');
+    res.setHeader('Set-Cookie', `csrf_token=${token};Path=/;SameSite=Strict;HttpOnly=false;Secure`);
+  }
+  next();
+}
+
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 app.use(compression());
 
@@ -38,9 +49,11 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+      styleSrcAttr: ["'unsafe-inline'"],
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
       scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://www.googletagmanager.com'],
-      imgSrc: ["'self'", 'data:', 'blob:', 'https://vheora.co'],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://vheora.co', 'https://*.vercel.app'],
       connectSrc: ["'self'", 'https://cdn.jsdelivr.net', 'https://www.google-analytics.com'],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
@@ -57,7 +70,14 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: ['https://vheora.co', 'https://www.vheora.com', 'https://vheora.com', 'https://vheoraa.vercel.app', 'http://localhost:3001', 'http://localhost:3000'],
+  origin: function(origin, callback) {
+    const allowed = ['https://vheora.co', 'https://www.vheora.com', 'https://vheora.com'];
+    if (!origin || allowed.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
   maxAge: 86400
@@ -87,9 +107,29 @@ const strictLimiter = rateLimit({
   message: { error: 'Çok fazla istek. Biraz bekleyin.' }
 });
 
+const formLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Çok fazla form gönderildi. 1 saat sonra tekrar deneyin.' }
+});
+
+const visitLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Rate limit aşıldı.' }
+});
+
 app.use('/api/', apiLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/admin', strictLimiter);
+app.use('/api/contact', formLimiter);
+app.use('/api/quote', formLimiter);
+app.use('/api/testimonial', formLimiter);
+app.use('/api/visit', visitLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -148,13 +188,24 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(csrfInit);
+
 const { JWT_SECRET } = require('./middleware/auth');
+
+const MAINTENANCE_BYPASS_IPS = (process.env.MAINTENANCE_BYPASS_IPS || '').split(',').map(function(s){return s.trim()}).filter(Boolean);
 
 const maintenanceCheck = async (req, res, next) => {
   const url = req.originalUrl || req.url || '';
 
   if (url.startsWith('/admin') || url === '/admin') {
     return next();
+  }
+
+  if (MAINTENANCE_BYPASS_IPS.length > 0) {
+    const clientIp = getClientIp(req);
+    if (MAINTENANCE_BYPASS_IPS.indexOf(clientIp) !== -1) {
+      return next();
+    }
   }
 
   const alwaysAllowed = (
@@ -197,7 +248,7 @@ const maintenanceCheck = async (req, res, next) => {
     const bypassRow = await db.get("SELECT value FROM settings WHERE key = 'maintenance_bypass_token'");
 
     if (bypassRow && bypassRow.value) {
-      if (cookies['vheora_bypass'] === 'aktif') {
+      if (cookies['vheora_bypass'] && cookies['vheora_bypass'] === bypassRow.value) {
         return next();
       }
       var rawUrl = req.originalUrl || req.url || '';
@@ -212,7 +263,7 @@ const maintenanceCheck = async (req, res, next) => {
       }
       if (!urlToken && req.query && req.query.token) urlToken = req.query.token;
       if (urlToken && urlToken === bypassRow.value) {
-        res.setHeader('Set-Cookie', 'vheora_bypass=aktif;Path=/;Max-Age=86400;SameSite=Lax;Secure');
+        res.setHeader('Set-Cookie', `vheora_bypass=${bypassRow.value};Path=/;Max-Age=86400;SameSite=Lax;Secure`);
         return res.redirect(302, '/');
       }
     }
@@ -222,6 +273,10 @@ const maintenanceCheck = async (req, res, next) => {
       if (url.includes('/api/')) {
         return res.status(503).json({ error: 'Site bakım modundadır. Lütfen daha sonra tekrar deneyin.', maintenance: true });
       }
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
       return res.status(503).sendFile(path.join(__dirname, '..', 'maintenance.html'));
     }
   } catch (e) {
