@@ -226,7 +226,7 @@ async function runMigrations(driver) {
 
   try {
     const { translations } = require('./translations_seed');
-    const catKeys = ['cat.yuzuk','cat.bileklik','cat.kolye','cat.kupe','cat.set','footer.cat.ring','footer.cat.bracelet','footer.cat.necklace','footer.cat.earring','footer.cat.set','col.product.quote','quote.title','quote.firstName','quote.lastName','quote.phone','quote.email','quote.notice','quote.submit','quote.success.title','quote.success.text','quote.success.close','hero.featured'];
+    const catKeys = ['cat.yuzuk','cat.bileklik','cat.kolye','cat.kupe','cat.set','footer.cat.ring','footer.cat.bracelet','footer.cat.necklace','footer.cat.earring','footer.cat.set','col.product.quote','quote.title','quote.firstName','quote.lastName','quote.phone','quote.email','quote.notice','quote.submit','quote.success.title','quote.success.text','quote.success.close','hero.featured','loader.status','support.sss','support.shipping','support.care','support.size','support.tracking','support.title','tracking.title','tracking.subtitle','tracking.orderNo','tracking.email','tracking.submit','admin.title','admin.subtitle','admin.login','admin.cancel','whatsapp.tooltip','footer.legal.privacy','footer.legal.kvkk','footer.legal.cookie'];
     for (const [lang, keys] of Object.entries(translations)) {
       for (const key of catKeys) {
         if (keys[key]) {
