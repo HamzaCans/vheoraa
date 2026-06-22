@@ -202,7 +202,7 @@
           <div class="hero-frame-border"></div>
           <img src="images/img_4486.png" alt="VHEORA Lüks Takı Koleksiyonu" width="520" height="650" class="blur-up" loading="eager">
           <div class="hero-badge-circle">
-            <span>ÖNE ÇIKAN</span>
+            <span data-i18n="hero.featured">ÖNE ÇIKAN</span>
           </div>
         </div>
       </div>
@@ -509,29 +509,29 @@
     <div class="quote-container">
       <button class="quote-close" id="quoteClose">&times;</button>
       <div class="quote-header">
-        <h2>Teklif Al</h2>
+        <h2 data-i18n="quote.title">Teklif Al</h2>
         <p class="quote-product-name" id="modalProductName">Ürün Adı</p>
       </div>
       <div class="quote-form" id="quoteFormContent">
         <div class="quote-form-row">
-          <input type="text" id="quoteFirstName" placeholder="Adınız" required>
-          <input type="text" id="quoteLastName" placeholder="Soyadınız" required>
+          <input type="text" id="quoteFirstName" data-i18n-placeholder="quote.firstName" placeholder="Adınız" required>
+          <input type="text" id="quoteLastName" data-i18n-placeholder="quote.lastName" placeholder="Soyadınız" required>
         </div>
-        <input type="tel" id="quotePhone" placeholder="Telefon Numaranız (05xx...)" required>
-        <input type="email" id="quoteEmail" placeholder="E-Posta (isteğe bağlı)">
+        <input type="tel" id="quotePhone" data-i18n-placeholder="quote.phone" placeholder="Telefon Numaranız (05xx...)" required>
+        <input type="email" id="quoteEmail" data-i18n-placeholder="quote.email" placeholder="E-Posta (isteğe bağlı)">
         <div class="quote-notice">
           <span>📋</span>
-          <p>Bilgilerinizi gönderdiğinizde ekibimiz en kısa sürede sizinle iletişime geçecektir.</p>
+          <p data-i18n="quote.notice">Bilgilerinizi gönderdiğinizde ekibimiz en kısa sürede sizinle iletişime geçecektir.</p>
         </div>
         <button id="sendQuote" class="btn-quote-submit">
-          <span>Teklif Gönder</span>
+          <span data-i18n="quote.submit">Teklif Gönder</span>
         </button>
       </div>
       <div class="quote-success" id="quoteSuccess" style="display:none">
         <div class="quote-success-icon">✓</div>
-        <h3>Talebiniz Alındı!</h3>
-        <p>En kısa sürede sizinle iletişime geçeceğiz.</p>
-        <button class="btn-quote-submit" onclick="document.getElementById('quoteModal').classList.remove('active')">Kapat</button>
+        <h3 data-i18n="quote.success.title">Talebiniz Alındı!</h3>
+        <p data-i18n="quote.success.text">En kısa sürede sizinle iletişime geçeceğiz.</p>
+        <button class="btn-quote-submit" onclick="document.getElementById('quoteModal').classList.remove('active')" data-i18n="quote.success.close">Kapat</button>
       </div>
     </div>
   </div>

@@ -226,7 +226,7 @@ async function runMigrations(driver) {
 
   try {
     const { translations } = require('./translations_seed');
-    const catKeys = ['cat.yuzuk','cat.bileklik','cat.kolye','cat.kupe','cat.set','footer.cat.ring','footer.cat.bracelet','footer.cat.necklace','footer.cat.earring','footer.cat.set'];
+    const catKeys = ['cat.yuzuk','cat.bileklik','cat.kolye','cat.kupe','cat.set','footer.cat.ring','footer.cat.bracelet','footer.cat.necklace','footer.cat.earring','footer.cat.set','col.product.quote','quote.title','quote.firstName','quote.lastName','quote.phone','quote.email','quote.notice','quote.submit','quote.success.title','quote.success.text','quote.success.close','hero.featured'];
     for (const [lang, keys] of Object.entries(translations)) {
       for (const key of catKeys) {
         if (keys[key]) {

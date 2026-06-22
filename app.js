@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="product-info">
               <div class="product-category" data-i18n="${catI18n}">${catLabel}</div>
               <h3 class="product-name">${p.name}</h3>
-              <button class="product-price-btn open-quote" data-product="${p.name}">Teklif Al</button>
+              <button class="product-price-btn open-quote" data-product="${p.name}" data-i18n="col.product.quote">Teklif Al</button>
             </div>
           </div>
         </div>`;
@@ -328,6 +328,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       });
+      if (currentTranslations && Object.keys(currentTranslations).length) applyTranslations();
     } catch (_) {}
   }
   loadFeaturedProducts();
@@ -370,6 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       });
+      if (currentTranslations && Object.keys(currentTranslations).length) applyTranslations();
     } catch (_) {}
   }
   loadShowcase();
@@ -1318,6 +1320,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           el.setAttribute('data-i18n-original', el.textContent);
         }
         el.textContent = currentTranslations[key];
+      }
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (currentLang === 'tr') {
+        if (el.hasAttribute('data-i18n-placeholder-original')) {
+          el.placeholder = el.getAttribute('data-i18n-placeholder-original');
+          el.removeAttribute('data-i18n-placeholder-original');
+        }
+      } else if (currentTranslations[key]) {
+        if (!el.hasAttribute('data-i18n-placeholder-original')) {
+          el.setAttribute('data-i18n-placeholder-original', el.placeholder);
+        }
+        el.placeholder = currentTranslations[key];
       }
     });
   }
