@@ -1315,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           el.textContent = el.getAttribute('data-i18n-original');
           el.removeAttribute('data-i18n-original');
         }
-      } else if (currentTranslations[key]) {
+      } else if (key in currentTranslations) {
         if (!el.hasAttribute('data-i18n-original')) {
           el.setAttribute('data-i18n-original', el.textContent);
         }
@@ -1329,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           el.placeholder = el.getAttribute('data-i18n-placeholder-original');
           el.removeAttribute('data-i18n-placeholder-original');
         }
-      } else if (currentTranslations[key]) {
+      } else if (key in currentTranslations) {
         if (!el.hasAttribute('data-i18n-placeholder-original')) {
           el.setAttribute('data-i18n-placeholder-original', el.placeholder);
         }

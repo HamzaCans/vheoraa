@@ -692,6 +692,8 @@ section[id] {
 
 .hero-content {
   max-width: 580px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .hero-badge {
