@@ -223,6 +223,23 @@ async function runMigrations(driver) {
   } catch (e) {
     // settings table may not exist yet
   }
+
+  try {
+    const { translations } = require('./translations_seed');
+    const catKeys = ['cat.yuzuk','cat.bileklik','cat.kolye','cat.kupe','cat.set','footer.cat.ring','footer.cat.bracelet','footer.cat.necklace','footer.cat.earring','footer.cat.set'];
+    for (const [lang, keys] of Object.entries(translations)) {
+      for (const key of catKeys) {
+        if (keys[key]) {
+          await driver.run(
+            'INSERT INTO translations (lang_code, key, value) VALUES (?, ?, ?) ON CONFLICT(lang_code, key) DO UPDATE SET value = ?',
+            [lang, key, keys[key], keys[key]]
+          );
+        }
+      }
+    }
+  } catch (e) {
+    // translations table may not exist yet
+  }
 }
 
 async function seedIfEmpty(driver) {

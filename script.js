@@ -301,6 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
         const badge = p.badge ? `<span class="product-badge">${p.badge}</span>` : '';
         const catLabel = catLabels[p.category] || p.category;
+        const catI18n = `cat.${p.category}`;
         return `
         <div class="product-card reveal staggered" style="--reveal-delay: ${(i + 1) * 0.1}s">
           <div class="product-card-inner">
@@ -309,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               ${badge}
             </div>
             <div class="product-info">
-              <div class="product-category">${catLabel}</div>
+              <div class="product-category" data-i18n="${catI18n}">${catLabel}</div>
               <h3 class="product-name">${p.name}</h3>
               <button class="product-price-btn open-quote" data-product="${p.name}">Teklif Al</button>
             </div>
@@ -346,11 +347,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
           const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
           const catLabel = catLabels[p.category] || p.category;
+          const catI18n = `cat.${p.category}`;
           return `<div class="showcase-item" data-product="${p.name}">
             <img src="${imgSrc}" alt="${p.name}" width="280" height="340" loading="lazy" decoding="async">
             <div class="showcase-item-overlay">
               <div class="showcase-item-name">${p.name}</div>
-              <div class="showcase-item-category">${catLabel}</div>
+              <div class="showcase-item-category" data-i18n="${catI18n}">${catLabel}</div>
             </div>
           </div>`;
         }).join('');

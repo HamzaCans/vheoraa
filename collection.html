@@ -517,7 +517,7 @@
                     <div class="product-item reveal staggered" data-category="${p.category}" data-product-id="${p.id || ''}" style="--reveal-delay: ${Math.random() * 0.3}s">
                         <div class="product-img">${stockBadge(p.stock_status)}${goldBadge(p.gram)}<div class="carousel" data-current="0">${carouselImgs}</div>${navBtns}${dots}</div>
                         <div class="product-content">
-                            <div class="product-cat">${categoryLabelMap[p.category] || p.category}</div>
+                            <div class="product-cat" data-i18n="cat.${p.category}">${categoryLabelMap[p.category] || p.category}</div>
                             <h3 class="product-title">${p.name}</h3>
                             ${priceTag(p)}
                             ${p.description ? '<p class="product-desc">' + p.description + '</p>' : ''}
