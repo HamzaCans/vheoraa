@@ -391,6 +391,24 @@
         border-radius: 13px;
       }
     }
+
+    @media (max-width: 480px) {
+      .custom-title { font-size: clamp(1.6rem, 7vw, 2rem); }
+      .custom-subtitle { font-size: 1rem; }
+      .custom-left { padding: 40px 16px; }
+      .custom-cta-group { max-width: 260px; }
+      .custom-left .btn-primary,
+      .custom-left .btn-secondary {
+        padding: 10px 20px;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+      }
+      .gia-frame {
+        width: 90%;
+        max-width: 280px;
+      }
+      .gia-frame-corner { width: 24px; height: 24px; }
+    }
   </style>
 </head>
 <body>

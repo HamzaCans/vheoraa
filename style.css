@@ -917,12 +917,6 @@ section[id] {
       0 0 12px rgba(13, 58, 53, 0.25);
   }
 }
-  aspect-ratio: 4/5;
-  border-radius: 4px;
-  background: linear-gradient(160deg, #082420 0%, #0D3A35 40%, #276152 100%);
-  position: relative;
-  z-index: 2;
-}
 
 .about-image-placeholder {
   width: 100%;
@@ -3254,7 +3248,7 @@ body.menu-open {
   }
 
   .about-experience-badge .number {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
   }
 
   .about-experience-badge .label {
@@ -3450,6 +3444,43 @@ body.menu-open {
 
   .loader-bar {
     width: 160px;
+  }
+
+  .quote-header h2 {
+    font-size: 1.6rem;
+    letter-spacing: 0.5px;
+  }
+
+  .order-track-container {
+    padding: 24px 16px;
+    width: 95%;
+  }
+
+  .about-experience-badge {
+    width: 72px;
+    height: 72px;
+  }
+
+  .about-experience-badge .number {
+    font-size: 1.1rem;
+  }
+
+  .about-experience-badge .label {
+    font-size: 0.48rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+    letter-spacing: 1px;
+  }
+
+  .section-subtitle {
+    font-size: 0.88rem;
+    padding: 0 4px;
+  }
+
+  .support-body {
+    padding: 20px;
   }
 }
 
@@ -4755,8 +4786,17 @@ font {
   body {
     position: relative;
   }
-  * {
-    max-width: 100vw;
+  .container,
+  .section,
+  .featured-grid,
+  .testimonials-grid,
+  .about-stats,
+  .footer-grid,
+  .custom-left,
+  .custom-right,
+  .collection-header {
+    max-width: 100%;
+    overflow: hidden;
   }
   img, video, picture {
     max-width: 100%;

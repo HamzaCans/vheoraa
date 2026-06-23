@@ -388,6 +388,32 @@
         border-radius: 13px;
       }
     }
+
+    @media (max-width: 480px) {
+      .custom-title { font-size: clamp(1.6rem, 7vw, 2rem); }
+      .custom-subtitle { font-size: 1rem; }
+      .custom-left { padding: 40px 16px; }
+      .custom-cta-group { max-width: 260px; }
+      .custom-left .btn-primary,
+      .custom-left .btn-secondary {
+        padding: 10px 20px;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+      }
+      .service-frame {
+        width: 90%;
+        max-width: 280px;
+      }
+      .service-frame-corner { width: 24px; height: 24px; }
+
+      .order-track-container {
+        padding: 24px 16px;
+        width: 95%;
+      }
+      .order-track-header h2 {
+        font-size: 1.3rem;
+      }
+    }
   </style>
 </head>
 <body>

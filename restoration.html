@@ -378,7 +378,33 @@
       .custom-left .btn-primary,
       .custom-left .btn-secondary {
         padding: 12px 28px;
+        font-size: 0.78rem;
+        letter-spacing: 2.5px;
+        border-radius: 10px;
       }
+      .custom-left .btn-primary::after,
+      .custom-left .btn-secondary::after {
+        inset: -3px;
+        border-radius: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .custom-title { font-size: clamp(1.6rem, 7vw, 2rem); }
+      .custom-subtitle { font-size: 1rem; }
+      .custom-left { padding: 40px 16px; }
+      .custom-cta-group { max-width: 260px; }
+      .custom-left .btn-primary,
+      .custom-left .btn-secondary {
+        padding: 10px 20px;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+      }
+      .service-frame {
+        width: 90%;
+        max-width: 280px;
+      }
+      .service-frame-corner { width: 24px; height: 24px; }
     }
   </style>
 </head>
