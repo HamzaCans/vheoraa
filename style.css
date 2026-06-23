@@ -1343,72 +1343,6 @@ section[id] {
   gap: 24px;
 }
 
-.services-grid .service-card--gia {
-  grid-column: span 2;
-}
-
-.service-card--gia .gia-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  text-align: left;
-}
-
-.service-card--gia .gia-visual {
-  flex: 0 0 200px;
-  height: 200px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(251, 246, 240, 0.06);
-  border: 1px solid rgba(251, 246, 240, 0.15);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.service-card--gia .gia-visual img {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 24px rgba(251, 246, 240, 0.15));
-  transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
-}
-
-.service-card--gia:hover .gia-visual img {
-  transform: scale(1.08) rotate(2deg);
-}
-
-.service-card--gia .gia-seal-overlay {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 52px;
-  height: 52px;
-  color: #FBF6F0;
-  opacity: 0.7;
-  animation: sealSpin 12s linear infinite;
-}
-
-@keyframes sealSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.service-card--gia .gia-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.service-card--gia .service-title {
-  text-align: left;
-  margin-bottom: 12px;
-}
-
-.service-card--gia .service-description {
-  text-align: left;
-}
-
 .service-card {
   position: relative;
   padding: 48px 32px;
@@ -2747,27 +2681,6 @@ body.menu-open {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .services-grid .service-card--gia {
-    grid-column: span 2;
-  }
-
-  .service-card--gia .gia-card-inner {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
-
-  .service-card--gia .gia-visual {
-    flex: none;
-    width: 140px;
-    height: 140px;
-  }
-
-  .service-card--gia .service-title,
-  .service-card--gia .service-description {
-    text-align: center;
-  }
-
   .featured-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2870,22 +2783,6 @@ body.menu-open {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-  }
-
-  .services-grid .service-card--gia {
-    grid-column: span 2;
-  }
-
-  .service-card--gia .gia-visual {
-    width: 120px;
-    height: 120px;
-  }
-
-  .service-card--gia .gia-seal-overlay {
-    width: 40px;
-    height: 40px;
-    top: 8px;
-    right: 8px;
   }
 
   .service-card {
