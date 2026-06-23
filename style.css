@@ -2853,18 +2853,19 @@ body.menu-open {
 
   .testimonials-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .testimonial-card {
-    padding: 20px 16px;
+    padding: 24px 20px;
     font-size: 0.9rem;
+    text-align: center;
   }
 
   .testimonials-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
   }
 
   .testimonials-header .section-label {
@@ -2878,6 +2879,7 @@ body.menu-open {
 
   .slider-controls {
     justify-content: center;
+    margin-top: 20px;
   }
 
   .share-header {
@@ -2921,53 +2923,70 @@ body.menu-open {
   .contact .container {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 40px;
     align-items: start;
   }
 
   .contact-info {
     max-width: 100%;
-    text-align: left;
+    text-align: center;
     order: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .contact-info .section-label {
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .contact-info .section-label::after {
-    margin-left: 0;
+    margin-left: auto;
     margin-right: auto;
   }
 
+  .contact-info .section-title {
+    text-align: center;
+  }
+
   .contact-text {
-    text-align: left;
-    margin-bottom: 24px;
+    text-align: center;
+    margin-bottom: 28px;
+    max-width: 480px;
   }
 
   .contact-details {
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 18px;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 360px;
   }
 
   .contact-item {
-    flex-direction: row;
-    text-align: left;
-    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .contact-item-icon {
+    width: 44px;
+    height: 44px;
   }
 
   .contact-socials {
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .contact-form-wrapper {
     order: 2;
-    padding: 24px 16px;
+    padding: 28px 20px;
     background: #FFFFFF;
     border: 1px solid rgba(13, 58, 53, 0.15);
     border-radius: 12px;
     position: relative;
     overflow: hidden;
+    width: 100%;
   }
 
   .contact-form-wrapper::before {
@@ -3483,6 +3502,42 @@ body.menu-open {
 
   .support-body {
     padding: 20px;
+  }
+
+  .contact-details {
+    gap: 14px;
+  }
+
+  .contact-item-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .contact-item-label {
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+  }
+
+  .contact-item-value {
+    font-size: 0.85rem;
+  }
+
+  .contact-form-wrapper {
+    padding: 20px 16px;
+  }
+
+  .testimonial-card {
+    padding: 20px 16px;
+  }
+
+  .about-visual {
+    max-width: 300px;
+  }
+
+  .about-stats {
+    max-width: 320px;
+    gap: 12px;
   }
 }
 
