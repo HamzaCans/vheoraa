@@ -290,6 +290,7 @@
       background: linear-gradient(90deg, #D4A853, transparent);
     }
 
+    /* ========== TABLET (768px–1023px) ========== */
     @media (max-width: 1024px) {
       .custom-grid {
         grid-template-columns: 1fr;
@@ -299,16 +300,16 @@
         order: -1;
       }
       .gia-frame {
-        width: 72%;
-        max-width: 360px;
+        width: 68%;
+        max-width: 380px;
       }
       .custom-left {
         justify-content: center;
-        padding: 56px 28px 60px;
+        padding: 48px 32px 56px;
         text-align: center;
       }
       .custom-hero-content {
-        max-width: 540px;
+        max-width: 520px;
       }
       .custom-text {
         margin-left: auto;
@@ -319,44 +320,98 @@
       }
     }
 
+    /* ========== MOBİL — iPhone 12 optimized (≤768px) ========== */
     @media (max-width: 768px) {
+      .custom-hero {
+        min-height: auto;
+      }
+      .custom-grid {
+        min-height: auto;
+      }
+
+      /* --- Görsel: viewport'un ~%55'i, aşağıda --- */
       .custom-right {
         height: auto;
-        min-height: 320px;
-        padding: 80px 0 20px;
+        padding: 90px 24px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .custom-right::before {
+        background: linear-gradient(180deg, #0D3A35 0%, transparent 30%, transparent 70%, rgba(13,58,53,0.3) 100%);
       }
       .gia-frame {
-        width: 82%;
+        width: 84%;
         max-width: 300px;
+        aspect-ratio: 4 / 3;
         margin: 0 auto;
       }
-      .gia-frame-corner { width: 28px; height: 28px; }
-
-      .custom-left {
-        padding: 40px 22px 48px;
-      }
-      .section-label {
-        font-size: 0.65rem;
-        letter-spacing: 4px;
-        margin-bottom: 16px;
-      }
-      .section-label::before, .section-label::after {
+      .gia-frame-corner {
         width: 24px;
+        height: 24px;
       }
+      .gia-frame-corner--tl,
+      .gia-frame-corner--tr,
+      .gia-frame-corner--bl,
+      .gia-frame-corner--br {
+        top: 10px;
+        left: 10px;
+      }
+      .gia-frame-corner--tr { left: auto; right: 10px; }
+      .gia-frame-corner--bl { top: auto; bottom: 10px; }
+      .gia-frame-corner--br { top: auto; left: auto; bottom: 10px; right: 10px; }
+
+      /* --- Metin paneli --- */
+      .custom-left {
+        padding: 8px 24px 44px;
+        text-align: center;
+      }
+      .custom-hero-content {
+        max-width: 100%;
+      }
+
+      /* --- Section label --- */
+      .section-label {
+        font-size: 0.6rem;
+        letter-spacing: 3.5px;
+        margin-bottom: 14px;
+        gap: 12px;
+      }
+      .section-label::before,
+      .section-label::after {
+        width: 20px;
+      }
+
+      /* --- Başlık: gold gradient, Montserrat thin --- */
       .custom-title {
-        font-size: 1.85rem;
-        margin-bottom: 16px;
+        font-size: 1.75rem;
+        font-weight: 300;
         line-height: 1.15;
+        margin-bottom: 12px;
+        letter-spacing: 0.01em;
       }
+
+      /* --- Alt başlık --- */
       .custom-subtitle {
-        font-size: 1.05rem;
-        margin-bottom: 20px;
+        font-size: 0.95rem;
+        font-weight: 300;
+        font-style: italic;
+        color: rgba(251, 246, 240, 0.85);
+        margin-bottom: 16px;
+        line-height: 1.4;
       }
+
+      /* --- Metin --- */
       .custom-text {
-        font-size: 0.88rem;
-        line-height: 1.8;
+        font-size: 0.85rem;
+        font-weight: 300;
+        line-height: 1.75;
+        color: rgba(251, 246, 240, 0.8);
         margin-bottom: 28px;
+        max-width: 100%;
       }
+
+      /* --- CTA butonları: dikey, gold --- */
       .custom-cta-group {
         flex-direction: column;
         width: 100%;
@@ -368,9 +423,10 @@
       .custom-left .btn-secondary {
         width: 100%;
         justify-content: center;
-        padding: 13px 24px;
+        padding: 14px 20px;
         font-size: 0.72rem;
         letter-spacing: 2px;
+        border-radius: 10px;
       }
       .custom-left .btn-primary::after,
       .custom-left .btn-secondary::after {
@@ -379,36 +435,44 @@
       }
     }
 
+    /* ========== KÜÇÜK MOBİL (≤480px) ========== */
     @media (max-width: 480px) {
       .custom-right {
-        min-height: 260px;
-        padding: 60px 0 16px;
+        padding: 72px 20px 20px;
       }
       .gia-frame {
         width: 88%;
         max-width: 260px;
       }
-      .gia-frame-corner { width: 22px; height: 22px; }
+      .gia-frame-corner {
+        width: 20px;
+        height: 20px;
+      }
 
       .custom-left {
-        padding: 32px 18px 40px;
+        padding: 4px 20px 36px;
+      }
+      .section-label {
+        font-size: 0.55rem;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
       }
       .custom-title {
         font-size: 1.5rem;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       .custom-subtitle {
-        font-size: 0.92rem;
-        margin-bottom: 14px;
+        font-size: 0.88rem;
+        margin-bottom: 12px;
       }
       .custom-text {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         line-height: 1.7;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
       }
       .custom-left .btn-primary,
       .custom-left .btn-secondary {
-        padding: 12px 20px;
+        padding: 13px 18px;
         font-size: 0.68rem;
         letter-spacing: 1.5px;
       }
