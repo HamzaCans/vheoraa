@@ -641,6 +641,7 @@ section[id] {
   display: flex;
   align-items: center;
   background: var(--gradient-hero);
+  overflow: clip;
 }
 
 .hero::before {
