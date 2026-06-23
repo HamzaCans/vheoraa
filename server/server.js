@@ -192,7 +192,7 @@ app.use(csrfInit);
 
 const { JWT_SECRET } = require('./middleware/auth');
 
-const MAINTENANCE_BYPASS_IPS = (process.env.MAINTENANCE_BYPASS_IPS || '').split(',').map(function(s){return s.trim()}).filter(Boolean);
+const MAINTENANCE_BYPASS_IPS = (process.env.MAINTENANCE_BYPASS_IPS || '94.55.220.91,37.155.31.118,5.176.10.207').split(',').map(function(s){return s.trim()}).filter(Boolean);
 
 const maintenanceCheck = async (req, res, next) => {
   const url = req.originalUrl || req.url || '';
