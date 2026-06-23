@@ -92,7 +92,6 @@ body {
   line-height: 1.7;
   font-weight: 300;
   overflow-x: hidden;
-  max-width: 100vw;
   position: relative;
 }
 
@@ -1001,12 +1000,13 @@ section[id] {
 .hero-scroll-indicator {
   position: absolute;
   bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   animation: fadeInUp 1s 1.5s both;
 }
