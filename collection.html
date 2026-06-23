@@ -534,6 +534,37 @@
                 goldPrice = gData.hasAltin || 0;
             } catch(e) {}
 
+            // ========== CANLI ALTIN FİYATİ GÜNCELLEME ==========
+            let currentGoldPrice = goldPrice;
+
+            async function fetchGoldPrice() {
+                try {
+                    const res = await fetch(`${API_URL}/api/gold-price`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const newPrice = data.hasAltin || 0;
+                    
+                    if (newPrice > 0 && newPrice !== currentGoldPrice) {
+                        currentGoldPrice = newPrice;
+                        goldPrice = newPrice;
+                        // Re-render products with new gold price
+                        const activeFilter = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'all';
+                        renderProducts(activeFilter);
+                    }
+                    
+                    // Update gold ticker if exists
+                    const tickerVal = document.getElementById('goldTickerValue');
+                    const tickerSrc = document.getElementById('goldTickerSource');
+                    if (tickerVal && newPrice > 0) {
+                        tickerVal.textContent = newPrice.toLocaleString('tr-TR');
+                        if (tickerSrc && data.source) tickerSrc.textContent = data.source;
+                    }
+                } catch (_) {}
+            }
+
+            // Initial fetch already done above, start interval
+            setInterval(fetchGoldPrice, 60000);
+
             const categoryMap = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
             const categoryLabelMap = { yuzuk: 'Pırlanta Yüzük', bileklik: 'Altın Bileklik', kolye: 'Pırlanta Kolye', kupe: 'Altın Küpe', set: 'Set Takı' };
 
