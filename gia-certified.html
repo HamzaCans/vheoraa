@@ -217,27 +217,39 @@
     }
 
     /* Gold CTA buttons — dark page override */
-    .custom-left .btn-primary {
-      padding: 18px 48px;
-      font-size: 0.8rem;
-      letter-spacing: 3.5px;
-      box-shadow: 0 4px 24px rgba(212, 168, 83, 0.35);
-    }
-    .custom-left .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(212, 168, 83, 0.45);
-    }
+    .custom-left .btn-primary,
     .custom-left .btn-secondary {
       background: #D4A853;
       color: #0D3A35;
       border: 1px solid #D4A853;
       font-weight: 500;
+      padding: 18px 40px;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      position: relative;
+      overflow: hidden;
     }
+    .custom-left .btn-primary::after,
+    .custom-left .btn-secondary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: 0 0 0 0 rgba(39, 97, 82, 0.4);
+      animation: green-pulse 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes green-pulse {
+      0%   { box-shadow: 0 0 0 0   rgba(39, 97, 82, 0.4); }
+      50%  { box-shadow: 0 0 0 10px rgba(39, 97, 82, 0);   }
+      100% { box-shadow: 0 0 0 0   rgba(39, 97, 82, 0);   }
+    }
+    .custom-left .btn-primary:hover,
     .custom-left .btn-secondary:hover {
       background: #C49A48;
       border-color: #C49A48;
       transform: translateY(-3px);
-      box-shadow: 0 4px 24px rgba(212, 168, 83, 0.35);
+      box-shadow: 0 8px 32px rgba(212, 168, 83, 0.45);
     }
   </style>
 </head>
