@@ -143,15 +143,15 @@ function createConfetti(anchor) {
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.2;
-        this.speedY = (Math.random() - 0.5) * 0.2 - 0.1;
-        this.opacity = Math.random() * 0.6 + 0.1;
+        this.size = Math.random() * 2.5 + 0.8;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3 - 0.1;
+        this.opacity = Math.random() * 0.8 + 0.2;
         this.life = 0;
         this.maxLife = Math.random() * 200 + 100;
         const cs = [
-          { r: 212, g: 168, b: 83 },
-          { r: 240, g: 194, b: 127 },
+          { r: 200, g: 155, b: 60 },
+          { r: 240, g: 208, b: 128 },
           { r: 255, g: 255, b: 255 },
         ];
         this.color = cs[Math.floor(Math.random() * cs.length)];
@@ -170,14 +170,14 @@ function createConfetti(anchor) {
         ctx.fill();
         if (this.size > 1) {
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.1})`;
+          ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.15})`;
           ctx.fill();
         }
       }
     }
 
-    const count = Math.min(40, Math.floor((canvas.width * canvas.height) / 15000) || 20);
+    const count = Math.min(60, Math.floor((canvas.width * canvas.height) / 10000) || 30);
     for (let i = 0; i < count; i++) lParticles.push(new LPart());
 
     function animateLoader() {
