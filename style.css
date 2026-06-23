@@ -4078,19 +4078,19 @@ font {
 }
 
 .btn-quote-submit {
-  background: var(--gradient-gold);
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #C89B3C, #F0D080);
+  color: #0D3A35;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-weight: 300;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border: none;
   cursor: pointer;
   width: 100%;
@@ -4099,11 +4099,14 @@ font {
 }
 
 .btn-quote-submit:hover {
-  box-shadow: 0 8px 30px rgba(13, 58, 53, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(200, 155, 60, 0.35);
+  background: linear-gradient(135deg, #F0D080, #C89B3C);
 }
 
 .btn-quote-submit:active {
-  transform: scale(0.98);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 12px rgba(200, 155, 60, 0.3);
 }
 
 .btn-quote-submit:disabled {
