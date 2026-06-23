@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#0D3A35">
   <meta name="description" content="VHEORA ile hayalinizdeki mücevheri tasarlayın. Kişiye özel pırlanta yüzük, kolye ve takı tasarım hizmeti.">
   <meta property="og:title" content="Kişiye Özel Tasarım | VHEORA">
   <meta property="og:description" content="Hayallerinizi sanatla buluşturun. Uzman tasarımcılarımız size özel mücevherler tasarlıyor.">
@@ -26,11 +26,10 @@
       min-height: 100vh;
       display: flex;
       align-items: center;
-      background: var(--color-dark);
+      background: #0D3A35;
       overflow: hidden;
     }
 
-    /* Professional Desktop Split Layout */
     .custom-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -45,7 +44,7 @@
       padding: 120px 60px 80px 24px;
       position: relative;
       z-index: 2;
-      background: var(--color-dark);
+      background: #0D3A35;
     }
 
     .custom-hero-content {
@@ -63,21 +62,111 @@
       width: 100%;
       height: 100%;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .custom-hero-visual img {
+    /* Luxury Frame */
+    .design-frame {
+      position: relative;
+      width: 88%;
+      max-width: 540px;
+      aspect-ratio: 4 / 3;
+      border-radius: 16px;
+      overflow: hidden;
+      animation: frame-float 4s ease-in-out infinite;
+    }
+
+    .design-frame-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(0.7) contrast(1.1) saturate(0.8);
-      transition: transform 1.5s cubic-bezier(0.2, 0, 0.2, 1);
+      object-position: center;
+      display: block;
+      border-radius: 16px;
+      position: relative;
+      z-index: 1;
     }
 
-    .custom-right:hover .custom-hero-visual img {
-      transform: scale(1.05);
+    /* Animated gold border */
+    .design-frame-border {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(212, 168, 83, 0.4);
+      border-radius: 16px;
+      z-index: 3;
+      pointer-events: none;
+      animation: border-glow 3s ease-in-out infinite alternate;
     }
 
-    /* Elegant Overlay Gradient */
+    /* Corner accents */
+    .design-frame-corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .design-frame-corner::before,
+    .design-frame-corner::after {
+      content: '';
+      position: absolute;
+      background: #D4A853;
+      border-radius: 2px;
+    }
+    .design-frame-corner::before {
+      width: 100%;
+      height: 2px;
+    }
+    .design-frame-corner::after {
+      width: 2px;
+      height: 100%;
+    }
+
+    .design-frame-corner--tl { top: 12px; left: 12px; }
+    .design-frame-corner--tl::before { top: 0; left: 0; }
+    .design-frame-corner--tl::after { top: 0; left: 0; }
+
+    .design-frame-corner--tr { top: 12px; right: 12px; }
+    .design-frame-corner--tr::before { top: 0; right: 0; }
+    .design-frame-corner--tr::after { top: 0; right: 0; }
+
+    .design-frame-corner--bl { bottom: 12px; left: 12px; }
+    .design-frame-corner--bl::before { bottom: 0; left: 0; }
+    .design-frame-corner--bl::after { bottom: 0; left: 0; }
+
+    .design-frame-corner--br { bottom: 12px; right: 12px; }
+    .design-frame-corner--br::before { bottom: 0; right: 0; }
+    .design-frame-corner--br::after { bottom: 0; right: 0; }
+
+    /* Outer glow */
+    .design-frame-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 24px;
+      background: transparent;
+      box-shadow: 0 0 40px rgba(212, 168, 83, 0.15), 0 0 80px rgba(212, 168, 83, 0.05);
+      z-index: 0;
+      animation: glow-pulse 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes frame-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    @keyframes border-glow {
+      0%   { border-color: rgba(212, 168, 83, 0.3); box-shadow: inset 0 0 20px rgba(212, 168, 83, 0.05); }
+      100% { border-color: rgba(212, 168, 83, 0.7); box-shadow: inset 0 0 30px rgba(212, 168, 83, 0.1); }
+    }
+
+    @keyframes glow-pulse {
+      0%   { box-shadow: 0 0 30px rgba(212, 168, 83, 0.1), 0 0 60px rgba(212, 168, 83, 0.03); }
+      100% { box-shadow: 0 0 50px rgba(212, 168, 83, 0.2), 0 0 100px rgba(212, 168, 83, 0.06); }
+    }
+
     .custom-right::before {
       content: '';
       position: absolute;
@@ -85,12 +174,11 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, var(--color-dark) 0%, transparent 20%, transparent 80%, rgba(5,5,5,0.4) 100%);
+      background: linear-gradient(90deg, #0D3A35 0%, transparent 20%, transparent 80%, rgba(13,58,53,0.4) 100%);
       z-index: 2;
       pointer-events: none;
     }
 
-    /* Sparkle effect on drawing */
     .sparkle-overlay {
       position: absolute;
       top: 0;
@@ -107,7 +195,7 @@
       height: 3px;
       background: white;
       border-radius: 50%;
-      box-shadow: 0 0 10px 2px white, 0 0 20px 4px var(--color-gold-light);
+      box-shadow: 0 0 10px 2px white, 0 0 20px 4px rgba(39,97,82,0.8);
       animation: sparkle-anim 3s infinite alternate;
       opacity: 0;
     }
@@ -140,7 +228,7 @@
       font-size: clamp(1.1rem, 2vw, 1.6rem);
       font-style: italic;
       font-weight: 300;
-      color: #B1B7AB;
+      color: #FBF6F0;
       margin-bottom: 36px;
       animation: fadeInUp 1s 0.4s both;
     }
@@ -150,7 +238,7 @@
       font-size: 0.95rem;
       font-weight: 300;
       line-height: 2;
-      color: rgba(251,246,240,0.82);
+      color: #FBF6F0;
       margin-bottom: 44px;
       max-width: 520px;
       animation: fadeInUp 1s 0.6s both;
@@ -172,7 +260,36 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Tablet/Mobile Adjustments */
+    .section-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #D4A853;
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      animation: fadeInUp 1s 0.1s both;
+    }
+
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #D4A853);
+    }
+
+    .section-label::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, #D4A853, transparent);
+    }
+
     @media (max-width: 1024px) {
       .custom-grid {
         grid-template-columns: 1fr;
@@ -180,6 +297,10 @@
       .custom-right {
         height: 50vh;
         order: -1;
+      }
+      .design-frame {
+        width: 75%;
+        max-width: 380px;
       }
       .custom-left {
         justify-content: center;
@@ -203,6 +324,11 @@
       .custom-subtitle { font-size: 1.2rem; }
       .custom-cta-group { flex-direction: column; width: 100%; max-width: 300px; margin: 0 auto; }
       .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .design-frame {
+        width: 85%;
+        max-width: 320px;
+      }
+      .design-frame-corner { width: 28px; height: 28px; }
     }
 
     /* Gold CTA buttons — dark page override */
@@ -269,7 +395,6 @@
 </head>
 <body>
 
-  <!-- ========== NAVIGATION ========== -->
   <nav class="navbar scrolled">
     <div class="container">
       <a href="index.html" class="nav-logo notranslate">
@@ -284,7 +409,6 @@
     </div>
   </nav>
 
-  <!-- ========== CUSTOM DESIGN HERO ========== -->
   <section class="custom-hero">
     <div class="custom-grid">
       <div class="custom-left">
@@ -300,7 +424,7 @@
           </p>
 
           <div class="custom-cta-group">
-            <a href="tel:+905510207299" class="btn-primary" id="appointmentBtn">
+            <a href="tel:+905510207299" class="btn-primary">
               Randevu Al
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.28-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </a>
@@ -314,21 +438,28 @@
 
       <div class="custom-right">
         <div class="custom-hero-visual">
-          <picture><source srcset="workshop.webp" type="image/webp"><img src="workshop.jpg" alt="VHEORA Özel Tasarım Atölyesi" id="customDesignImg" loading="lazy" decoding="async"></picture>
+          <div class="design-frame">
+            <div class="design-frame-border"></div>
+            <div class="design-frame-corner design-frame-corner--tl"></div>
+            <div class="design-frame-corner design-frame-corner--tr"></div>
+            <div class="design-frame-corner design-frame-corner--bl"></div>
+            <div class="design-frame-corner design-frame-corner--br"></div>
+            <div class="design-frame-glow"></div>
+            <img src="workshop.jpg" alt="VHEORA Özel Tasarım Atölyesi" class="design-frame-img" loading="lazy" decoding="async">
+          </div>
           <div class="sparkle-overlay" id="sparkleOverlay"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== FOOTER ========== -->
   <footer class="footer">
     <div class="container" style="text-align: center; padding: 40px 0;">
-      <p>© 2026 VHEORA. Tüm hakları saklıdır.</p>
+      <p style="color: #276152;">© 2026 VHEORA. Tüm hakları saklıdır.</p>
     </div>
   </footer>
 
-  <script defer>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       const sparkleOverlay = document.getElementById('sparkleOverlay');
       if (sparkleOverlay) {
@@ -340,20 +471,6 @@
           sparkle.style.animationDelay = `${Math.random() * 3}s`;
           sparkleOverlay.appendChild(sparkle);
         }
-      }
-
-      const appointmentBtn = document.getElementById('appointmentBtn');
-      const btnText = document.getElementById('btnText');
-      if (appointmentBtn && btnText) {
-        let clicks = 0;
-        appointmentBtn.addEventListener('click', function(e) {
-          if (clicks === 0) {
-            e.preventDefault();
-            btnText.textContent = "+90 551 020 7299";
-            btnText.style.letterSpacing = "1px";
-            clicks++;
-          }
-        });
       }
     });
   </script>
