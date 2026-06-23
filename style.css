@@ -1262,6 +1262,8 @@ section[id] {
 
 .about-content {
   max-width: 520px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .about-text {
