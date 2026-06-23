@@ -19,6 +19,8 @@ const stockRoutes = require('./routes/stock');
 const orderRoutes = require('./routes/orders');
 const goldPriceRoutes = require('./routes/goldPrice');
 
+const sitemapRoutes = require('./routes/sitemap');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -218,6 +220,7 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/translations/') ||
     url.includes('/api/languages') ||
     url.includes('/api/admin') ||
+    url.includes('/api/sitemap') ||
     url === '/sw.js' || url === '/manifest.json' ||
     url === '/favicon.png' ||
     url.match(/\.(css|js|webp|png|jpg|jpeg|svg|ico|woff2|woff|ttf|otf|eot)($|\?)/) && !url.includes('/api/')
@@ -302,6 +305,7 @@ app.use('/api', localizationRoutes);
 app.use('/api/admin', stockRoutes);
 app.use('/api/admin', orderRoutes);
 app.use('/api', goldPriceRoutes);
+app.use('/api/sitemap', sitemapRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
