@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "public",
   "headers": [
     {
       "source": "/(.*)",
@@ -55,14 +57,18 @@
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
         { "key": "Pragma", "value": "no-cache" }
       ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" },
-        { "key": "Surrogate-Control", "value": "no-store" }
-      ]
     }
+  ],
+  "rewrites": [],
+  "routes": [
+    { "src": "^/api/(.*)", "dest": "/api/index.js" },
+    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
+    { "src": "^/$", "dest": "/api/index.js" },
+    { "src": "^/admin(/.*)?$", "dest": "/api/index.js" },
+    { "src": "^/(.*)\\.html$", "dest": "/$1.html" },
+    { "handle": "filesystem" }
+  ]
+}
   ],
   "rewrites": [],
   "routes": [
