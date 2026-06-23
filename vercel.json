@@ -59,6 +59,17 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/:path*", "destination": "/:path*" }
+  ],
+  "routes": [
+    { "src": "^/api/(.*)", "dest": "/api/index.js" },
+    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
+    { "src": "^/$", "dest": "/api/index.js" },
+    { "src": "^/admin(/.*)?$", "dest": "/api/index.js" }
+  ]
+}
+  ],
   "rewrites": [],
   "routes": [
     { "src": "^/api/(.*)", "dest": "/api/index.js" },
