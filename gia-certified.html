@@ -62,20 +62,103 @@
       justify-content: center;
     }
 
-    .custom-hero-visual .visual-placeholder {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(39,97,82,0.3) 0%, rgba(13,58,53,0.6) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(251,246,240,0.1);
+    /* GIA Luxury Frame */
+    .gia-frame {
+      position: relative;
+      width: 80%;
+      max-width: 480px;
+      aspect-ratio: 3 / 4;
+      border-radius: 16px;
+      overflow: hidden;
+      animation: frame-float 4s ease-in-out infinite;
     }
 
-    .custom-hero-visual .visual-placeholder svg {
-      width: 120px;
-      height: 120px;
-      color: rgba(251,246,240,0.15);
+    .gia-frame-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Animated gold border */
+    .gia-frame-border {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(212, 168, 83, 0.4);
+      border-radius: 16px;
+      z-index: 3;
+      pointer-events: none;
+      animation: border-glow 3s ease-in-out infinite alternate;
+    }
+
+    /* Corner accents */
+    .gia-frame-corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .gia-frame-corner::before,
+    .gia-frame-corner::after {
+      content: '';
+      position: absolute;
+      background: #D4A853;
+      border-radius: 2px;
+    }
+    .gia-frame-corner::before {
+      width: 100%;
+      height: 2px;
+    }
+    .gia-frame-corner::after {
+      width: 2px;
+      height: 100%;
+    }
+
+    .gia-frame-corner--tl { top: 12px; left: 12px; }
+    .gia-frame-corner--tl::before { top: 0; left: 0; }
+    .gia-frame-corner--tl::after { top: 0; left: 0; }
+
+    .gia-frame-corner--tr { top: 12px; right: 12px; }
+    .gia-frame-corner--tr::before { top: 0; right: 0; }
+    .gia-frame-corner--tr::after { top: 0; right: 0; }
+
+    .gia-frame-corner--bl { bottom: 12px; left: 12px; }
+    .gia-frame-corner--bl::before { bottom: 0; left: 0; }
+    .gia-frame-corner--bl::after { bottom: 0; left: 0; }
+
+    .gia-frame-corner--br { bottom: 12px; right: 12px; }
+    .gia-frame-corner--br::before { bottom: 0; right: 0; }
+    .gia-frame-corner--br::after { bottom: 0; right: 0; }
+
+    /* Outer glow */
+    .gia-frame-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 24px;
+      background: transparent;
+      box-shadow: 0 0 40px rgba(212, 168, 83, 0.15), 0 0 80px rgba(212, 168, 83, 0.05);
+      z-index: 0;
+      animation: glow-pulse 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes frame-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    @keyframes border-glow {
+      0%   { border-color: rgba(212, 168, 83, 0.3); box-shadow: inset 0 0 20px rgba(212, 168, 83, 0.05); }
+      100% { border-color: rgba(212, 168, 83, 0.7); box-shadow: inset 0 0 30px rgba(212, 168, 83, 0.1); }
+    }
+
+    @keyframes glow-pulse {
+      0%   { box-shadow: 0 0 30px rgba(212, 168, 83, 0.1), 0 0 60px rgba(212, 168, 83, 0.03); }
+      100% { box-shadow: 0 0 50px rgba(212, 168, 83, 0.2), 0 0 100px rgba(212, 168, 83, 0.06); }
     }
 
     .custom-right::before {
@@ -197,6 +280,10 @@
         height: 50vh;
         order: -1;
       }
+      .gia-frame {
+        width: 60%;
+        max-width: 320px;
+      }
       .custom-left {
         justify-content: center;
         padding: 60px 24px;
@@ -219,6 +306,11 @@
       .custom-subtitle { font-size: 1.2rem; }
       .custom-cta-group { flex-direction: column; width: 100%; max-width: 300px; margin: 0 auto; }
       .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .gia-frame {
+        width: 70%;
+        max-width: 260px;
+      }
+      .gia-frame-corner { width: 28px; height: 28px; }
     }
 
     /* Gold CTA buttons — dark page override */
@@ -228,12 +320,12 @@
       color: #0D3A35;
       border: 1px solid #D4A853;
       font-weight: 500;
-      padding: 20px 48px;
-      font-size: 0.82rem;
+      padding: 14px 36px;
+      font-size: 0.78rem;
       letter-spacing: 3px;
       text-align: center;
       justify-content: center;
-      border-radius: 12px;
+      border-radius: 10px;
       position: relative;
       overflow: visible;
       transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -270,7 +362,7 @@
     @media (max-width: 768px) {
       .custom-left .btn-primary,
       .custom-left .btn-secondary {
-        padding: 18px 36px;
+        padding: 12px 28px;
         font-size: 0.78rem;
         letter-spacing: 2.5px;
         border-radius: 10px;
@@ -328,12 +420,14 @@
 
       <div class="custom-right">
         <div class="custom-hero-visual">
-          <div class="visual-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
+          <div class="gia-frame">
+            <div class="gia-frame-border"></div>
+            <div class="gia-frame-corner gia-frame-corner--tl"></div>
+            <div class="gia-frame-corner gia-frame-corner--tr"></div>
+            <div class="gia-frame-corner gia-frame-corner--bl"></div>
+            <div class="gia-frame-corner gia-frame-corner--br"></div>
+            <div class="gia-frame-glow"></div>
+            <img src="indir (4).jpg" alt="GIA Sertifikalı Pırlanta" class="gia-frame-img" loading="lazy" decoding="async">
           </div>
           <div class="sparkle-overlay" id="sparkleOverlay"></div>
         </div>
