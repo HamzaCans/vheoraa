@@ -174,7 +174,7 @@ section[id] {
   line-height: 1.15;
   color: var(--color-white);
   margin-bottom: 24px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -1262,7 +1262,11 @@ section[id] {
 
 .about-content {
   max-width: 520px;
-  overflow-wrap: break-word;
+  overflow: hidden;
+}
+
+.about-content .section-title {
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
