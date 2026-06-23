@@ -286,7 +286,6 @@
       height: 1px;
       background: linear-gradient(90deg, #D4A853, transparent);
     }
-    }
 
     @media (max-width: 1024px) {
       .custom-grid {
@@ -422,7 +421,7 @@
           </p>
 
           <div class="custom-cta-group">
-            <a href="collection.html" class="btn-primary">
+            <a href="javascript:void(0)" class="btn-primary" onclick="openOrderTrack()">
               Sipariş Takip
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
@@ -451,6 +450,33 @@
     </div>
   </section>
 
+  <!-- ========== ORDER TRACK MODAL ========== -->
+  <div class="order-track-modal" id="orderTrackModal">
+    <div class="order-track-overlay" onclick="closeOrderTrack()"></div>
+    <div class="order-track-container">
+      <button class="order-track-close" onclick="closeOrderTrack()">&times;</button>
+      <div class="order-track-header">
+        <h2>Sipariş Takip</h2>
+        <p>Sipariş numaranız ve e-posta adresiniz ile sipariş durumunuzu öğrenin.</p>
+      </div>
+      <div class="order-track-form" id="orderTrackForm">
+        <div class="form-group">
+          <label for="trackOrderNo">Sipariş Numarası</label>
+          <input type="text" id="trackOrderNo" placeholder="Örn: VHO-..." required>
+        </div>
+        <div class="form-group">
+          <label for="trackEmail">E-Posta Adresiniz</label>
+          <input type="email" id="trackEmail" placeholder="ornek@email.com" required>
+        </div>
+        <button class="form-submit" onclick="trackOrder()">
+          <span>Sorgula</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="order-track-result" id="orderTrackResult" style="display:none;"></div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container" style="text-align: center; padding: 40px 0;">
       <p style="color: #276152;">© 2026 VHEORA. Tüm hakları saklıdır.</p>
@@ -458,15 +484,48 @@
   </footer>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const sparkleOverlay = document.getElementById('sparkleOverlay');
+    function openOrderTrack() {
+      document.getElementById('orderTrackModal').classList.add('active');
+      document.getElementById('orderTrackResult').style.display = 'none';
+      document.getElementById('orderTrackForm').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeOrderTrack() {
+      document.getElementById('orderTrackModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    async function trackOrder() {
+      const orderNo = document.getElementById('trackOrderNo').value.trim();
+      const email = document.getElementById('trackEmail').value.trim();
+      if (!orderNo || !email) { alert('Lütfen sipariş numarası ve e-posta adresinizi girin.'); return; }
+      const btn = document.querySelector('.order-track-form .form-submit');
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = 'Sorgulanıyor...';
+      try {
+        const res = await fetch('/api/admin/orders/track?order_no=' + encodeURIComponent(orderNo) + '&email=' + encodeURIComponent(email));
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Sipariş bulunamadı'); btn.innerHTML = origHTML; btn.disabled = false; return; }
+        document.getElementById('orderTrackForm').style.display = 'none';
+        const statusMap = { pending:'Beklemede', confirmed:'Onaylandı', preparing:'Hazırlanıyor', shipped:'Kargoda', delivered:'Teslim Edildi', cancelled:'İptal Edildi' };
+        document.getElementById('orderTrackResult').innerHTML = '<div class="track-result-card"><div class="track-result-header"><h3>' + data.order_no + '</h3><span class="track-status-badge status-' + data.status + '">' + (statusMap[data.status] || data.status) + '</span></div><div class="track-result-body"><div class="track-info"><strong>Müşteri:</strong> ' + data.customer_name + '</div><div class="track-info"><strong>Tarih:</strong> ' + new Date(data.created_at).toLocaleDateString('tr-TR') + '</div>' + (data.carrier ? '<div class="track-info"><strong>Kargo:</strong> ' + data.carrier + '</div>' : '') + (data.tracking_no ? '<div class="track-info"><strong>Takip No:</strong> ' + data.tracking_no + '</div>' : '') + '<div class="track-info"><strong>Tutar:</strong> ' + (data.total_amount?.toLocaleString('tr-TR', {style:'currency',currency:'TRY'}) || '-') + '</div></div>' + (data.items && data.items.length ? '<div class="track-items"><h4>Sipariş İçeriği</h4>' + data.items.map(function(i){ return '<div class="track-item"><span>' + i.product_name + '</span><span>' + i.quantity + ' x ' + (i.unit_price?.toLocaleString('tr-TR', {style:'currency',currency:'TRY'}) || '-') + '</span></div>'; }).join('') + '</div>' : '') + '</div><button class="form-submit" onclick="closeOrderTrack()" style="margin-top:16px;">Kapat</button>';
+        document.getElementById('orderTrackResult').style.display = 'block';
+      } catch(e) {
+        alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+      }
+      btn.innerHTML = origHTML;
+      btn.disabled = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var sparkleOverlay = document.getElementById('sparkleOverlay');
       if (sparkleOverlay) {
-        for (let i = 0; i < 15; i++) {
-          const sparkle = document.createElement('div');
+        for (var i = 0; i < 15; i++) {
+          var sparkle = document.createElement('div');
           sparkle.className = 'sparkle';
-          sparkle.style.top = `${30 + Math.random() * 40}%`;
-          sparkle.style.left = `${30 + Math.random() * 40}%`;
-          sparkle.style.animationDelay = `${Math.random() * 3}s`;
+          sparkle.style.top = (30 + Math.random() * 40) + '%';
+          sparkle.style.left = (30 + Math.random() * 40) + '%';
+          sparkle.style.animationDelay = (Math.random() * 3) + 's';
           sparkleOverlay.appendChild(sparkle);
         }
       }
