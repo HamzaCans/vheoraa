@@ -159,12 +159,14 @@ section[id] {
   margin-bottom: 24px;
 }
 
-.section-label::before {
+.section-label::before,
+.section-label::after {
   content: '';
   display: block;
   width: 40px;
   height: 1px;
   background: var(--gradient-gold);
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -1326,14 +1328,6 @@ section[id] {
 
 .services-header .section-label {
   justify-content: center;
-}
-
-.services-header .section-label::after {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: var(--gradient-gold);
 }
 
 .services-header .section-subtitle {
@@ -2753,11 +2747,6 @@ body.menu-open {
     justify-content: center;
   }
 
-  .about-content .section-label::after {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .about-text {
     text-align: center;
     max-width: 480px;
@@ -2872,11 +2861,6 @@ body.menu-open {
     justify-content: center;
   }
 
-  .testimonials-header .section-label::after {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .slider-controls {
     justify-content: center;
     margin-top: 20px;
@@ -2938,11 +2922,6 @@ body.menu-open {
 
   .contact-info .section-label {
     justify-content: center;
-  }
-
-  .contact-info .section-label::after {
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .contact-info .section-title {
