@@ -295,20 +295,20 @@
         grid-template-columns: 1fr;
       }
       .custom-right {
-        height: 50vh;
+        height: 55vh;
         order: -1;
       }
       .design-frame {
-        width: 75%;
-        max-width: 380px;
+        width: 72%;
+        max-width: 360px;
       }
       .custom-left {
         justify-content: center;
-        padding: 60px 24px;
+        padding: 56px 28px 60px;
         text-align: center;
       }
       .custom-hero-content {
-        max-width: 600px;
+        max-width: 540px;
       }
       .custom-text {
         margin-left: auto;
@@ -320,15 +320,98 @@
     }
 
     @media (max-width: 768px) {
-      .custom-title { font-size: 2.5rem; }
-      .custom-subtitle { font-size: 1.2rem; }
-      .custom-cta-group { flex-direction: column; width: 100%; max-width: 300px; margin: 0 auto; }
-      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .custom-right {
+        height: auto;
+        min-height: 320px;
+        padding: 60px 0 20px;
+      }
       .design-frame {
-        width: 85%;
-        max-width: 320px;
+        width: 82%;
+        max-width: 300px;
+        margin: 0 auto;
       }
       .design-frame-corner { width: 28px; height: 28px; }
+
+      .custom-left {
+        padding: 40px 22px 48px;
+      }
+      .section-label {
+        font-size: 0.65rem;
+        letter-spacing: 4px;
+        margin-bottom: 16px;
+      }
+      .section-label::before, .section-label::after {
+        width: 24px;
+      }
+      .custom-title {
+        font-size: 1.85rem;
+        margin-bottom: 16px;
+        line-height: 1.15;
+      }
+      .custom-subtitle {
+        font-size: 1.05rem;
+        margin-bottom: 20px;
+      }
+      .custom-text {
+        font-size: 0.88rem;
+        line-height: 1.8;
+        margin-bottom: 28px;
+      }
+      .custom-cta-group {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        gap: 12px;
+      }
+      .custom-left .btn-primary,
+      .custom-left .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 13px 24px;
+        font-size: 0.72rem;
+        letter-spacing: 2px;
+      }
+      .custom-left .btn-primary::after,
+      .custom-left .btn-secondary::after {
+        inset: -3px;
+        border-radius: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .custom-right {
+        min-height: 260px;
+        padding: 48px 0 16px;
+      }
+      .design-frame {
+        width: 88%;
+        max-width: 260px;
+      }
+      .design-frame-corner { width: 22px; height: 22px; }
+
+      .custom-left {
+        padding: 32px 18px 40px;
+      }
+      .custom-title {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+      }
+      .custom-subtitle {
+        font-size: 0.92rem;
+        margin-bottom: 14px;
+      }
+      .custom-text {
+        font-size: 0.82rem;
+        line-height: 1.7;
+        margin-bottom: 22px;
+      }
+      .custom-left .btn-primary,
+      .custom-left .btn-secondary {
+        padding: 12px 20px;
+        font-size: 0.68rem;
+        letter-spacing: 1.5px;
+      }
     }
 
     /* Gold CTA buttons — dark page override */
@@ -376,38 +459,6 @@
     .custom-left .btn-secondary:active {
       transform: translateY(-1px) scale(0.98);
       box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
-    }
-    @media (max-width: 768px) {
-      .custom-left .btn-primary,
-      .custom-left .btn-secondary {
-        padding: 12px 28px;
-        font-size: 0.78rem;
-        letter-spacing: 2.5px;
-        border-radius: 10px;
-      }
-      .custom-left .btn-primary::after,
-      .custom-left .btn-secondary::after {
-        inset: -3px;
-        border-radius: 13px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .custom-title { font-size: clamp(1.6rem, 7vw, 2rem); }
-      .custom-subtitle { font-size: 1rem; }
-      .custom-left { padding: 40px 16px; }
-      .custom-cta-group { max-width: 260px; }
-      .custom-left .btn-primary,
-      .custom-left .btn-secondary {
-        padding: 10px 20px;
-        font-size: 0.7rem;
-        letter-spacing: 2px;
-      }
-      .design-frame {
-        width: 90%;
-        max-width: 280px;
-      }
-      .design-frame-corner { width: 24px; height: 24px; }
     }
   </style>
 </head>
