@@ -62,20 +62,101 @@
       justify-content: center;
     }
 
-    .custom-hero-visual .visual-placeholder {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(39,97,82,0.3) 0%, rgba(13,58,53,0.6) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(251,246,240,0.1);
+    /* Luxury Frame */
+    .service-frame {
+      position: relative;
+      width: 88%;
+      max-width: 540px;
+      aspect-ratio: 4 / 3;
+      border-radius: 16px;
+      overflow: hidden;
+      animation: frame-float 4s ease-in-out infinite;
     }
 
-    .custom-hero-visual .visual-placeholder svg {
-      width: 120px;
-      height: 120px;
-      color: rgba(251,246,240,0.15);
+    .service-frame-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      border-radius: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-frame-border {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(212, 168, 83, 0.4);
+      border-radius: 16px;
+      z-index: 3;
+      pointer-events: none;
+      animation: border-glow 3s ease-in-out infinite alternate;
+    }
+
+    .service-frame-corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .service-frame-corner::before,
+    .service-frame-corner::after {
+      content: '';
+      position: absolute;
+      background: #D4A853;
+      border-radius: 2px;
+    }
+    .service-frame-corner::before {
+      width: 100%;
+      height: 2px;
+    }
+    .service-frame-corner::after {
+      width: 2px;
+      height: 100%;
+    }
+
+    .service-frame-corner--tl { top: 12px; left: 12px; }
+    .service-frame-corner--tl::before { top: 0; left: 0; }
+    .service-frame-corner--tl::after { top: 0; left: 0; }
+
+    .service-frame-corner--tr { top: 12px; right: 12px; }
+    .service-frame-corner--tr::before { top: 0; right: 0; }
+    .service-frame-corner--tr::after { top: 0; right: 0; }
+
+    .service-frame-corner--bl { bottom: 12px; left: 12px; }
+    .service-frame-corner--bl::before { bottom: 0; left: 0; }
+    .service-frame-corner--bl::after { bottom: 0; left: 0; }
+
+    .service-frame-corner--br { bottom: 12px; right: 12px; }
+    .service-frame-corner--br::before { bottom: 0; right: 0; }
+    .service-frame-corner--br::after { bottom: 0; right: 0; }
+
+    .service-frame-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 24px;
+      background: transparent;
+      box-shadow: 0 0 40px rgba(212, 168, 83, 0.15), 0 0 80px rgba(212, 168, 83, 0.05);
+      z-index: 0;
+      animation: glow-pulse 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes frame-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    @keyframes border-glow {
+      0%   { border-color: rgba(212, 168, 83, 0.3); box-shadow: inset 0 0 20px rgba(212, 168, 83, 0.05); }
+      100% { border-color: rgba(212, 168, 83, 0.7); box-shadow: inset 0 0 30px rgba(212, 168, 83, 0.1); }
+    }
+
+    @keyframes glow-pulse {
+      0%   { box-shadow: 0 0 30px rgba(212, 168, 83, 0.1), 0 0 60px rgba(212, 168, 83, 0.03); }
+      100% { box-shadow: 0 0 50px rgba(212, 168, 83, 0.2), 0 0 100px rgba(212, 168, 83, 0.06); }
     }
 
     .custom-right::before {
@@ -198,7 +279,6 @@
       height: 1px;
       background: linear-gradient(90deg, #D4A853, transparent);
     }
-    }
 
     @media (max-width: 1024px) {
       .custom-grid {
@@ -207,6 +287,10 @@
       .custom-right {
         height: 50vh;
         order: -1;
+      }
+      .service-frame {
+        width: 75%;
+        max-width: 380px;
       }
       .custom-left {
         justify-content: center;
@@ -230,6 +314,11 @@
       .custom-subtitle { font-size: 1.2rem; }
       .custom-cta-group { flex-direction: column; width: 100%; max-width: 300px; margin: 0 auto; }
       .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .service-frame {
+        width: 85%;
+        max-width: 320px;
+      }
+      .service-frame-corner { width: 28px; height: 28px; }
     }
 
     /* Gold CTA buttons — dark page override */
@@ -282,14 +371,6 @@
       .custom-left .btn-primary,
       .custom-left .btn-secondary {
         padding: 12px 28px;
-        font-size: 0.78rem;
-        letter-spacing: 2.5px;
-        border-radius: 10px;
-      }
-      .custom-left .btn-primary::after,
-      .custom-left .btn-secondary::after {
-        inset: -3px;
-        border-radius: 13px;
       }
     }
   </style>
@@ -339,12 +420,14 @@
 
       <div class="custom-right">
         <div class="custom-hero-visual">
-          <div class="visual-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
+          <div class="service-frame">
+            <div class="service-frame-border"></div>
+            <div class="service-frame-corner service-frame-corner--tl"></div>
+            <div class="service-frame-corner service-frame-corner--tr"></div>
+            <div class="service-frame-corner service-frame-corner--bl"></div>
+            <div class="service-frame-corner service-frame-corner--br"></div>
+            <div class="service-frame-glow"></div>
+            <img src="restoration-service.jpg" alt="VHEORA Profesyonel Restorasyon" class="service-frame-img" loading="lazy" decoding="async">
           </div>
           <div class="sparkle-overlay" id="sparkleOverlay"></div>
         </div>
