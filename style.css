@@ -176,6 +176,9 @@ section[id] {
   margin-bottom: 24px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .section-title .gold {
@@ -5040,7 +5043,12 @@ font {
 .hero-description,
 .about-text,
 .contact-text,
-.section-subtitle {
+.section-subtitle,
+.section-title,
+.hero-title .line,
+.support-body,
+.tracking-modal,
+.quote-modal {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -5053,7 +5061,10 @@ font {
   max-width: min(460px, 100%);
 }
 .hero-badge {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: min(340px, 100%);
 }
 .hero-buttons {
   flex-wrap: wrap;
@@ -5080,7 +5091,7 @@ font {
   max-width: min(480px, 100%);
 }
 .footer-brand-text {
-  max-width: min(300px, 100%);
+  max-width: min(400px, 100%);
 }
 .share-visual-text {
   max-width: min(220px, 100%);
@@ -5243,4 +5254,119 @@ font {
 }
 [dir="rtl"] .footer-links a {
   text-align: right;
+}
+
+/* ==========================================
+   Additional overflow safety for all languages
+   ========================================== */
+
+/* Buttons — allow text wrapping for long translations */
+.btn-primary,
+.btn-secondary {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Service page CTA groups */
+.custom-cta-group {
+  flex-wrap: wrap;
+}
+.custom-cta-group .btn-primary,
+.custom-cta-group .btn-secondary {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Nav links wrapping */
+.nav-links {
+  flex-wrap: wrap;
+}
+.nav-links a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Stat labels wrapping */
+.stat-label {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* SSS accordion text */
+.sss-question,
+.sss-answer {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Footer links */
+.footer-links {
+  flex-wrap: wrap;
+}
+.footer-links a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Product price buttons */
+.product-price-btn {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  text-align: center;
+}
+
+/* Section label overflow */
+.section-label {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Hero badge circle overflow */
+.hero-badge-circle span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Service card text */
+.service-title,
+.service-description {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Custom service page title + text */
+.custom-title,
+.custom-subtitle,
+.custom-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Mobile: reduce CTA button font + letter-spacing */
+@media (max-width: 768px) {
+  .custom-left .btn-primary,
+  .custom-left .btn-secondary {
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    padding: 12px 20px;
+  }
+  .custom-title {
+    font-size: clamp(1.8rem, 6vw, 2.5rem) !important;
+  }
+  .custom-subtitle {
+    font-size: 1rem !important;
+  }
+  .custom-text {
+    font-size: 0.88rem;
+    line-height: 1.9;
+  }
 }
