@@ -1,24 +1,19 @@
 /* ========================================
    TCMB Döviz Kuru API
-   GET /api/tcmb-rates → canlı kur
-   Admin endpoints → doğrudan TCMB'den çeker
    ======================================== */
 
 const express = require('express');
 const router = express.Router();
 const https = require('https');
-const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 
 let cache = null;
 let cacheTime = 0;
 const CACHE_TTL = 3600000;
 
-// Log geçmişi (memory)
 let rateHistory = [];
 const MAX_HISTORY = 100;
 
-// ========== TCMB XML ÇEK ==========
 function fetchTCMBRates() {
   return new Promise((resolve, reject) => {
     const req = https.request({
@@ -61,7 +56,6 @@ function parseXML(xml) {
   return { date, rates };
 }
 
-// Cache'i güncelle + history'ye ekle
 function updateCache(data) {
   cache = { success: true, date: data.date, fetchedAt: new Date().toISOString(), base: 'TRY', rates: data.rates };
   cacheTime = Date.now();
@@ -79,15 +73,12 @@ function updateCache(data) {
 
 // İlk yükleme
 fetchTCMBRates().then(updateCache).catch(() => {});
-// Her 3 saatte bir güncelle
 setInterval(() => { fetchTCMBRates().then(updateCache).catch(() => {}); }, 3 * 60 * 60 * 1000);
 
-// ========== API: CANLI KUR ==========
+// Public: canlı kur
 router.get('/', async (req, res) => {
   try {
-    if (cache && (Date.now() - cacheTime) < CACHE_TTL) {
-      return res.json(cache);
-    }
+    if (cache && (Date.now() - cacheTime) < CACHE_TTL) return res.json(cache);
     const data = await fetchTCMBRates();
     updateCache(data);
     res.json(cache);
@@ -97,27 +88,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ========== API: ADMIN — LOGLISTESI ==========
-router.get('/list', authenticateToken, async (req, res) => {
+// Admin: log listesi
+router.get('/list', authenticateToken, (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-  const logs = rateHistory.slice(-limit).reverse();
-  res.json({ success: true, logs });
+  res.json({ success: true, logs: rateHistory.slice(-limit).reverse() });
 });
 
-// ========== API: ADMIN — GRAFIK ==========
-router.get('/chart', authenticateToken, async (req, res) => {
+// Admin: grafik
+router.get('/chart', authenticateToken, (req, res) => {
   res.json({ success: true, logs: rateHistory.slice(-50) });
 });
 
-// ========== API: ADMIN — ISTATISTIKLER ==========
-router.get('/stats', authenticateToken, async (req, res) => {
+// Admin: istatistikler
+router.get('/stats', authenticateToken, (req, res) => {
   const latest = rateHistory.length > 0 ? rateHistory[rateHistory.length - 1] : null;
-  res.json({
-    success: true,
-    latest: latest,
-    totalLogs: rateHistory.length,
-    changes24h: {}
-  });
+  res.json({ success: true, latest, totalLogs: rateHistory.length, changes24h: {} });
 });
 
 module.exports = router;
