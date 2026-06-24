@@ -1,39 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/(.*)", "destination": "/$1" }
-  ]
-}
-  ],
-  "rewrites": [],
-  "routes": [
-    { "src": "^/api/(.*)", "dest": "/api/index.js" },
-    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
-    { "src": "^/$", "dest": "/api/index.js" },
-    { "src": "^/admin(/.*)?$", "dest": "/api/index.js" },
-    { "src": "^/(.*)\\.html$", "dest": "/$1.html" },
-    { "handle": "filesystem" }
-  ]
-}
-  ],
-  "rewrites": [],
-  "routes": [
-    { "src": "^/api/(.*)", "dest": "/api/index.js" },
-    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
-    { "src": "^/style\\.css$", "dest": "/style.css" },
-    { "src": "^/script\\.js$", "dest": "/script.js" },
-    { "src": "^/app\\.js$", "dest": "/app.js" },
-    { "src": "^/images/(.*)", "dest": "/images/$1" },
-    { "src": "^/favicon\\.png$", "dest": "/favicon.png" },
-    { "src": "^/manifest\\.json$", "dest": "/manifest.json" },
-    { "src": "^/sw\\.js$", "dest": "/sw.js" },
-    { "src": "^/robots\\.txt$", "dest": "/robots.txt" },
-    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
-    { "src": "^/$", "dest": "/api/index.js" },
-    { "src": "^/admin(/.*)?$", "dest": "/api/index.js" },
-    { "src": "^/(.*)\\.html$", "dest": "/$1.html" },
-    { "handle": "filesystem" }
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }
