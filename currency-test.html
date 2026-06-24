@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head><title>VHEORA Döviz Test</title></head>
+<body style="background:#111;color:#fff;font-family:monospace;padding:40px;">
+<h2>💱 Döviz Kuru API Test</h2>
+<button onclick="testAll()" style="padding:12px 24px;font-size:16px;cursor:pointer;">Test Et</button>
+<pre id="output" style="margin-top:20px;padding:20px;background:#222;border-radius:8px;white-space:pre-wrap;"></pre>
+
+<script>
+var API = '';
+var TOKEN = localStorage.getItem('vheora_token') || '';
+
+async function testAll() {
+  var out = document.getElementById('output');
+  out.textContent = 'Test çalışıyor...\n\n';
+
+  // Test 1: Public TCMB endpoint
+  out.textContent += '=== 1. TCMB Canlı Kur ===\n';
+  try {
+    var r1 = await fetch(API + '/api/tcmb-rates');
+    var d1 = await r1.json();
+    out.textContent += 'Status: ' + r1.status + '\n';
+    out.textContent += 'Response: ' + JSON.stringify(d1, null, 2) + '\n\n';
+  } catch(e) {
+    out.textContent += 'HATA: ' + e.message + '\n\n';
+  }
+
+  // Test 2: Admin Stats
+  out.textContent += '=== 2. Admin Currency Stats ===\n';
+  try {
+    var r2 = await fetch(API + '/api/admin/currency-logs/stats', {
+      headers: { 'Authorization': '***' + TOKEN }
+    });
+    var d2 = await r2.json();
+    out.textContent += 'Status: ' + r2.status + '\n';
+    out.textContent += 'Response: ' + JSON.stringify(d2, null, 2) + '\n\n';
+  } catch(e) {
+    out.textContent += 'HATA: ' + e.message + '\n\n';
+  }
+
+  // Test 3: Admin List
+  out.textContent += '=== 3. Admin Currency List ===\n';
+  try {
+    var r3 = await fetch(API + '/api/admin/currency-logs/list?limit=3', {
+      headers: { 'Authorization': '***' + TOKEN }
+    });
+    var d3 = await r3.json();
+    out.textContent += 'Status: ' + r3.status + '\n';
+    out.textContent += 'Response: ' + JSON.stringify(d3, null, 2) + '\n\n';
+  } catch(e) {
+    out.textContent += 'HATA: ' + e.message + '\n\n';
+  }
+
+  out.textContent += '=== BİTTİ ===';
+}
+</script>
+</body>
+</html>
