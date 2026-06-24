@@ -115,7 +115,7 @@
       var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
       try {
         var res = await fetch(url, { ...options, signal: controller.signal });
-        if (res.status === 401) { localStorage.removeItem('vheora_token'); window.location.href = '/admin/'; return null; }
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(() => window.location.href = '/admin/', 1500); return null; }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return await res.json();
       } finally { clearTimeout(timeout); }

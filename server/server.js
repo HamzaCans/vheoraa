@@ -385,6 +385,22 @@ app.get('/sw.js', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'sw.js'));
 });
 
+app.get('/logistics-service.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'logistics-service.jpg'));
+});
+
+app.get('/restoration-service.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'restoration-service.jpg'));
+});
+
+app.get('/workshop.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'workshop.jpg'));
+});
+
+app.get('/gia-report.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'gia-report.jpg'));
+});
+
 app.get('*.html', (req, res, next) => {
   const filePath = path.join(__dirname, '..', req.path);
   if (!require('fs').existsSync(filePath)) {
