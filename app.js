@@ -309,6 +309,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         var laborCost = parseInt(p.labor_cost) || 2500;
         var fiyat = gram && goldPrice > 0 ? Math.round((goldPrice + laborCost) * gram) : 0;
         if (!fiyat) return '<div class="featured-price" style="opacity:0.4">—</div>';
+        if (window.VheoraCurrency) {
+          return window.VheoraCurrency.renderPrice(fiyat, p.gram);
+        }
         return '<div class="featured-price">' + fiyat.toLocaleString('tr-TR') + ' ₺</div>';
       }
       grid.innerHTML = products.map((p, i) => {
@@ -442,7 +445,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tickerVal = document.getElementById('goldTickerValue');
       const tickerSrc = document.getElementById('goldTickerSource');
       if (tickerVal && currentGoldPrice > 0) {
-        tickerVal.textContent = currentGoldPrice.toLocaleString('tr-TR');
+        // Döviz dönüşümlü altın fiyatı
+        if (window.VheoraCurrency) {
+          var cur = VheoraCurrency.getCurrentCurrency();
+          var converted = VheoraCurrency.convertPrice(currentGoldPrice, cur.code);
+          var formatted = VheoraCurrency.formatPrice(converted, cur.locale);
+          tickerVal.textContent = formatted + ' ' + cur.symbol;
+        } else {
+          tickerVal.textContent = currentGoldPrice.toLocaleString('tr-TR') + ' ₺';
+        }
         if (tickerSrc && data.source) tickerSrc.textContent = data.source;
       }
       document.querySelectorAll('.calc-gold-price').forEach(el => {
@@ -450,7 +461,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const laborCost = parseInt(el.getAttribute('data-labor-cost')) || 2500;
         if (gram && currentGoldPrice > 0) {
           const fiyat = Math.round((currentGoldPrice + laborCost) * gram);
-          el.textContent = fiyat.toLocaleString('tr-TR') + ' ₺ (' + gram + 'g)';
+          if (window.VheoraCurrency) {
+            var cur = VheoraCurrency.getCurrentCurrency();
+            var converted = VheoraCurrency.convertPrice(fiyat, cur.code);
+            var formatted = VheoraCurrency.formatPrice(converted, cur.locale);
+            el.textContent = formatted + ' ' + cur.symbol + ' (' + gram + 'g)';
+          } else {
+            el.textContent = fiyat.toLocaleString('tr-TR') + ' ₺ (' + gram + 'g)';
+          }
         }
       });
     } catch (_) {}
@@ -1310,6 +1328,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       applyTranslations();
       document.documentElement.setAttribute('lang', 'tr');
       document.documentElement.setAttribute('dir', 'ltr');
+      // Dil değişti → fiyatları güncelle
+      if (window.VheoraCurrency) window.VheoraCurrency.updateAllPrices();
+      if (typeof fetchGoldPrice === 'function') fetchGoldPrice();
       return;
     }
     try {
@@ -1320,11 +1341,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       applyTranslations();
       document.documentElement.setAttribute('lang', lang);
       document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      // Dil değişti → fiyatları güncelle
+      if (window.VheoraCurrency) window.VheoraCurrency.updateAllPrices();
+      if (typeof fetchGoldPrice === 'function') fetchGoldPrice();
     } catch (e) {
       currentTranslations = {};
       currentLang = 'tr';
       applyTranslations();
       document.documentElement.setAttribute('dir', 'ltr');
+      if (window.VheoraCurrency) window.VheoraCurrency.updateAllPrices();
+      if (typeof fetchGoldPrice === 'function') fetchGoldPrice();
     }
   }
 
@@ -1384,6 +1410,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     setCookie('vheora_lang', lang);
     updateLangUI(lang);
     loadTranslations(lang);
+    // Döviz kuru fiyatlarını güncelle
+    if (window.VheoraCurrency) {
+      window.VheoraCurrency.updateAllPrices();
+    }
+    // Altın fiyatını da yeni kur ile göster
+    if (typeof fetchGoldPrice === 'function') fetchGoldPrice();
+  }
+
+  // Kurları yükle (dil değişimi için hazır olsun)
+  if (window.VheoraCurrency) {
+    window.VheoraCurrency.fetchRates();
   }
 
   if (langBtn && langDropdown) {

@@ -518,6 +518,7 @@
     </div>
 
     <script src="app.js" defer></script>
+    <script src="vheora_currency.js" defer></script>
     <script>
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -599,6 +600,9 @@
             function priceTag(product) {
                 var fiyat = calculatePrice(product.gram, product.labor_cost);
                 if (!fiyat) return '';
+                if (window.VheoraCurrency) {
+                    return window.VheoraCurrency.renderPriceTag(fiyat, product.gram);
+                }
                 return '<div class="product-price-tag">' +
                     '<span class="price-value">' + fiyat.toLocaleString('tr-TR') + '</span>' +
                     '<span class="price-currency">₺</span>' +
@@ -826,6 +830,15 @@
                 if (e.key === 'ArrowLeft') { lightboxIdx = (lightboxIdx - 1 + lightboxImages.length) % lightboxImages.length; showLightboxImage(); }
                 if (e.key === 'ArrowRight') { lightboxIdx = (lightboxIdx + 1) % lightboxImages.length; showLightboxImage(); }
             });
+
+            // Dil değiştiğinde ürün fiyatlarını yeniden render et
+            if (window.VheoraCurrency) {
+                VheoraCurrency.onLanguageChange(function() {
+                    var activeFilter = document.querySelector('.filter-btn.active');
+                    var filterVal = activeFilter ? activeFilter.getAttribute('data-filter') : 'all';
+                    renderProducts(filterVal);
+                });
+            }
         });
     </script>
 </body>

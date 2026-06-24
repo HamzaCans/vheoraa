@@ -18,6 +18,7 @@ const localizationRoutes = require('./routes/localization');
 const stockRoutes = require('./routes/stock');
 const orderRoutes = require('./routes/orders');
 const goldPriceRoutes = require('./routes/goldPrice');
+const tcmbRoutes = require('./routes/tcmb');
 
 const sitemapRoutes = require('./routes/sitemap');
 
@@ -219,6 +220,7 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/visit') ||
     url.includes('/api/translations/') ||
     url.includes('/api/languages') ||
+    url.includes('/api/tcmb-rates') ||
     url.includes('/api/admin') ||
     url.includes('/api/sitemap') ||
     url === '/sw.js' || url === '/manifest.json' ||
@@ -305,6 +307,8 @@ app.use('/api', localizationRoutes);
 app.use('/api/admin', stockRoutes);
 app.use('/api/admin', orderRoutes);
 app.use('/api', goldPriceRoutes);
+app.use('/api/tcmb-rates', tcmbRoutes);
+app.use('/api/admin/currency-logs', tcmbRoutes);
 app.use('/api/sitemap', sitemapRoutes);
 
 app.get('/api/health', (req, res) => {
@@ -316,6 +320,7 @@ const _staticPaths = {
   '/style.css': _root + '/style.css',
   '/script.js': _root + '/script.js',
   '/app.js': _root + '/app.js',
+  '/vheora_currency.js': _root + '/vheora_currency.js',
   '/cookie-consent.js': _root + '/cookie-consent.js',
   '/maintenance.js': _root + '/maintenance.js',
   '/favicon.png': _root + '/favicon.png',

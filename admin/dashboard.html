@@ -66,6 +66,34 @@
         </div>
       </div>
     </div>
+    <!-- ========== DÖVİZ KURLARI BÖLÜMÜ ========== -->
+    <div class="gold-price-section" id="currencySection" style="margin-top:24px;">
+      <div class="gold-price-header">
+        <div class="gold-price-icon">💱</div>
+        <div class="gold-price-info">
+          <div class="gold-price-label">TCMB Döviz Kurları</div>
+          <div class="gold-price-source" id="currencySource">Kaynak: TCMB</div>
+        </div>
+        <div class="gold-price-value" id="currencyLastUpdate" style="font-size:0.85rem;opacity:0.7;">—</div>
+      </div>
+      <div class="gold-price-details" id="currencyRates">
+        <div class="gold-price-detail"><span class="gold-detail-label">💵 USD</span><span class="gold-detail-value" id="curUSD">—</span></div>
+        <div class="gold-price-detail"><span class="gold-detail-label">💶 EUR</span><span class="gold-detail-value" id="curEUR">—</span></div>
+        <div class="gold-price-detail"><span class="gold-detail-label">💷 GBP</span><span class="gold-detail-value" id="curGBP">—</span></div>
+        <div class="gold-price-detail"><span class="gold-detail-label">₽ RUB</span><span class="gold-detail-value" id="curRUB">—</span></div>
+        <div class="gold-price-detail"><span class="gold-detail-label">🇸🇦 SAR</span><span class="gold-detail-value" id="curSAR">—</span></div>
+      </div>
+      <div class="gold-price-chart-wrapper">
+        <h4 class="gold-chart-title">📈 Son 24 Saat Döviz Grafiği</h4>
+        <canvas id="currencyChart" height="180"></canvas>
+      </div>
+      <div class="gold-price-table-wrapper">
+        <h4 class="gold-chart-title">📋 3 Saatlik Döviz Logları</h4>
+        <div id="currencyLogs" class="gold-price-logs">
+          <p class="empty-state">Yükleniyor...</p>
+        </div>
+      </div>
+    </div>
     <div class="charts-row">
       <div class="chart-card">
         <h3 class="chart-title">Aylık Mesajlar</h3>
@@ -379,8 +407,100 @@
       loadDashboard();
       loadLatestActivity();
       loadGoldPrice();
+      loadCurrencyRates();
     }
     init();
+
+    /* ====== DÖVİZ KURLARI ====== */
+    var currencyChart = null;
+    async function loadCurrencyRates() {
+      try {
+        var token = getToken();
+        var headers = { 'Authorization': 'Bearer ' + token };
+
+        // Son kurları çek
+        var stats = await fetchJSON(API + '/api/admin/currency-logs/stats', { headers: headers });
+        if (stats && stats.latest) {
+          var l = stats.latest;
+          document.getElementById('curUSD').textContent = l.usd ? l.usd.toFixed(2) + ' ₺' : '—';
+          document.getElementById('curEUR').textContent = l.eur ? l.eur.toFixed(2) + ' ₺' : '—';
+          document.getElementById('curGBP').textContent = l.gbp ? l.gbp.toFixed(2) + ' ₺' : '—';
+          document.getElementById('curRUB').textContent = l.rub ? l.rub.toFixed(4) + ' ₺' : '—';
+          document.getElementById('curSAR').textContent = l.sar ? l.sar.toFixed(4) + ' ₺' : '—';
+          document.getElementById('currencyLastUpdate').textContent = l.logged_at ? new Date(l.logged_at.replace(' ','T')).toLocaleString('tr-TR', { timeZone: userTimezone }) : '—';
+
+          // 24 saatlik değişim rozetleri
+          if (stats.changes24h) {
+            var changeMap = { usd: 'curUSD', eur: 'curEUR', gbp: 'curGBP', rub: 'curRUB', sar: 'curSAR' };
+            for (var key in changeMap) {
+              var ch = stats.changes24h[key];
+              if (ch) {
+                var el = document.getElementById(changeMap[key]);
+                var arrow = ch.changePercent >= 0 ? '▲' : '▼';
+                var color = ch.changePercent >= 0 ? '#66bb6a' : '#ef5350';
+                var badge = ' <span style="font-size:0.75rem;color:' + color + ';margin-left:6px;">' + arrow + ' %' + Math.abs(ch.changePercent).toFixed(2) + '</span>';
+                el.innerHTML = ch.current.toFixed(2) + ' ₺' + badge;
+              }
+            }
+          }
+        }
+
+        // Grafik verisi
+        var chartData = await fetchJSON(API + '/api/admin/currency-logs/chart', { headers: headers });
+        if (chartData && chartData.logs && chartData.logs.length) {
+          var logs = chartData.logs;
+          var labels = logs.map(function(h) {
+            return h.logged_at ? new Date(h.logged_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
+          });
+          if (currencyChart) currencyChart.destroy();
+          var ctx = document.getElementById('currencyChart');
+          if (ctx && typeof Chart !== 'undefined') {
+            currencyChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  { label: 'USD', data: logs.map(function(l){return l.usd;}), borderColor: '#42a5f5', backgroundColor: 'rgba(66,165,245,0.08)', fill: false, tension: 0.4, pointRadius: 3, borderWidth: 2 },
+                  { label: 'EUR', data: logs.map(function(l){return l.eur;}), borderColor: '#66bb6a', backgroundColor: 'rgba(102,187,106,0.08)', fill: false, tension: 0.4, pointRadius: 3, borderWidth: 2 },
+                  { label: 'GBP', data: logs.map(function(l){return l.gbp;}), borderColor: '#ffa726', backgroundColor: 'rgba(255,167,38,0.08)', fill: false, tension: 0.4, pointRadius: 3, borderWidth: 2 }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8a8a9a', usePointStyle: true, pointStyle: 'circle' } } },
+                scales: {
+                  y: { ticks: { color: '#8a8a9a', callback: function(v) { return v.toFixed(2); } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                  x: { ticks: { color: '#8a8a9a', maxTicksLimit: 8 }, grid: { display: false } }
+                }
+              }
+            });
+          }
+
+          // Log tablosu
+          var tableHtml = '<table><thead><tr><th>Tarih</th><th>Saat</th><th>USD</th><th>EUR</th><th>GBP</th><th>RUB</th><th>SAR</th></tr></thead><tbody>';
+          logs.slice().reverse().forEach(function(h) {
+            var d = h.logged_at ? new Date(h.logged_at.replace(' ','T')) : null;
+            tableHtml += '<tr>';
+            tableHtml += '<td>' + (d ? d.toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td>';
+            tableHtml += '<td>' + (d ? d.toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '-') + '</td>';
+            tableHtml += '<td style="font-weight:600;color:#42a5f5;">' + (h.usd ? h.usd.toFixed(2) : '-') + '</td>';
+            tableHtml += '<td style="font-weight:600;color:#66bb6a;">' + (h.eur ? h.eur.toFixed(2) : '-') + '</td>';
+            tableHtml += '<td style="font-weight:600;color:#ffa726;">' + (h.gbp ? h.gbp.toFixed(2) : '-') + '</td>';
+            tableHtml += '<td>' + (h.rub ? h.rub.toFixed(4) : '-') + '</td>';
+            tableHtml += '<td>' + (h.sar ? h.sar.toFixed(4) : '-') + '</td>';
+            tableHtml += '</tr>';
+          });
+          tableHtml += '</tbody></table>';
+          document.getElementById('currencyLogs').innerHTML = tableHtml;
+        } else {
+          document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Henüz döviz kaydı yok. İlk log 3 saat içinde oluşacak.</p>';
+        }
+      } catch(e) {
+        console.warn('Currency error:', e);
+        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi</p>';
+      }
+    }
 </script>
 </body>
 </html>
