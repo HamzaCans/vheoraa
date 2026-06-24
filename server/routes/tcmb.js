@@ -72,16 +72,17 @@ function parseXML(xml) {
 async function ensureTable() {
   try {
     const db = await getDb();
+    const isPg = !!process.env.DATABASE_URL;
     await db.run(`
       CREATE TABLE IF NOT EXISTS currency_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id ${isPg ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT'},
         tcmb_date TEXT,
         usd REAL,
         eur REAL,
         rub REAL,
         sar REAL,
         gbp REAL,
-        logged_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        logged_at TIMESTAMP DEFAULT ${isPg ? 'NOW()' : "CURRENT_TIMESTAMP"}
       )
     `);
     console.log('[TCMB] currency_logs tablosu hazır');
@@ -180,7 +181,9 @@ router.get('/chart', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
     const logs = await db.all(
-      `SELECT * FROM currency_logs WHERE logged_at >= datetime('now', '-24 hours') ORDER BY logged_at ASC`
+      process.env.DATABASE_URL
+        ? `SELECT * FROM currency_logs WHERE logged_at >= NOW() - INTERVAL '24 hours' ORDER BY logged_at ASC`
+        : `SELECT * FROM currency_logs WHERE logged_at >= datetime('now', '-24 hours') ORDER BY logged_at ASC`
     );
     res.json({ success: true, logs: logs || [] });
   } catch (e) {
@@ -200,7 +203,9 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
     // 24 saat önceki kur
     const prev24h = await db.get(
-      `SELECT * FROM currency_logs WHERE logged_at <= datetime('now', '-24 hours') ORDER BY logged_at DESC LIMIT 1`
+      process.env.DATABASE_URL
+        ? `SELECT * FROM currency_logs WHERE logged_at <= NOW() - INTERVAL '24 hours' ORDER BY logged_at DESC LIMIT 1`
+        : `SELECT * FROM currency_logs WHERE logged_at <= datetime('now', '-24 hours') ORDER BY logged_at DESC LIMIT 1`
     );
 
     // Değişim hesapla
