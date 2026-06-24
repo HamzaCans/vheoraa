@@ -130,8 +130,21 @@ function startScheduler() {
   console.log('[TCMB] Zamanlayıcı başlatıldı — her 3 saatte bir loglanacak');
 }
 
-// Başlat
-ensureTable().then(startScheduler);
+// Başlat (Vercel serverless uyumlu)
+let _initialized = false;
+async function init() {
+  if (_initialized) return;
+  _initialized = true;
+  await ensureTable();
+  await logRates();
+  // Vercel'de setInterval çalışmaz, ama local/PM2'de çalışır
+  setInterval(logRates, LOG_INTERVAL);
+}
+// Her istekte initialize et (cold start garantisi)
+router.use(async (req, res, next) => {
+  try { await init(); } catch (_) {}
+  next();
+});
 
 // ========== API: CANLI KUR ==========
 // GET /api/tcmb-rates
@@ -153,6 +166,8 @@ router.get('/', async (req, res) => {
     cacheTime = Date.now();
 
     res.json(cache);
+    // Her istekte DB'ye de logla (Vercel cron uyumlu)
+    logRates().catch(() => {});
   } catch (error) {
     if (cache) return res.json({ ...cache, stale: true });
     res.status(500).json({ success: false, error: 'TCMB kurları alınamadı' });
