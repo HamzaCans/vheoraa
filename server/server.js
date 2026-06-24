@@ -311,24 +311,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const staticFiles = [
-  'style.css', 'script.js', 'app.js',
-  'cookie-consent.js', 'maintenance.js',
-  'favicon.png', 'robots.txt', 'sitemap.xml',
-  'collection.html', 'gia-certified.html',
-  'restoration.html', 'logistics.html',
-  'custom-design.html', 'legal.html'
-];
+const _root = path.join(__dirname, '..');
+const _staticPaths = {
+  '/style.css': _root + '/style.css',
+  '/script.js': _root + '/script.js',
+  '/app.js': _root + '/app.js',
+  '/cookie-consent.js': _root + '/cookie-consent.js',
+  '/maintenance.js': _root + '/maintenance.js',
+  '/favicon.png': _root + '/favicon.png',
+  '/robots.txt': _root + '/robots.txt',
+  '/sitemap.xml': _root + '/sitemap.xml',
+  '/collection.html': _root + '/collection.html',
+  '/gia-certified.html': _root + '/gia-certified.html',
+  '/restoration.html': _root + '/restoration.html',
+  '/logistics.html': _root + '/logistics.html',
+  '/custom-design.html': _root + '/custom-design.html',
+  '/legal.html': _root + '/legal.html'
+};
 
-staticFiles.forEach(function(f) {
-  app.get('/' + f, function(req, res) {
-    res.sendFile(path.join(__dirname, '..', f));
+Object.keys(_staticPaths).forEach(function(route) {
+  app.get(route, function(req, res) {
+    res.sendFile(_staticPaths[route]);
   });
 });
 
-app.get('/images/*', function(req, res) {
-  res.sendFile(path.join(__dirname, '..', req.path));
-});
+app.use('/images', express.static(path.join(__dirname, '..', 'images')));
 
 const cacheTime = 7 * 24 * 60 * 60;
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
