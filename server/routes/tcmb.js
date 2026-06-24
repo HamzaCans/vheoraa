@@ -107,7 +107,7 @@ router.get('/list', authenticateToken, async (req, res) => {
     const logs = await db.all('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT ?', [limit]);
     res.json({ success: true, logs: logs || [] });
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    res.status(500).json({ success: false, error: e.message, stack: e.stack });
   }
 });
 
@@ -126,9 +126,17 @@ router.get('/chart', authenticateToken, async (req, res) => {
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
+    // Tablo yoksa oluştur
+    try {
+      await db.get('SELECT 1 FROM currency_logs LIMIT 1');
+    } catch (e) {
+      // Tablo yok
+      await db.run('CREATE TABLE IF NOT EXISTS currency_logs (id SERIAL PRIMARY KEY, tcmb_date TEXT, usd REAL, eur REAL, rub REAL, sar REAL, gbp REAL, logged_at TEXT DEFAULT NOW())');
+      // İlk logu yaz
+      await logRates();
+    }
     const latest = await db.get('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT 1');
     const count = await db.get('SELECT COUNT(*) as total FROM currency_logs');
-
     res.json({
       success: true,
       latest: latest || null,
@@ -136,7 +144,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
       changes24h: {}
     });
   } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    res.status(500).json({ success: false, error: e.message, stack: e.stack });
   }
 });
 
