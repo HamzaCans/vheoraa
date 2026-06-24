@@ -160,7 +160,7 @@ router.get('/', async (req, res) => {
 
 // ========== API: ADMIN — LOG GEÇMİŞİ ==========
 // GET /api/admin/currency-logs/list?limit=50
-router.get('/admin/list', authenticateToken, async (req, res) => {
+router.get('/list', authenticateToken, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const db = await getDb();
@@ -176,7 +176,7 @@ router.get('/admin/list', authenticateToken, async (req, res) => {
 
 // ========== API: ADMIN — SON 24 SAATLIK GRAFİK VERİSİ ==========
 // GET /api/admin/currency-logs/chart
-router.get('/admin/chart', authenticateToken, async (req, res) => {
+router.get('/chart', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
     const logs = await db.all(
@@ -190,7 +190,7 @@ router.get('/admin/chart', authenticateToken, async (req, res) => {
 
 // ========== API: ADMIN — İSTATİSTİKLER ==========
 // GET /api/admin/currency-logs/stats
-router.get('/admin/stats', authenticateToken, async (req, res) => {
+router.get('/stats', authenticateToken, async (req, res) => {
   try {
     const db = await getDb();
 
