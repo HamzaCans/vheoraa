@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server/server.js",
-    "vercel-build": "cd server && npm install && cd .. && node scripts/copy-static.js"
+    "vercel-build": "npm install && cd server && npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
