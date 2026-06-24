@@ -107,3 +107,13 @@ router.get('/stats', (req, res) => {
 
 module.exports = router;
 // Wed Jun 24 21:34:27 UTC 2026
+
+// Emergency: direct currency endpoint (no auth, no cache)
+router.get('/direct-stats', (req, res) => {
+  const latest = rateHistory.length > 0 ? rateHistory[rateHistory.length - 1] : null;
+  res.json({ success: true, latest, totalLogs: rateHistory.length, changes24h: {} });
+});
+router.get('/direct-list', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  res.json({ success: true, logs: rateHistory.slice(-limit).reverse() });
+});
