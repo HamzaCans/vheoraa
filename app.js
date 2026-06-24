@@ -311,9 +311,10 @@ document.addEventListener('DOMContentLoaded', async () => {
               <img class="blur-up" src="${imgSrc}" alt="${p.name}" width="300" height="300" loading="lazy" decoding="async">
               ${badge}
             </div>
-            <div class="product-info">
+               <div class="product-info">
               <div class="product-category" data-i18n="${catI18n}">${catLabel}</div>
               <h3 class="product-name">${p.name}</h3>
+              <div class="calc-gold-price featured-price" data-gram="${p.gram}" data-labor-cost="${p.labor_cost || 2500}">—</div>
               <button class="product-price-btn open-quote" data-product="${p.name}" data-i18n="col.product.quote">Teklif Al</button>
             </div>
           </div>
@@ -333,7 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (currentTranslations && Object.keys(currentTranslations).length) applyTranslations();
     } catch (_) {}
   }
-  loadFeaturedProducts();
+  loadFeaturedProducts().then(() => fetchGoldPrice());
 
   // ========== DİNAMİK SHOWCASE (KAYAN BANT) ==========
   async function loadShowcase() {
@@ -434,7 +435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const laborCost = parseInt(el.getAttribute('data-labor-cost')) || 2500;
         if (gram && currentGoldPrice > 0) {
           const fiyat = Math.round((currentGoldPrice + laborCost) * gram);
-          el.textContent = fiyat.toLocaleString('tr-TR') + ' ₺';
+          el.textContent = fiyat.toLocaleString('tr-TR') + ' ₺ (' + gram + 'g)';
         }
       });
     } catch (_) {}

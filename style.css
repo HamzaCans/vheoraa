@@ -1570,6 +1570,23 @@ section[id] {
   letter-spacing: 0.04em;
 }
 
+.featured-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(200,155,60,0.12), rgba(200,155,60,0.04));
+  border: 1px solid rgba(200,155,60,0.25);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #C89B3C;
+  letter-spacing: 0.02em;
+}
+
 .product-price-btn {
   width: 100%;
   padding: 12px;
@@ -4953,6 +4970,12 @@ font {
 }
 .product-card:hover .product-name {
   color: var(--color-gold);
+}
+.featured-price {
+  transition: color 0.3s ease;
+}
+.product-card:hover .featured-price {
+  color: #F0D080;
 }
 .product-price-btn {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
