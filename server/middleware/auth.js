@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || crypto.createHash('sha256').update('vheora-jwt-' + (process.env.DATABASE_URL || 'vheora')).digest('hex');
 if (!process.env.JWT_SECRET) {
-  console.error('[SECURITY] JWT_SECRET env var not set. Using random fallback — existing tokens will be invalidated on restart!');
+  console.warn('[SECURITY] JWT_SECRET env var not set. Using stable fallback from DATABASE_URL.');
 }
 
 const tokenBlacklist = new Set();

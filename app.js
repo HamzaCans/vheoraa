@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentGoldPrice = goldData.hasAltin || 0;
       }
       var goldPrice = currentGoldPrice;
-      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      const catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
       function priceTag(p) {
         var gram = parseFloat(p.gram);
         var laborCost = parseInt(p.labor_cost) || 2500;
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) return;
       const products = await res.json();
       if (!products.length) return;
-      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      const catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
       function renderItems(items) {
         return items.map(p => {
           const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');

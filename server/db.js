@@ -321,18 +321,28 @@ async function seedIfEmpty(driver) {
     }
   }
 
+  // Eski kategori değerlerini yenilerine migrate et
+  try {
+    await driver.run("UPDATE products SET category = 'altin_yuzuk' WHERE category = 'yuzuk' AND name NOT LIKE '%Tekta\u015F%' AND name NOT LIKE '%Prenses%'");
+    await driver.run("UPDATE products SET category = 'pirantali_tek_tas' WHERE category = 'yuzuk' AND (name LIKE '%Tekta\u015F%' OR name LIKE '%Prenses%')");
+    await driver.run("UPDATE products SET category = 'altin_kolye' WHERE category = 'kolye'");
+    await driver.run("UPDATE products SET category = 'altin_bileklik' WHERE category = 'bileklik'");
+    await driver.run("UPDATE products SET category = 'altin_kupe' WHERE category = 'kupe'");
+    await driver.run("UPDATE products SET category = 'altin_yuzuk' WHERE category = 'set'");
+  } catch (_) {}
+
   const productCount = await driver.get('SELECT COUNT(*) as c FROM products');
   if (productCount.c === '0' || productCount.c === 0) {
     const seedProducts = [
-      { name: 'Sonsuz \u00C7i\u00E7ek Tekta\u015F', category: 'yuzuk', description: 'Sonsuzluk ve \u00E7i\u00E7ek zarafetinin birle\u015Fimi. 0.50 ct GIA sertifikal\u0131 p\u0131rlanta, 14K alt\u0131n mont\u00FCr.', badge: 'Yeni', gram: '3.2', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 1, sort_order: 1 },
-      { name: 'G\u00F6ksel Damla Kolye', category: 'kolye', description: 'G\u00F6ky\u00FCz\u00FCn\u00FCn mavi derinli\u011Fini tasvir eden damla formunda p\u0131rlanta kolye.', badge: '\u00C7ok Satan', gram: '4.1', labor_cost: 2500, image: 'images/diamond_necklace.png', is_featured: 1, sort_order: 2 },
-      { name: '\u015Eafak Damlalar\u0131 K\u00FCpe', category: 'kupe', description: '\u015Eafak vaktinin s\u0131cak renklerinden ilham alan damla k\u00FCpe \u00E7ifti.', badge: 'S\u0131n\u0131rl\u0131 Seri', gram: '2.8', labor_cost: 2500, image: 'images/gold_earrings.png', is_featured: 1, sort_order: 3 },
-      { name: 'Alt\u0131n Zincir Bileklik', category: 'bileklik', description: '585 ayar alt\u0131n zincir bileklik. Zarif ve g\u00FCnl\u00FCk kullan\u0131ma uygun tasar\u0131m.', badge: '', gram: '5.5', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 4 },
-      { name: 'Sonsuzluk Tekta\u015F', category: 'yuzuk', description: 'Sonsuzluk sembol\u00FCn\u00FC ta\u015F\u0131yan tekta\u015F y\u00FCz\u00FCk. 0.30 ct p\u0131rlanta, beyaz alt\u0131n mont\u00FCr.', badge: '', gram: '2.9', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 0, sort_order: 5 },
-      { name: 'Prenses Kesim Y\u00FCz\u00FCk', category: 'yuzuk', description: 'Prenses kesim 0.75 ct p\u0131rlanta ile tasarlanm\u0131\u015F l\u00FCks ni\u015Fan y\u00FCz\u00FC\u011F\u00FC.', badge: '', gram: '3.8', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 0, sort_order: 6 },
-      { name: '\u0130talyan Zincir', category: 'bileklik', description: '\u0130talyan i\u015F\u00E7ili\u011Fiyle \u00F6r\u00FClm\u00FC\u015F alt\u0131n bileklik. G\u00FCnl\u00FCk ve \u00F6zel g\u00FCn kullan\u0131m\u0131.', badge: '', gram: '6.2', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 7 },
-      { name: 'P\u0131rlanta Su Yolu', category: 'bileklik', description: 'Su yolu tekni\u011Fiyle dizilmi\u015F p\u0131rlanta ve alt\u0131n bileklik.', badge: '', gram: '7.1', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 8 },
-      { name: 'D\u00FC\u011F\u00FCn Koleksiyonu Set', category: 'set', description: 'D\u00FC\u011F\u00FCn\u00FCz i\u00E7in tasarlanm\u0131\u015F tamamlay\u0131c\u0131 kolye, k\u00FCpe ve y\u00FCz\u00FCk seti.', badge: '', gram: '12.5', labor_cost: 2500, image: 'images/hero_collection.png', is_featured: 0, sort_order: 9 }
+      { name: 'Sonsuz \u00C7i\u00E7ek Tekta\u015F', category: 'pirantali_tek_tas', description: 'Sonsuzluk ve \u00E7i\u00E7ek zarafetinin birle\u015Fimi. 0.50 ct GIA sertifikal\u0131 p\u0131rlanta, 14K alt\u0131n mont\u00FCr.', badge: 'Yeni', gram: '3.2', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 1, sort_order: 1 },
+      { name: 'G\u00F6ksel Damla Kolye', category: 'altin_kolye', description: 'G\u00F6ky\u00FCz\u00FCn\u00FCn mavi derinli\u011Fini tasvir eden damla formunda p\u0131rlanta kolye.', badge: '\u00C7ok Satan', gram: '4.1', labor_cost: 2500, image: 'images/diamond_necklace.png', is_featured: 1, sort_order: 2 },
+      { name: '\u015Eafak Damlalar\u0131 K\u00FCpe', category: 'altin_kupe', description: '\u015Eafak vaktinin s\u0131cak renklerinden ilham alan damla k\u00FCpe \u00E7ifti.', badge: 'S\u0131n\u0131rl\u0131 Seri', gram: '2.8', labor_cost: 2500, image: 'images/gold_earrings.png', is_featured: 1, sort_order: 3 },
+      { name: 'Alt\u0131n Zincir Bileklik', category: 'altin_bileklik', description: '585 ayar alt\u0131n zincir bileklik. Zarif ve g\u00FCnl\u00FCk kullan\u0131ma uygun tasar\u0131m.', badge: '', gram: '5.5', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 4 },
+      { name: 'Sonsuzluk Tekta\u015F', category: 'pirantali_tek_tas', description: 'Sonsuzluk sembol\u00FCn\u00FC ta\u015F\u0131yan tekta\u015F y\u00FCz\u00FCk. 0.30 ct p\u0131rlanta, beyaz alt\u0131n mont\u00FCr.', badge: '', gram: '2.9', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 0, sort_order: 5 },
+      { name: 'Prenses Kesim Y\u00FCz\u00FCk', category: 'pirantali_tek_tas', description: 'Prenses kesim 0.75 ct p\u0131rlanta ile tasarlanm\u0131\u015F l\u00FCks ni\u015Fan y\u00FCz\u00FC\u011F\u00FC.', badge: '', gram: '3.8', labor_cost: 2500, image: 'images/gold_diamond_ring.png', is_featured: 0, sort_order: 6 },
+      { name: '\u0130talyan Zincir', category: 'altin_bileklik', description: '\u0130talyan i\u015F\u00E7ili\u011Fiyle \u00F6r\u00FClm\u00FC\u015F alt\u0131n bileklik. G\u00FCnl\u00FCk ve \u00F6zel g\u00FCn kullan\u0131m\u0131.', badge: '', gram: '6.2', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 7 },
+      { name: 'P\u0131rlanta Su Yolu', category: 'altin_bileklik', description: 'Su yolu tekni\u011Fiyle dizilmi\u015F p\u0131rlanta ve alt\u0131n bileklik.', badge: '', gram: '7.1', labor_cost: 2500, image: 'images/gold_bracelet.png', is_featured: 0, sort_order: 8 },
+      { name: 'D\u00FC\u011F\u00FCn Koleksiyonu Set', category: 'altin_yuzuk', description: 'D\u00FC\u011F\u00FCn\u00FCz i\u00E7in tasarlanm\u0131\u015F tamamlay\u0131c\u0131 kolye, k\u00FCpe ve y\u00FCz\u00FCk seti.', badge: '', gram: '12.5', labor_cost: 2500, image: 'images/hero_collection.png', is_featured: 0, sort_order: 9 }
     ];
     for (const p of seedProducts) {
       await driver.run(

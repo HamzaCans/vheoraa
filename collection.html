@@ -450,11 +450,12 @@
         <div class="container">
             <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all" data-i18n="col.filter.all" style="--i:0">Tümü</button>
-                <button class="filter-btn" data-filter="yuzuk" data-i18n="col.filter.ring" style="--i:1">Yüzükler</button>
-                <button class="filter-btn" data-filter="bileklik" data-i18n="col.filter.bracelet" style="--i:2">Bileklikler</button>
-                <button class="filter-btn" data-filter="kolye" data-i18n="col.filter.necklace" style="--i:3">Kolyeler</button>
-                <button class="filter-btn" data-filter="kupe" data-i18n="col.filter.earring" style="--i:4">Küpeler</button>
-                <button class="filter-btn" data-filter="set" data-i18n="col.filter.set" style="--i:5">Set Takılar</button>
+                <button class="filter-btn" data-filter="altin_yuzuk" data-i18n="col.filter.gold_ring" style="--i:1">Altın Yüzük</button>
+                <button class="filter-btn" data-filter="altin_kolye" data-i18n="col.filter.gold_necklace" style="--i:2">Altın Kolye</button>
+                <button class="filter-btn" data-filter="altin_bileklik" data-i18n="col.filter.gold_bracelet" style="--i:3">Altın Bileklik</button>
+                <button class="filter-btn" data-filter="altin_kupe" data-i18n="col.filter.gold_earring" style="--i:4">Altın Küpe</button>
+                <button class="filter-btn" data-filter="pirantali_tek_tas" data-i18n="col.filter.diamond_solitaire" style="--i:5">Pırlantalı Tek Taş</button>
+                <button class="filter-btn" data-filter="altin_alyans" data-i18n="col.filter.wedding_band" style="--i:6">Altın Alyans</button>
             </div>
         </div>
     </div>
@@ -566,18 +567,18 @@
             // Initial fetch already done above, start interval
             setInterval(fetchGoldPrice, 60000);
 
-            const categoryMap = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
-            const categoryLabelMap = { yuzuk: 'Pırlanta Yüzük', bileklik: 'Altın Bileklik', kolye: 'Pırlanta Kolye', kupe: 'Altın Küpe', set: 'Set Takı' };
+            const categoryMap = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
+            const categoryLabelMap = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
 
             if (allProducts.length === 0) {
                 allProducts = [
-                    { id: 1, name: 'Sonsuzluk Tektaş', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
-                    { id: 2, name: 'Prenses Kesim', category: 'yuzuk', image: 'images/gold_diamond_ring.png' },
-                    { id: 3, name: 'İtalyan Zincir', category: 'bileklik', image: 'images/gold_bracelet.png' },
-                    { id: 4, name: 'Pırlanta Su Yolu', category: 'bileklik', image: 'images/gold_bracelet.png' },
-                    { id: 5, name: 'Göksel Damla', category: 'kolye', image: 'images/diamond_necklace.png' },
-                    { id: 6, name: 'Şafak Damlaları', category: 'kupe', image: 'images/gold_earrings.png' },
-                    { id: 7, name: 'Düğün Koleksiyonu', category: 'set', image: 'images/hero_collection.png' },
+                    { id: 1, name: 'Sonsuzluk Tektaş', category: 'pirantali_tek_tas', image: 'images/gold_diamond_ring.png' },
+                    { id: 2, name: 'Prenses Kesim', category: 'pirantali_tek_tas', image: 'images/gold_diamond_ring.png' },
+                    { id: 3, name: 'İtalyan Zincir', category: 'altin_bileklik', image: 'images/gold_bracelet.png' },
+                    { id: 4, name: 'Pırlanta Su Yolu', category: 'altin_bileklik', image: 'images/gold_bracelet.png' },
+                    { id: 5, name: 'Göksel Damla', category: 'altin_kolye', image: 'images/diamond_necklace.png' },
+                    { id: 6, name: 'Şafak Damlaları', category: 'altin_kupe', image: 'images/gold_earrings.png' },
+                    { id: 7, name: 'Düğün Koleksiyonu', category: 'altin_yuzuk', image: 'images/hero_collection.png' },
                 ];
             }
 
@@ -694,7 +695,19 @@
                 });
             });
 
-            renderProducts('all');
+            var urlFilter = new URLSearchParams(window.location.search).get('filter');
+            if (urlFilter) {
+                var matchBtn = Array.from(filterBtns).find(b => b.getAttribute('data-filter') === urlFilter);
+                if (matchBtn) {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    matchBtn.classList.add('active');
+                    renderProducts(urlFilter);
+                } else {
+                    renderProducts('all');
+                }
+            } else {
+                renderProducts('all');
+            }
 
             const modal = document.getElementById('quoteModal');
             const overlay = document.getElementById('quoteOverlay');

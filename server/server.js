@@ -24,7 +24,7 @@ const sitemapRoutes = require('./routes/sitemap');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const csrfSecret = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
+const csrfSecret = process.env.CSRF_SECRET || crypto.createHash('sha256').update('vheora-csrf-' + (process.env.DATABASE_URL || 'vheora')).digest('hex').substring(0, 32);
 function csrfInit(req, res, next) {
   if (!req.cookies?.csrf_token) {
     const token = crypto.randomBytes(32).toString('hex');

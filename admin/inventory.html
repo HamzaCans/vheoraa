@@ -206,8 +206,8 @@
         container.innerHTML = '<p class="empty-state">' + (allProducts.length ? 'Aramanızla eşleşen ürün bulunamadı.' : 'Henüz ürün eklenmemiş.') + '</p>';
         return;
       }
-      var catColors = { yuzuk: '#d4a853', bileklik: '#e07c4f', kolye: '#5cb3e0', kupe: '#b07cd4', set: '#5ce0a0' };
-      var catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      var catColors = { altin_yuzuk: '#d4a853', altin_kolye: '#5cb3e0', altin_bileklik: '#e07c4f', altin_kupe: '#b07cd4', pirantali_tek_tas: '#5ce0a0', altin_alyans: '#f0d080' };
+      var catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
       container.innerHTML = '<table><thead><tr><th>Görsel</th><th>Ürün</th><th>Kategori</th><th>Gram</th><th>Mevcut Stok</th><th>Eşik</th><th>Durum</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>' +
         filtered.map(function(p) {
           var level = getStockLevel(p.stock, p.low_stock_threshold);

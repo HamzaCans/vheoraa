@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) return;
       const products = await res.json();
       if (!products.length) return;
-      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      const catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
       grid.innerHTML = products.map((p, i) => {
         const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
         const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) return;
       const products = await res.json();
       if (!products.length) return;
-      const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      const catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
       function renderItems(items) {
         return items.map(p => {
           const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');

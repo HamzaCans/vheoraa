@@ -35,14 +35,15 @@
           </div>
           <div class="form-group">
             <label>Kategori *</label>
-            <select id="prodCategory" required>
-              <option value="">Seçin</option>
-              <option value="yuzuk">Yüzük</option>
-              <option value="bileklik">Bileklik</option>
-              <option value="kolye">Kolye</option>
-              <option value="kupe">Küpe</option>
-              <option value="set">Set Takı</option>
-            </select>
+          <select id="prodCategory" required>
+            <option value="">Seçin</option>
+            <option value="altin_yuzuk">Altın Yüzük</option>
+            <option value="altin_kolye">Altın Kolye</option>
+            <option value="altin_bileklik">Altın Bileklik</option>
+            <option value="altin_kupe">Altın Küpe</option>
+            <option value="pirantali_tek_tas">Pırlantalı Tek Taş</option>
+            <option value="altin_alyans">Altın Alyans</option>
+          </select>
           </div>
         </div>
         <div class="form-group">
@@ -317,9 +318,10 @@
           products.map(function(p) {
             var imgSrc = p.images && p.images.length ? p.images[0] : (p.image ? (p.image.startsWith('data:') ? p.image : API + p.image) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><rect fill="%23111118" width="50" height="50"/></svg>');
             var imgCount = p.images && p.images.length ? p.images.length : (p.image ? 1 : 0);
-            var catColors = { yuzuk: '#d4a853', bileklik: '#e07c4f', kolye: '#5cb3e0', kupe: '#b07cd4', set: '#5ce0a0' };
-            var catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
-            var catColor = catColors[p.category] || '#d4a853';
+                var catColors = { altin_yuzuk: '#d4a853', altin_kolye: '#5cb3e0', altin_bileklik: '#e07c4f', altin_kupe: '#b07cd4', pirantali_tek_tas: '#5ce0a0', altin_alyans: '#f0d080' };
+                var catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
+                var catLabel = catLabels[p.category] || p.category;
+                var catColor = catColors[p.category] || '#d4a853';
             var catLabel = catLabels[p.category] || p.category;
             return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb">' + (imgCount > 1 ? '<span style="position:relative;top:-40px;left:-10px;background:var(--color-gold);color:#000;font-size:0.55rem;padding:2px 5px;border-radius:8px;font-weight:700;">' + imgCount + '</span>' : '') + '</td>' +
               '<td style="font-weight:500;">' + p.name + '</td>' +
