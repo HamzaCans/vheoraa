@@ -181,6 +181,16 @@ async function initSchema(driver) {
       has_altin REAL NOT NULL,
       raw_data TEXT DEFAULT '',
       created_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
+    )`,
+    `CREATE TABLE IF NOT EXISTS currency_logs (
+      id ${process.env.DATABASE_URL ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+      tcmb_date TEXT DEFAULT '',
+      usd REAL DEFAULT 0,
+      eur REAL DEFAULT 0,
+      rub REAL DEFAULT 0,
+      sar REAL DEFAULT 0,
+      gbp REAL DEFAULT 0,
+      logged_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
     )`
   ];
 

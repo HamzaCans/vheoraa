@@ -15,31 +15,7 @@ let cache = null;
 let cacheTime = 0;
 const CACHE_TTL = 3600000;
 
-// ========== INIT FLAG ==========
-let _dbReady = false;
-
-async function ensureDb() {
-  if (_dbReady) return;
-  try {
-    const db = await getDb();
-    await db.exec(`
-      CREATE TABLE IF NOT EXISTS currency_logs (
-        id SERIAL PRIMARY KEY,
-        tcmb_date TEXT,
-        usd REAL,
-        eur REAL,
-        rub REAL,
-        sar REAL,
-        gbp REAL,
-        logged_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-    _dbReady = true;
-    console.log('[TCMB] currency_logs tablosu hazır');
-  } catch (e) {
-    console.error('[TCMB] Tablo hatası:', e.message);
-  }
-}
+// Tablo db.js'te otomatik oluşturuluyor
 
 // ========== TCMB XML ÇEK ==========
 function fetchTCMBRates() {
@@ -87,7 +63,7 @@ function parseXML(xml) {
 // ========== DB'YE LOG YAZ ==========
 async function logRates() {
   try {
-    await ensureDb();
+
     const data = await fetchTCMBRates();
     const r = data.rates;
     const db = await getDb();
@@ -133,7 +109,7 @@ router.get('/', async (req, res) => {
 // ========== API: ADMIN — LOG LİSTESİ ==========
 router.get('/list', authenticateToken, async (req, res) => {
   try {
-    await ensureDb();
+
     const db = await getDb();
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const logs = await db.all('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT ?', [limit]);
@@ -147,7 +123,7 @@ router.get('/list', authenticateToken, async (req, res) => {
 // ========== API: ADMIN — GRAFİK ==========
 router.get('/chart', authenticateToken, async (req, res) => {
   try {
-    await ensureDb();
+
     const db = await getDb();
     const logs = await db.all("SELECT * FROM currency_logs WHERE logged_at >= NOW() - INTERVAL '24 hours' ORDER BY logged_at ASC");
     res.json({ success: true, logs: logs || [] });
@@ -160,7 +136,7 @@ router.get('/chart', authenticateToken, async (req, res) => {
 // ========== API: ADMIN — İSTATİSTİKLER ==========
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
-    await ensureDb();
+
     const db = await getDb();
     const latest = await db.get('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT 1');
     const count = await db.get('SELECT COUNT(*) as total FROM currency_logs');
