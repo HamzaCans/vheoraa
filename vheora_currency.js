@@ -1,16 +1,10 @@
 /* ========================================
    VHEORA — Currency Conversion Module
-   TCMB canlı kurlar (backend proxy ile)
+   TCMB canlı kurlar (CORS proxy ile)
    ======================================== */
 
 (function() {
   'use strict';
-
-  var API_URL = (function() {
-    var isFile = window.location.protocol === 'file:';
-    var isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-    return (isFile || isLocal) && window.location.port !== '3001' ? 'http://localhost:3001' : '';
-  })();
 
   // ========== DİL → PARA BİRİMİ EŞLEŞTİRMESİ ==========
   var LANG_CURRENCY_MAP = {
@@ -23,16 +17,11 @@
   };
 
   var _rates = null;
-  var _ratesDate = '';
   var _ratesTimestamp = 0;
-  var _ratesTTL = 3600000; // 1 saat cache
+  var _ratesTTL = 3600000;
 
-  // Fallback (nadiren kullanılır)
-  var FALLBACK_RATES = {
-    TRY: 1, USD: 46.50, EUR: 52.76, RUB: 0.62, SAR: 12.39, GBP: 61.37
-  };
+  var FALLBACK_RATES = { TRY: 1, USD: 46.50, EUR: 52.76, RUB: 0.62, SAR: 12.39, GBP: 61.37 };
 
-  // ========== MEVCUT DİLİ AL ==========
   function getCurrentLang() {
     var cookies = document.cookie.split(';');
     for (var i = 0; i < cookies.length; i++) {
@@ -46,29 +35,52 @@
 
   function getCurrentCurrency() {
     var lang = getCurrentLang();
-    // Haritada varsa o para birimini kullan, yoksa EUR göster
     return LANG_CURRENCY_MAP[lang] || { code: 'EUR', symbol: '€', locale: 'en-US', name: 'Euro' };
   }
 
-  // ========== BACKEND PROXY'DEN KURLARI ÇEK ==========
-  // GET /api/tcmb-rates → { success, date, rates: { USD: 46.49, EUR: 52.76, ... } }
+  // ========== TCMB'DEN KURLARI ÇEK ==========
   function fetchRates(callback) {
     if (_rates && (Date.now() - _ratesTimestamp) < _ratesTTL) {
       if (callback) callback(_rates);
       return;
     }
 
+    // 1. Önce backend proxy dene
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', API_URL + '/api/tcmb-rates', true);
+    xhr.open('GET', '/api/tcmb-rates', true);
     xhr.timeout = 8000;
-
     xhr.onload = function() {
       if (xhr.status === 200) {
         try {
           var data = JSON.parse(xhr.responseText);
           if (data.success && data.rates) {
             _rates = data.rates;
-            _ratesDate = data.date || '';
+            _ratesTimestamp = Date.now();
+            if (callback) callback(_rates);
+            return;
+          }
+        } catch (e) {}
+      }
+      // Backend başarısız → CORS proxy ile TCMB'den çek
+      fetchFromTCMBProxy(callback);
+    };
+    xhr.onerror = function() { fetchFromTCMBProxy(callback); };
+    xhr.ontimeout = function() { fetchFromTCMBProxy(callback); };
+    xhr.send();
+  }
+
+  // CORS proxy ile TCMB XML çek
+  function fetchFromTCMBProxy(callback) {
+    var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://www.tcmb.gov.tr/kurlar/today.xml');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', proxyUrl, true);
+    xhr.timeout = 10000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var rates = parseTCMBXML(xhr.responseText);
+          if (rates && Object.keys(rates).length > 1) {
+            _rates = rates;
             _ratesTimestamp = Date.now();
             if (callback) callback(_rates);
             return;
@@ -80,24 +92,37 @@
       _ratesTimestamp = Date.now();
       if (callback) callback(_rates);
     };
-
     xhr.onerror = function() {
       _rates = FALLBACK_RATES;
       _ratesTimestamp = Date.now();
       if (callback) callback(_rates);
     };
-
     xhr.ontimeout = function() {
       _rates = FALLBACK_RATES;
       _ratesTimestamp = Date.now();
       if (callback) callback(_rates);
     };
-
     xhr.send();
   }
 
-  // ========== FİYAT DÖNÜŞTÜR ==========
-  // rates: 1 birim = X TRY → fiyatTRY / rate = hedef birim
+  function parseTCMBXML(xml) {
+    var rates = { TRY: 1 };
+    var regex = /<Currency[^>]*Kod="([^"]+)"[^>]*>([\s\S]*?)<\/Currency>/g;
+    var match;
+    while ((match = regex.exec(xml)) !== null) {
+      var kod = match[1];
+      var block = match[2];
+      var unitMatch = block.match(/<Unit>(\d+)<\/Unit>/);
+      var sellingMatch = block.match(/<ForexSelling>([\d.,]+)<\/ForexSelling>/);
+      if (sellingMatch && sellingMatch[1]) {
+        var selling = parseFloat(sellingMatch[1].replace(',', '.'));
+        var unit = unitMatch ? parseInt(unitMatch[1]) : 1;
+        if (selling > 0) rates[kod] = selling / unit;
+      }
+    }
+    return rates;
+  }
+
   function convertPrice(fiyatTRY, targetCurrency) {
     if (!targetCurrency || targetCurrency === 'TRY') return fiyatTRY;
     var rates = _rates || FALLBACK_RATES;
@@ -112,7 +137,6 @@
     catch (e) { return fiyat.toLocaleString(); }
   }
 
-  // ========== ANASAYFA FİYAT HTML'İ ==========
   function renderPrice(fiyatTRY, gram) {
     if (!fiyatTRY || fiyatTRY <= 0) return '';
     var c = getCurrentCurrency();
@@ -125,7 +149,6 @@
     return html;
   }
 
-  // ========== COLLECTION FİYAT HTML'İ ==========
   function renderPriceTag(fiyatTRY, gram) {
     if (!fiyatTRY || fiyatTRY <= 0) return '';
     var c = getCurrentCurrency();
@@ -138,7 +161,6 @@
       '</div>';
   }
 
-  // ========== TÜM FİYATLARI GÜNCELLE ==========
   function updateAllPrices() {
     var c = getCurrentCurrency();
     document.querySelectorAll('.currency-aware[data-try-price]').forEach(function(el) {
@@ -159,7 +181,6 @@
     });
   }
 
-  // ========== DİL DEĞİŞİKLİĞİNİ DİNLE ==========
   function onLanguageChange(callback) {
     var observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
@@ -167,12 +188,8 @@
       });
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    window.addEventListener('vheora:langChange', function(e) {
-      if (callback) callback(e.detail ? e.detail.lang : getCurrentLang());
-    });
   }
 
-  // ========== GLOBAL ERİŞİM ==========
   window.VheoraCurrency = {
     LANG_CURRENCY_MAP: LANG_CURRENCY_MAP,
     getCurrentLang: getCurrentLang,
@@ -184,11 +201,9 @@
     renderPriceTag: renderPriceTag,
     updateAllPrices: updateAllPrices,
     onLanguageChange: onLanguageChange,
-    getRates: function() { return _rates || FALLBACK_RATES; },
-    getRatesDate: function() { return _ratesDate; }
+    getRates: function() { return _rates || FALLBACK_RATES; }
   };
 
-  // Sayfa yüklenince kurları çek
   fetchRates(function() {
     setTimeout(updateAllPrices, 500);
   });
