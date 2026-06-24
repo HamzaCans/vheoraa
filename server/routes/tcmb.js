@@ -122,6 +122,33 @@ router.get('/chart', authenticateToken, async (req, res) => {
   }
 });
 
+// ========== DEBUG (public, silinecek) ==========
+router.get('/debug', async (req, res) => {
+  try {
+    const db = await getDb();
+    let tableOk = false;
+    let tableErr = null;
+    try {
+      await db.get('SELECT 1 FROM currency_logs LIMIT 1');
+      tableOk = true;
+    } catch (e) {
+      tableErr = e.message;
+      try {
+        await db.run('CREATE TABLE IF NOT EXISTS currency_logs (id SERIAL PRIMARY KEY, tcmb_date TEXT, usd REAL, eur REAL, rub REAL, sar REAL, gbp REAL, logged_at TEXT DEFAULT NOW())');
+        tableOk = true;
+        await logRates();
+      } catch (e2) {
+        tableErr = e2.message;
+      }
+    }
+    const count = tableOk ? await db.get('SELECT COUNT(*) as total FROM currency_logs') : null;
+    const latest = tableOk ? await db.get('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT 1') : null;
+    res.json({ tableOk, tableErr, totalLogs: count ? count.total : 0, latest, cache: !!cache });
+  } catch (e) {
+    res.status(500).json({ error: e.message, stack: e.stack });
+  }
+});
+
 // ========== API: ADMIN — İSTATİSTİKLER ==========
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
