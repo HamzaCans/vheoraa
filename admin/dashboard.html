@@ -170,7 +170,7 @@
       try {
         var res = await fetch(url, { ...options, signal: controller.signal });
         if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(() => window.location.href = '/admin/', 1500); return null; }
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) { var errBody = ''; try { errBody = await res.text(); } catch(_) {} throw new Error('HTTP ' + res.status + ' — ' + errBody.substring(0, 300)); }
         return await res.json();
       } finally { clearTimeout(timeout); }
     }
@@ -378,7 +378,7 @@
         }
       } catch(e) {
         console.warn('Gold price error:', e);
-        document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Altın fiyatı yüklenemedi</p>';
+        document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Altın fiyatı yüklenemedi</p><pre style="color:#ef5350;font-size:11px;white-space:pre-wrap;">' + e.message + '</pre>';
       }
     }
     async function loadLatestActivity() {
@@ -498,7 +498,7 @@
         }
       } catch(e) {
         console.warn('Currency error:', e);
-        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi</p>';
+        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi</p><pre style="color:#ef5350;font-size:11px;white-space:pre-wrap;">' + e.message + '</pre>';
       }
     }
 </script>
