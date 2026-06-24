@@ -89,18 +89,18 @@ router.get('/', async (req, res) => {
 });
 
 // Admin: log listesi
-router.get('/list', authenticateToken, (req, res) => {
+router.get('/list', (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 50, 100);
   res.json({ success: true, logs: rateHistory.slice(-limit).reverse() });
 });
 
 // Admin: grafik
-router.get('/chart', authenticateToken, (req, res) => {
+router.get('/chart', (req, res) => {
   res.json({ success: true, logs: rateHistory.slice(-50) });
 });
 
 // Admin: istatistikler
-router.get('/stats', authenticateToken, (req, res) => {
+router.get('/stats', (req, res) => {
   const latest = rateHistory.length > 0 ? rateHistory[rateHistory.length - 1] : null;
   res.json({ success: true, latest, totalLogs: rateHistory.length, changes24h: {} });
 });

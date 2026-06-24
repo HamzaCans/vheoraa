@@ -419,7 +419,7 @@
         var headers = { 'Authorization': 'Bearer ' + token };
 
         // Son kurları çek
-        var stats = await fetchJSON(API + '/api/admin/currency-logs/stats', { headers: headers });
+        var stats = await fetchJSON(API + '/api/admin/currency-logs/stats');
         if (stats && stats.latest) {
           var l = stats.latest;
           document.getElementById('curUSD').textContent = l.usd ? l.usd.toFixed(2) + ' ₺' : '—';
@@ -446,7 +446,7 @@
         }
 
         // Grafik verisi
-        var chartData = await fetchJSON(API + '/api/admin/currency-logs/chart', { headers: headers });
+        var chartData = await fetchJSON(API + '/api/admin/currency-logs/chart');
         if (chartData && chartData.logs && chartData.logs.length) {
           var logs = chartData.logs;
           var labels = logs.map(function(h) {
