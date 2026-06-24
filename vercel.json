@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": "public",
-  "framework": "node",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.js" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

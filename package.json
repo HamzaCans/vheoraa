@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server/server.js",
-    "vercel-build": "npm install && cd server && npm install && cd .. && node -e \"const fs=require('fs'); const path=require('path'); const pub='public'; if(!fs.existsSync(pub)) fs.mkdirSync(pub, {recursive:true}); ['style.css','script.js','app.js','index.html','collection.html','custom-design.html','gia-certified.html','restoration.html','logistics.html','404.html','manifest.json','sw.js','favicon.png','robots.txt'].forEach(f=>{ if(fs.existsSync(f)) fs.copyFileSync(f,path.join(pub,f)); }); if(fs.existsSync('images')) { const dest=path.join(pub,'images'); if(!fs.existsSync(dest)) fs.mkdirSync(dest, {recursive:true}); fs.readdirSync('images').forEach(f=>fs.copyFileSync(path.join('images',f),path.join(dest,f)); }); console.log('Static files copied to public/');\""
+    "vercel-build": "npm install && cd server && npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
