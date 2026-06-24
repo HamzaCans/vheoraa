@@ -308,7 +308,20 @@ app.use('/api', goldPriceRoutes);
 app.use('/api/sitemap', sitemapRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const fs = require('fs');
+  const root = path.join(__dirname, '..');
+  const files = [];
+  try {
+    const entries = fs.readdirSync(root);
+    entries.forEach(e => { files.push(e); });
+  } catch(e) { files.push('ERROR: ' + e.message); }
+  res.json({
+    status: 'ok',
+    dirname: __dirname,
+    root: root,
+    files: files,
+    timestamp: new Date().toISOString()
+  });
 });
 
 const cacheTime = 7 * 24 * 60 * 60;
