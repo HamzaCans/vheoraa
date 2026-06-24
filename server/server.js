@@ -320,7 +320,6 @@ const _staticPaths = {
   '/maintenance.js': _root + '/maintenance.js',
   '/favicon.png': _root + '/favicon.png',
   '/robots.txt': _root + '/robots.txt',
-  '/sitemap.xml': _root + '/sitemap.xml',
   '/collection.html': _root + '/collection.html',
   '/gia-certified.html': _root + '/gia-certified.html',
   '/restoration.html': _root + '/restoration.html',
@@ -334,6 +333,8 @@ Object.keys(_staticPaths).forEach(function(route) {
     res.sendFile(_staticPaths[route]);
   });
 });
+
+app.get('/sitemap.xml', sitemapRoutes);
 
 app.use('/images', express.static(path.join(__dirname, '..', 'images')));
 
