@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://vheora.co/sitemap.xml
+Sitemap: https://vheora.com/sitemap.xml

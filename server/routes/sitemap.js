@@ -11,7 +11,7 @@ const STATIC_PAGES = [
 
 function generateSitemapUrl(url, lastmod, changefreq, priority) {
   return `  <url>
-    <loc>https://vheora.co${url}</loc>
+    <loc>https://vheora.com${url}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>

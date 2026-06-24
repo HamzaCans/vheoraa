@@ -55,7 +55,7 @@ app.use(helmet({
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
       scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://www.googletagmanager.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'blob:', 'https://vheora.co', 'https://*.vercel.app'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://vheora.com', 'https://vheora.co', 'https://*.vercel.app'],
       connectSrc: ["'self'", 'https://cdn.jsdelivr.net', 'https://www.google-analytics.com'],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
@@ -73,7 +73,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: function(origin, callback) {
-    const allowed = ['https://vheora.co', 'https://www.vheora.com', 'https://vheora.com'];
+    const allowed = ['https://vheora.com', 'https://www.vheora.com', 'https://vheora.co'];
     if (!origin || allowed.indexOf(origin) !== -1) {
       callback(null, true);
     } else {

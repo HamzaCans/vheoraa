@@ -130,7 +130,7 @@ router.post('/testimonial', async (req, res) => {
         <p><strong>Puan:</strong> ${'★'.repeat(rating || 5)}</p>
         <p><strong>Yorum:</strong></p>
         <p>${escapeHtml(text)}</p>
-        <p><a href="https://vheora.co/admin/testimonials.html">Yorumu onaylamak için tıklayın</a></p>
+        <p><a href="https://vheora.com/admin/testimonials.html">Yorumu onaylamak için tıklayın</a></p>
       `
     });
 
