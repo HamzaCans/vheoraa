@@ -1,6 +1,11 @@
 {
   "version": 2,
+  "outputDirectory": "public",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/admin(/.*)?", "destination": "/api/index.js" },
+    { "source": "/(.*)\\.html", "destination": "/api/index.js" },
+    { "source": "/", "destination": "/api/index.js" }
   ]
 }
