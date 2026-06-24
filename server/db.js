@@ -244,16 +244,15 @@ async function seedIfEmpty(driver) {
   if (count.c === '0' || count.c === 0) {
     const adminUser = process.env.ADMIN_USERNAME;
     const adminPass = process.env.ADMIN_PASSWORD;
-    if (!adminUser || !adminPass) {
-      console.error('[SECURITY] ADMIN_USERNAME / ADMIN_PASSWORD not set in env. Falling back to defaults — CHANGE THIS!');
-    }
-    const username = adminUser || 'Hamzbkadmin';
-    const password = adminPass || 'Vh_12345678';
-    const hashed = bcrypt.hashSync(password, 10);
-    await driver.run(
-      'INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, ?)',
-      [username, 'vheora.co@gmail.com', hashed, new Date().toISOString()]
-    );
+  if (!adminUser || !adminPass) {
+    console.error('[SECURITY] FATAL: ADMIN_USERNAME / ADMIN_PASSWORD env vars not set. Cannot create admin user.');
+    return;
+  }
+  const hashed = bcrypt.hashSync(adminPass, 10);
+  const result = await db.run(
+    'INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, ?)',
+    [adminUser, 'vheora.co@gmail.com', hashed, new Date().toISOString()]
+  );
 
     const seedTestimonials = [
       { name: 'Elif Yılmaz', location: 'İstanbul, Nişantaşı', text: 'Nişan yüzüğümüzü buradan aldık, parmağımdaki ışıltısı her gün beni mutlu ediyor. İşçilik gerçekten çok ince, beklediğimize değdi.', rating: 5 },

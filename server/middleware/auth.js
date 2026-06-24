@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 if (!process.env.JWT_SECRET) {
-  console.error('[SECURITY] JWT_SECRET environment variable is not set. Using fallback — set JWT_SECRET in Vercel env vars!');
+  console.error('[SECURITY] JWT_SECRET env var not set. Using random fallback — existing tokens will be invalidated on restart!');
 }
-const JWT_SECRET = process.env.JWT_SECRET || 'vheora-jwt-secret-change-in-production';
 
 const tokenBlacklist = new Set();
 
