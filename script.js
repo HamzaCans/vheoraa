@@ -332,9 +332,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
       if (currentTranslations && Object.keys(currentTranslations).length) applyTranslations();
+      fetchGoldPrice();
     } catch (_) {}
   }
-  loadFeaturedProducts().then(() => fetchGoldPrice());
+  loadFeaturedProducts();
 
   // ========== DİNAMİK SHOWCASE (KAYAN BANT) ==========
   async function loadShowcase() {
