@@ -291,11 +291,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const grid = document.getElementById('featuredGrid');
     if (!grid) return;
     try {
-      const res = await fetch(`${API_URL}/api/products/featured`);
-      if (!res.ok) return;
-      const products = await res.json();
+      const [prodRes, goldRes] = await Promise.all([
+        fetch(`${API_URL}/api/products/featured`),
+        fetch(`${API_URL}/api/gold-price`)
+      ]);
+      if (!prodRes.ok) return;
+      const products = await prodRes.json();
       if (!products.length) return;
+      if (goldRes.ok) {
+        const goldData = await goldRes.json();
+        currentGoldPrice = goldData.hasAltin || 0;
+      }
+      var goldPrice = currentGoldPrice;
       const catLabels = { yuzuk: 'Yüzük', bileklik: 'Bileklik', kolye: 'Kolye', kupe: 'Küpe', set: 'Set Takı' };
+      function priceTag(p) {
+        var gram = parseFloat(p.gram);
+        var laborCost = parseInt(p.labor_cost) || 2500;
+        var fiyat = gram && goldPrice > 0 ? Math.round((goldPrice + laborCost) * gram) : 0;
+        if (!fiyat) return '<div class="featured-price" style="opacity:0.4">—</div>';
+        return '<div class="featured-price">' + fiyat.toLocaleString('tr-TR') + ' ₺</div>';
+      }
       grid.innerHTML = products.map((p, i) => {
         const img = p.images && p.images.length ? p.images[0] : (p.image ? p.image : '');
         const imgSrc = img.startsWith('data:') || img.startsWith('http') || img.startsWith('/') ? img : API_URL + img;
@@ -314,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                <div class="product-info">
               <div class="product-category" data-i18n="${catI18n}">${catLabel}</div>
               <h3 class="product-name">${p.name}</h3>
-              <div class="calc-gold-price featured-price" data-gram="${p.gram}" data-labor-cost="${p.labor_cost || 2500}">—</div>
+              ${priceTag(p)}
               <button class="product-price-btn open-quote" data-product="${p.name}" data-i18n="col.product.quote">Teklif Al</button>
             </div>
           </div>
@@ -332,7 +347,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
       if (currentTranslations && Object.keys(currentTranslations).length) applyTranslations();
-      fetchGoldPrice();
     } catch (_) {}
   }
   loadFeaturedProducts();
