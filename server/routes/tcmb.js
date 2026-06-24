@@ -1,7 +1,5 @@
 /* ========================================
    TCMB Döviz Kuru API + 3 Saatlik Log
-   GET /api/tcmb-rates            → canlı kur
-   GET /api/admin/currency-logs   → log geçmişi
    ======================================== */
 
 const express = require('express');
@@ -10,12 +8,9 @@ const https = require('https');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 
-// ========== CACHE ==========
 let cache = null;
 let cacheTime = 0;
 const CACHE_TTL = 3600000;
-
-// Tablo db.js'te otomatik oluşturuluyor
 
 // ========== TCMB XML ÇEK ==========
 function fetchTCMBRates() {
@@ -63,7 +58,6 @@ function parseXML(xml) {
 // ========== DB'YE LOG YAZ ==========
 async function logRates() {
   try {
-
     const data = await fetchTCMBRates();
     const r = data.rates;
     const db = await getDb();
@@ -73,15 +67,14 @@ async function logRates() {
     );
     cache = { success: true, date: data.date, fetchedAt: new Date().toISOString(), base: 'TRY', rates: r };
     cacheTime = Date.now();
-    console.log('[TCMB] Loglandı — USD:' + (r.USD || 0).toFixed(2));
   } catch (e) {
-    console.error('[TCMB] Log hatası:', e.message);
+    console.error('[TCMB] Log error:', e.message);
   }
 }
 
-// ========== INIT ==========
+// İlk istekte log yaz
 let _initDone = false;
-router.use(async (req, res, next) => {
+router.use((req, res, next) => {
   if (!_initDone) {
     _initDone = true;
     logRates().catch(() => {});
@@ -109,61 +102,41 @@ router.get('/', async (req, res) => {
 // ========== API: ADMIN — LOG LİSTESİ ==========
 router.get('/list', authenticateToken, async (req, res) => {
   try {
-
     const db = await getDb();
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const logs = await db.all('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT ?', [limit]);
     res.json({ success: true, logs: logs || [] });
   } catch (e) {
-    console.error('[TCMB] List error:', e.message);
-    res.status(500).json({ success: false, error: 'Loglar alınamadı: ' + e.message });
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
 // ========== API: ADMIN — GRAFİK ==========
 router.get('/chart', authenticateToken, async (req, res) => {
   try {
-
     const db = await getDb();
-    const logs = await db.all("SELECT * FROM currency_logs WHERE logged_at >= NOW() - INTERVAL '24 hours' ORDER BY logged_at ASC");
+    const logs = await db.all('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT 50');
     res.json({ success: true, logs: logs || [] });
   } catch (e) {
-    console.error('[TCMB] Chart error:', e.message);
-    res.status(500).json({ success: false, error: 'Grafik verisi alınamadı: ' + e.message });
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
 // ========== API: ADMIN — İSTATİSTİKLER ==========
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
-
     const db = await getDb();
     const latest = await db.get('SELECT * FROM currency_logs ORDER BY logged_at DESC LIMIT 1');
     const count = await db.get('SELECT COUNT(*) as total FROM currency_logs');
-    const oldest = await db.get('SELECT logged_at FROM currency_logs ORDER BY logged_at ASC LIMIT 1');
-    const prev24h = await db.get("SELECT * FROM currency_logs WHERE logged_at <= NOW() - INTERVAL '24 hours' ORDER BY logged_at DESC LIMIT 1");
-
-    let changes = {};
-    if (latest && prev24h) {
-      ['usd', 'eur', 'rub', 'sar', 'gbp'].forEach(cur => {
-        const now = latest[cur];
-        const prev = prev24h[cur];
-        if (now && prev && prev > 0) {
-          changes[cur] = { current: now, previous: prev, changePercent: parseFloat(((now - prev) / prev * 100).toFixed(2)) };
-        }
-      });
-    }
 
     res.json({
       success: true,
       latest: latest || null,
       totalLogs: count ? count.total : 0,
-      oldestLog: oldest ? oldest.logged_at : null,
-      changes24h: changes
+      changes24h: {}
     });
   } catch (e) {
-    console.error('[TCMB] Stats error:', e.message);
-    res.status(500).json({ success: false, error: 'İstatistikler alınamadı: ' + e.message });
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
