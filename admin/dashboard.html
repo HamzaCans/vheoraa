@@ -447,10 +447,10 @@
     var currencyChart = null;
     async function loadCurrencyRates() {
       try {
-        var token = getToken();
-        var res = await fetch(API + '/api/tcmb-rates', { headers: { 'Authorization': 'Bearer ' + token } });
+        var res = await fetch(API + '/api/tcmb-rates');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         var data = await res.json();
-        if (data && data.rates) {
+        if (data && data.rates && Object.keys(data.rates).length > 0) {
           var r = data.rates;
           document.getElementById('curUSD').textContent = r.USD ? r.USD.toFixed(2) + ' ₺' : '—';
           document.getElementById('curEUR').textContent = r.EUR ? r.EUR.toFixed(2) + ' ₺' : '—';
@@ -473,7 +473,11 @@
               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#8a8a9a', callback: function(v) { return v.toLocaleString('tr-TR'); } }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
             });
           }
-          document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Kurlar TCMB\'den canlı çekiliyor. Detaylı loglar sayfada mevcut.</p>';
+          document.getElementById('currencyLogs').innerHTML = data.stale
+            ? '<p class="empty-state">Kurlar eski veri ile gösteriliyor, güncelleniyor...</p>'
+            : '<p class="empty-state">Kurlar TCMB\'den canlı çekiliyor. Detaylı loglar sayfada mevcut.</p>';
+        } else {
+          document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Kurlar şu an yüklenemedi. Sayfayı yenileyin.</p>';
         }
       } catch(e) {
         console.warn('Currency error:', e);

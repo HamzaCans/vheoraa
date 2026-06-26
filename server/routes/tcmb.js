@@ -101,7 +101,7 @@ router.get('/', async (req, res) => {
     res.json(cache);
   } catch (error) {
     if (cache) return res.json({ ...cache, stale: true });
-    res.status(500).json({ success: false, error: 'TCMB kurları alınamadı' });
+    res.json({ success: true, date: new Date().toISOString(), rates: {}, stale: true, error: 'TCMB kurları alınamadı' });
   }
 });
 
