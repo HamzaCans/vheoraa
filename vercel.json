@@ -7,6 +7,10 @@
     {
       "path": "/api/tcmb-rates",
       "schedule": "0 */3 * * *"
+    },
+    {
+      "path": "/api/gold-price",
+      "schedule": "0 */3 * * *"
     }
   ]
 }

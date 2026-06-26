@@ -407,6 +407,9 @@ app.get('/gia-report.jpg', (req, res) => {
 });
 
 app.get('*.html', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   const filePath = path.join(__dirname, '..', req.path);
   if (!require('fs').existsSync(filePath)) {
     res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
@@ -417,8 +420,15 @@ app.get('*.html', (req, res, next) => {
 
 app.use((req, res) => {
   const filePath = path.join(__dirname, '..', req.path);
-  if (req.path.endsWith('.html') && !require('fs').existsSync(filePath)) {
-    res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+  if (req.path.endsWith('.html')) {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    if (!require('fs').existsSync(filePath)) {
+      res.status(404).sendFile(path.join(__dirname, '..', '404.html'));
+    } else {
+      res.sendFile(filePath);
+    }
   } else if (req.path.startsWith('/api/')) {
     res.status(404).json({ error: 'API endpoint bulunamadı' });
   } else {

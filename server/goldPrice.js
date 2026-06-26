@@ -147,7 +147,7 @@ async function getGoldPriceHistory(hours = 24) {
     const rows = await db.all(
       process.env.DATABASE_URL
         ? `SELECT id, source, has_altin, created_at FROM gold_prices
-           WHERE created_at >= NOW() - ($1 || ' hours')::interval
+           WHERE created_at::timestamp >= NOW() - ($1::text || ' hours')::interval
            ORDER BY created_at DESC`
         : `SELECT id, source, has_altin, created_at FROM gold_prices
            WHERE created_at >= datetime('now', '-' || ? || ' hours')
