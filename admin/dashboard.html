@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>VHEORA | ADMIN</title>
   <link rel="icon" type="image/png" href="../favicon.png">
-  <link rel="stylesheet" href="admin.css?v=7">
+  <link rel="stylesheet" href="admin.css?v=8">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <body>
   <aside class="sidebar" id="sidebar"></aside>
@@ -444,8 +447,8 @@
     var currencyChart = null;
     async function loadCurrencyRates() {
       try {
-        var res = await fetch('/api/tcmb-rates');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var token = getToken();
+        var res = await fetch(API + '/api/tcmb-rates', { headers: { 'Authorization': 'Bearer ' + token } });
         var data = await res.json();
         if (data && data.rates) {
           var r = data.rates;
