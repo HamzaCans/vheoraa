@@ -6,13 +6,11 @@ const express = require('express');
 const router = express.Router();
 const https = require('https');
 const { authenticateToken } = require('../middleware/auth');
+const { getDb } = require('../db');
 
 let cache = null;
 let cacheTime = 0;
 const CACHE_TTL = 3600000;
-
-let rateHistory = [];
-const MAX_HISTORY = 100;
 
 function fetchTCMBRates() {
   return new Promise((resolve, reject) => {
@@ -56,19 +54,38 @@ function parseXML(xml) {
   return { date, rates };
 }
 
+async function logCurrencyToDb(data) {
+  try {
+    const db = await getDb();
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const isPg = !!process.env.DATABASE_URL;
+    const last = await db.get(
+      isPg
+        ? 'SELECT id, created_at FROM currency_rates ORDER BY id DESC LIMIT 1'
+        : 'SELECT id, created_at FROM currency_rates ORDER BY id DESC LIMIT 1'
+    );
+    if (last && last.created_at) {
+      const lastTime = new Date(last.created_at.replace(' ', 'T') + (last.created_at.includes('Z') ? '' : 'Z')).getTime();
+      if (Date.now() - lastTime < 3 * 60 * 60 * 1000) return;
+    }
+    const codes = ['USD', 'EUR', 'GBP', 'CHF', 'RUB', 'SAR'];
+    for (const code of codes) {
+      if (data.rates[code]) {
+        await db.run(
+          'INSERT INTO currency_rates (code, name, forex_buying, forex_selling, banknote_buying, banknote_selling, unit, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [code, code, data.rates[code], data.rates[code], data.rates[code], data.rates[code], 1, 'TCMB', now]
+        );
+      }
+    }
+  } catch (e) {
+    console.warn('[TCMB] DB log error:', e.message);
+  }
+}
+
 function updateCache(data) {
   cache = { success: true, date: data.date, fetchedAt: new Date().toISOString(), base: 'TRY', rates: data.rates };
   cacheTime = Date.now();
-  rateHistory.push({
-    logged_at: new Date().toISOString(),
-    tcmb_date: data.date,
-    usd: data.rates.USD || 0,
-    eur: data.rates.EUR || 0,
-    gbp: data.rates.GBP || 0,
-    rub: data.rates.RUB || 0,
-    sar: data.rates.SAR || 0
-  });
-  if (rateHistory.length > MAX_HISTORY) rateHistory.shift();
+  logCurrencyToDb(data);
 }
 
 // İlk yükleme
@@ -88,32 +105,59 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Admin: log listesi
-router.get('/list', (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-  res.json({ success: true, logs: rateHistory.slice(-limit).reverse() });
+// Admin: log listesi (DB'den)
+router.get('/list', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const isPg = !!process.env.DATABASE_URL;
+    const rows = await db.all(
+      isPg
+        ? `SELECT id, code, forex_buying as usd_val, created_at as logged_at FROM currency_rates WHERE code = 'USD' ORDER BY id DESC LIMIT $1`
+        : `SELECT id, code, forex_buying as usd_val, created_at as logged_at FROM currency_rates WHERE code = 'USD' ORDER BY id DESC LIMIT ?`,
+      [limit]
+    );
+    res.json({ success: true, logs: rows || [] });
+  } catch (e) {
+    res.json({ success: true, logs: [] });
+  }
 });
 
-// Admin: grafik
-router.get('/chart', (req, res) => {
-  res.json({ success: true, logs: rateHistory.slice(-50) });
+// Admin: grafik (DB'den)
+router.get('/chart', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const isPg = !!process.env.DATABASE_URL;
+    const rows = await db.all(
+      isPg
+        ? `SELECT code, forex_buying, created_at FROM currency_rates WHERE code = 'USD' ORDER BY id DESC LIMIT 50`
+        : `SELECT code, forex_buying, created_at FROM currency_rates WHERE code = 'USD' ORDER BY id DESC LIMIT 50`
+    );
+    res.json({ success: true, logs: (rows || []).reverse() });
+  } catch (e) {
+    res.json({ success: true, logs: [] });
+  }
 });
 
 // Admin: istatistikler
-router.get('/stats', (req, res) => {
-  const latest = rateHistory.length > 0 ? rateHistory[rateHistory.length - 1] : null;
-  res.json({ success: true, latest, totalLogs: rateHistory.length, changes24h: {} });
+router.get('/stats', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const isPg = !!process.env.DATABASE_URL;
+    const latest = await db.get(
+      isPg
+        ? `SELECT * FROM currency_rates ORDER BY id DESC LIMIT 1`
+        : `SELECT * FROM currency_rates ORDER BY id DESC LIMIT 1`
+    );
+    const count = await db.get(
+      isPg
+        ? `SELECT COUNT(*) as cnt FROM currency_rates`
+        : `SELECT COUNT(*) as cnt FROM currency_rates`
+    );
+    res.json({ success: true, latest: latest || null, totalLogs: count ? count.cnt : 0, changes24h: {} });
+  } catch (e) {
+    res.json({ success: true, latest: null, totalLogs: 0, changes24h: {} });
+  }
 });
 
 module.exports = router;
-// Wed Jun 24 21:34:27 UTC 2026
-
-// Emergency: direct currency endpoint (no auth, no cache)
-router.get('/direct-stats', (req, res) => {
-  const latest = rateHistory.length > 0 ? rateHistory[rateHistory.length - 1] : null;
-  res.json({ success: true, latest, totalLogs: rateHistory.length, changes24h: {} });
-});
-router.get('/direct-list', (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-  res.json({ success: true, logs: rateHistory.slice(-limit).reverse() });
-});

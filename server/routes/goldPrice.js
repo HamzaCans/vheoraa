@@ -1,5 +1,5 @@
 const express = require('express');
-const { getGoldPrice, getGoldPriceHistory } = require('../goldPrice');
+const { getGoldPrice, getGoldPriceHistory, forceLogGoldPrice } = require('../goldPrice');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 
@@ -18,6 +18,7 @@ router.get('/gold-price', async (req, res) => {
 router.get('/admin/gold-prices', authenticateToken, async (req, res) => {
   try {
     const hours = parseInt(req.query.hours) || 24;
+    await forceLogGoldPrice();
     const current = await getGoldPrice();
     const history = await getGoldPriceHistory(hours);
     res.json({ current, history });

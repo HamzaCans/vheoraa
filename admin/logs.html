@@ -323,7 +323,7 @@
         var res = await fetch(API + '/api/admin/visitor-logs', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Hata');
-        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="9" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
+        document.getElementById('visitorLogBody').innerHTML = '<tr><td colspan="10" class="empty-state"><p>Hen\u00FCz ziyaret\u00E7i kayd\u0131 yok.</p></td></tr>';
         adminToast('S\u0131f\u0131rland\u0131', 'Ziyaret\u00E7i kay\u0131tlar\u0131 ba\u015Far\u0131yla silindi.', 'success');
       } catch (err) {
         adminToast('Hata', err.message || 'Kay\u0131tlar silinemedi.', 'error');

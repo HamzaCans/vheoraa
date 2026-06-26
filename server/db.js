@@ -31,6 +31,18 @@ function normalizeSql(sql) {
     .replace(/date\('now'\)/gi, "CURRENT_DATE")
     .replace(/date\(([^)]+)\)/gi, (m, col) => `${col.trim()}::date`)
     .replace(/datetime\('now'\)/gi, 'NOW()')
+    .replace(/datetime\('now',\s*'([^']+)'\)/gi, (_, interval) => {
+      const parts = interval.split(' ');
+      if (parts.length === 2) {
+        const num = parseInt(parts[0].replace('-', ''));
+        const unit = parts[1].toLowerCase().replace(/s$/, '');
+        const map = { day: 'days', month: 'months', year: 'years', hour: 'hours' };
+        const absNum = Math.abs(num);
+        const op = parts[0].startsWith('-') ? '-' : '+';
+        return `NOW() ${op} INTERVAL '${absNum} ${map[unit] || unit + 's'}'`;
+      }
+      return `NOW() ${interval.startsWith('-') ? '-' : '+'} INTERVAL '${interval.replace(/^[+-]/, '')}'`;
+    })
     .replace(/strftime\('%Y-%m',\s*(\w+)\)/gi, "to_char($1::timestamp, 'YYYY-MM')")
     .replace(/date\('now',\s*'([^']+)'\)/gi, (_, interval) => {
       const parts = interval.split(' ');

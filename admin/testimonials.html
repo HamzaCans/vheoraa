@@ -51,6 +51,18 @@
       return t;
     }
 
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(function() { window.location.href = '/admin/'; }, 1500); return null; }
+        if (!res.ok) { throw new Error('HTTP ' + res.status); }
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+
     function adminToast(title, msg, type, duration) {
       type = type || 'success'; duration = duration || 3500;
       var c = document.getElementById('adminToast'); if (!c) return;
@@ -145,7 +157,8 @@
       var token = getToken();
       btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>...';
       try {
-        await fetch(API + '/api/admin/testimonials/' + id + '/approve', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+        var res = await fetchJSON(API + '/api/admin/testimonials/' + id + '/approve', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } });
+        if (res == null) return;
         btn.innerHTML = '✓ Onaylandı'; btn.className = btn.className.replace('btn-primary', 'btn-success');
         adminToast('Onaylandı', 'Yorum onaylandı.', 'success');
         setTimeout(function() { loadTestimonials(); }, 1000);
@@ -158,7 +171,8 @@
       var token = getToken();
       btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>...';
       try {
-        await fetch(API + '/api/admin/testimonials/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        var res = await fetchJSON(API + '/api/admin/testimonials/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        if (res == null) return;
         btn.innerHTML = '✓ Silindi'; btn.className = btn.className.replace('btn-danger', 'btn-success');
         adminToast('Silindi', 'Yorum silindi.', 'success');
         setTimeout(function() { loadTestimonials(); }, 1000);
@@ -169,8 +183,9 @@
       var container = document.getElementById('testimonialsContainer');
       var token = getToken();
       try {
-        var res = await fetch(API + '/api/admin/testimonials', { headers: { 'Authorization': 'Bearer ' + token } });
-        allTestimonials = await res.json();
+        var data = await fetchJSON(API + '/api/admin/testimonials', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (data == null) return;
+        allTestimonials = Array.isArray(data) ? data : [];
         renderTestimonials();
       } catch (err) {
         container.innerHTML = '<p class="empty-state">Sunucuya bağlanılamadı.</p>';

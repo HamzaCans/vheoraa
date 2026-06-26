@@ -194,17 +194,45 @@
       var ctx = document.getElementById(canvasId);
       if (!ctx) return null;
       if (typeof Chart === 'undefined') { console.warn('Chart.js not loaded'); return null; }
+      if (!labels.length || !data.length || data.every(function(d){ return d === 0; })) {
+        ctx.style.display = 'none';
+        var existing = ctx.parentNode.querySelector('.empty-state');
+        if (!existing) {
+          var emp = document.createElement('p');
+          emp.className = 'empty-state';
+          emp.textContent = 'Veri bulunmuyor.';
+          ctx.parentNode.appendChild(emp);
+        }
+        return null;
+      }
+      ctx.style.display = 'block';
+      var emptyMsg = ctx.parentNode.querySelector('.empty-state');
+      if (emptyMsg) emptyMsg.remove();
       return new Chart(ctx, {
         type: 'bar',
         data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: color || 'rgba(212, 168, 83, 0.3)', borderColor: 'rgba(212, 168, 83, 0.8)', borderWidth: 1, borderRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#8a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#8a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
       });
     }
     var doughnutColors = ['rgba(212,168,83,0.7)','rgba(66,165,245,0.7)','rgba(102,187,106,0.7)','rgba(206,147,216,0.7)','rgba(255,193,7,0.7)','rgba(239,83,80,0.7)','rgba(92,107,192,0.7)','rgba(38,166,154,0.7)','rgba(255,87,34,0.7)','rgba(0,0,0,0.3)'];
     function renderDoughnut(canvasId, labels, data, existingChart) {
       if (existingChart && typeof existingChart.destroy === 'function') existingChart.destroy();
       var ctx = document.getElementById(canvasId);
-      if (!ctx || typeof Chart === 'undefined' || !labels.length) return null;
+      if (!ctx || typeof Chart === 'undefined') return null;
+      if (!labels.length) {
+        ctx.style.display = 'none';
+        var existing = ctx.parentNode.querySelector('.empty-state');
+        if (!existing) {
+          var emp = document.createElement('p');
+          emp.className = 'empty-state';
+          emp.textContent = 'Veri bulunmuyor.';
+          ctx.parentNode.appendChild(emp);
+        }
+        return null;
+      }
+      ctx.style.display = 'block';
+      var emptyMsg = ctx.parentNode.querySelector('.empty-state');
+      if (emptyMsg) emptyMsg.remove();
       ctx.height = 220;
       return new Chart(ctx, {
         type: 'doughnut',
@@ -247,7 +275,7 @@
           var testData = (stats.monthly_testimonials || []).map(function(m) { return m.count; });
           if (testimonialsChart) testimonialsChart.destroy();
           testimonialsChart = renderChart('testimonialsChart', testLabels, testData, 'Yorum', 'rgba(46, 204, 113, 0.3)');
-          if (stats.pending !== undefined) document.getElementById('statPendingOrders').textContent = stats.pending || 0;
+          if (stats.pending !== undefined && stats.pending !== null) document.getElementById('statPendingOrders').textContent = stats.pending || 0;
         }
       } catch(e) { console.warn('Stats error:', e); }
       try {
@@ -267,7 +295,7 @@
           document.getElementById('statTodayVisitors').textContent = visitorStats.today || 0;
           document.getElementById('statUniqueIps').textContent = visitorStats.unique_ips || 0;
           if (visitorStats.devices && visitorStats.devices.length) {
-            renderDoughnut('devicesChart', visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; }), visitorStats.devices.map(function(d) { return parseInt(d.count) || 0; }), window.devicesChart);
+            window.devicesChart = renderDoughnut('devicesChart', visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; }), visitorStats.devices.map(function(d) { return parseInt(d.count) || 0; }), window.devicesChart);
           }
           if (visitorStats.browsers && visitorStats.browsers.length) {
             window.browsersChart = renderDoughnut('browsersChart', visitorStats.browsers.map(function(b) { return b.browser || 'Diğer'; }), visitorStats.browsers.map(function(b) { return parseInt(b.count) || 0; }), window.browsersChart);
@@ -330,17 +358,18 @@
           document.getElementById('goldPriceTime').textContent = data.current.timestamp ? new Date(data.current.timestamp).toLocaleString('tr-TR', { timeZone: userTimezone }) : '—';
         }
         if (data && data.history && data.history.length) {
-          var labels = data.history.reverse().map(function(h) {
+          var historyCopy = data.history.slice();
+          var chartLabels = historyCopy.reverse().map(function(h) {
             return h.created_at ? new Date(h.created_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
           });
-          var chartData = data.history.map(function(h) { return h.has_altin || 0; });
+          var chartData = historyCopy.map(function(h) { return h.has_altin || 0; });
           if (goldPriceChart) goldPriceChart.destroy();
           var ctx = document.getElementById('goldPriceChart');
           if (ctx && typeof Chart !== 'undefined') {
             goldPriceChart = new Chart(ctx, {
               type: 'line',
               data: {
-                labels: labels,
+                labels: chartLabels,
                 datasets: [{
                   label: 'Has Altın (₺/g)',
                   data: chartData,
@@ -416,6 +445,7 @@
     async function loadCurrencyRates() {
       try {
         var res = await fetch('/api/tcmb-rates');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         var data = await res.json();
         if (data && data.rates) {
           var r = data.rates;
@@ -425,11 +455,26 @@
           document.getElementById('curRUB').textContent = r.RUB ? r.RUB.toFixed(4) + ' ₺' : '—';
           document.getElementById('curSAR').textContent = r.SAR ? r.SAR.toFixed(4) + ' ₺' : '—';
           document.getElementById('currencyLastUpdate').textContent = data.fetchedAt ? new Date(data.fetchedAt).toLocaleString('tr-TR', { timeZone: userTimezone }) : new Date().toLocaleString('tr-TR');
+          var cLabels = ['USD', 'EUR', 'GBP', 'CHF'];
+          var cData = cLabels.map(function(c) { return r[c] || 0; });
+          var cColors = ['rgba(0,180,216,0.7)', 'rgba(52,152,219,0.7)', 'rgba(155,89,182,0.7)', 'rgba(46,204,113,0.7)'];
+          var cCtx = document.getElementById('currencyChart');
+          if (cCtx && typeof Chart !== 'undefined' && cData.some(function(d){ return d > 0; })) {
+            cCtx.style.display = 'block';
+            var empMsg = cCtx.parentNode.querySelector('.empty-state');
+            if (empMsg) empMsg.remove();
+            if (currencyChart) currencyChart.destroy();
+            currencyChart = new Chart(cCtx, {
+              type: 'bar',
+              data: { labels: cLabels, datasets: [{ label: 'Kur (₺)', data: cData, backgroundColor: cColors, borderRadius: 6 }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#8a8a9a', callback: function(v) { return v.toLocaleString('tr-TR'); } }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
+            });
+          }
+          document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Kurlar TCMB\'den canlı çekiliyor. Detaylı loglar sayfada mevcut.</p>';
         }
-        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Kurlar TCMB'den canlı çekiliyor. İlk log 3 saat içinde oluşacak.</p>';
       } catch(e) {
         console.warn('Currency error:', e);
-        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi: ' + e.message + '</p>';
+        document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi.</p>';
       }
     }
 </script>

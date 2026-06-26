@@ -122,13 +122,36 @@ async function getGoldPrice() {
   return { hasAltin: 0, source: 'unavailable', timestamp: new Date().toISOString() };
 }
 
+async function forceLogGoldPrice() {
+  try {
+    const result = await fetchGoldPrice();
+    if (result) {
+      const db = await getDb();
+      await db.run(
+        'INSERT INTO gold_prices (source, has_altin, raw_data, created_at) VALUES (?, ?, ?, ?)',
+        [result.source, result.hasAltin, result.raw || '', new Date().toISOString().replace('T', ' ').substring(0, 19)]
+      );
+      cache = { data: { hasAltin: result.hasAltin, source: result.source, timestamp: new Date().toISOString() }, lastFetch: Date.now() };
+      return cache.data;
+    }
+    return cache.data || { hasAltin: 0, source: 'unavailable', timestamp: new Date().toISOString() };
+  } catch (e) {
+    console.warn('[GoldPrice] forceLog error:', e.message);
+    return null;
+  }
+}
+
 async function getGoldPriceHistory(hours = 24) {
   try {
     const db = await getDb();
     const rows = await db.all(
-      `SELECT id, source, has_altin, created_at FROM gold_prices
-       WHERE created_at >= datetime('now', '-' || ? || ' hours')
-       ORDER BY created_at DESC`,
+      process.env.DATABASE_URL
+        ? `SELECT id, source, has_altin, created_at FROM gold_prices
+           WHERE created_at >= NOW() - ($1 || ' hours')::interval
+           ORDER BY created_at DESC`
+        : `SELECT id, source, has_altin, created_at FROM gold_prices
+           WHERE created_at >= datetime('now', '-' || ? || ' hours')
+           ORDER BY created_at DESC`,
       [hours]
     );
     return rows;
@@ -138,4 +161,4 @@ async function getGoldPriceHistory(hours = 24) {
   }
 }
 
-module.exports = { getGoldPrice, getGoldPriceHistory };
+module.exports = { getGoldPrice, getGoldPriceHistory, forceLogGoldPrice, logGoldPrice };

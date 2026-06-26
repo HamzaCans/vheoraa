@@ -1,4 +1,4 @@
-const db = require('../db');
+const { getDb } = require('../db');
 
 const STATIC_PAGES = [
   { url: '/', changefreq: 'daily', priority: '1.0' },
@@ -20,13 +20,14 @@ function generateSitemapUrl(url, lastmod, changefreq, priority) {
 
 async function getProducts() {
   try {
-    const products = db.prepare(`
-      SELECT id, name, updated_at, is_featured
-      FROM products
-      WHERE is_featured = 1 OR 1=1
-      ORDER BY sort_order ASC, created_at DESC
-    `).all();
-    return products;
+    const db = await getDb();
+    const isPg = !!process.env.DATABASE_URL;
+    const products = await db.all(
+      isPg
+        ? `SELECT id, name, updated_at, is_featured FROM products WHERE is_featured = true OR 1=1 ORDER BY sort_order ASC, created_at DESC`
+        : `SELECT id, name, updated_at, is_featured FROM products WHERE is_featured = 1 OR 1=1 ORDER BY sort_order ASC, created_at DESC`
+    );
+    return products || [];
   } catch (e) {
     console.error('Sitemap products error:', e);
     return [];

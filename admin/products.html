@@ -322,7 +322,6 @@
                 var catLabels = { altin_yuzuk: 'Altın Yüzük', altin_kolye: 'Altın Kolye', altin_bileklik: 'Altın Bileklik', altin_kupe: 'Altın Küpe', pirantali_tek_tas: 'Pırlantalı Tek Taş', altin_alyans: 'Altın Alyans' };
                 var catLabel = catLabels[p.category] || p.category;
                 var catColor = catColors[p.category] || '#d4a853';
-            var catLabel = catLabels[p.category] || p.category;
             return '<tr><td><img src="' + imgSrc + '" alt="' + p.name + '" class="product-thumb">' + (imgCount > 1 ? '<span style="position:relative;top:-40px;left:-10px;background:var(--color-gold);color:#000;font-size:0.55rem;padding:2px 5px;border-radius:8px;font-weight:700;">' + imgCount + '</span>' : '') + '</td>' +
               '<td style="font-weight:500;">' + p.name + '</td>' +
               '<td><span class="badge" style="background:' + catColor + '15;color:' + catColor + ';">' + catLabel + '</span></td>' +

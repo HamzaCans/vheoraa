@@ -31,7 +31,8 @@ router.put('/admin/settings', authenticateToken, async (req, res) => {
       'site_hero_title', 'site_hero_desc', 'site_badge_text',
       'site_about_text_1', 'site_about_text_2',
       'site_stat_country', 'site_stat_customer', 'site_stat_collection',
-      'site_contact_address', 'site_contact_email', 'site_contact_phone', 'site_contact_hours'
+      'site_contact_address', 'site_contact_email', 'site_contact_phone', 'site_contact_hours',
+      'gold_margin'
     ];
     for (const [key, value] of Object.entries(updates)) {
       if (!allowedKeys.includes(key)) continue;

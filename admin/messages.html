@@ -52,6 +52,18 @@
       return t;
     }
 
+    async function fetchJSON(url, options, timeoutMs) {
+      timeoutMs = timeoutMs || 15000;
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
+        if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(function() { window.location.href = '/admin/'; }, 1500); return null; }
+        if (!res.ok) { throw new Error('HTTP ' + res.status); }
+        return await res.json();
+      } finally { clearTimeout(timeout); }
+    }
+
     function adminToast(title, msg, type, duration) {
       type = type || 'success'; duration = duration || 3500;
       var c = document.getElementById('adminToast'); if (!c) return;
@@ -154,9 +166,9 @@
         } else {
           url = currentFilter === 'all' ? API + '/api/admin/messages' : API + '/api/admin/messages?type=' + currentFilter;
         }
-        var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-        var messages = await res.json();
-        if (!messages.length) {
+        var messages = await fetchJSON(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (messages == null) return;
+        if (!Array.isArray(messages) || !messages.length) {
           container.innerHTML = '<p class="empty-state">Henüz mesaj yok.</p>';
           return;
         }
