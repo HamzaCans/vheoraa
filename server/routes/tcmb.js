@@ -119,6 +119,7 @@ router.get('/list', authenticateToken, async (req, res) => {
     );
     res.json({ success: true, logs: rows || [] });
   } catch (e) {
+    console.warn('[TCMB] /list error:', e.message);
     res.json({ success: true, logs: [] });
   }
 });
@@ -135,6 +136,7 @@ router.get('/chart', authenticateToken, async (req, res) => {
     );
     res.json({ success: true, logs: (rows || []).reverse() });
   } catch (e) {
+    console.warn('[TCMB] /chart error:', e.message);
     res.json({ success: true, logs: [] });
   }
 });
@@ -156,6 +158,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
     );
     res.json({ success: true, latest: latest || null, totalLogs: count ? count.cnt : 0, changes24h: {} });
   } catch (e) {
+    console.warn('[TCMB] /stats error:', e.message);
     res.json({ success: true, latest: null, totalLogs: 0, changes24h: {} });
   }
 });

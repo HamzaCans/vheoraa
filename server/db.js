@@ -203,6 +203,18 @@ async function initSchema(driver) {
       sar REAL DEFAULT 0,
       gbp REAL DEFAULT 0,
       logged_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
+    )`,
+    `CREATE TABLE IF NOT EXISTS currency_rates (
+      id ${process.env.DATABASE_URL ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+      code TEXT NOT NULL DEFAULT '',
+      name TEXT DEFAULT '',
+      forex_buying REAL DEFAULT 0,
+      forex_selling REAL DEFAULT 0,
+      banknote_buying REAL DEFAULT 0,
+      banknote_selling REAL DEFAULT 0,
+      unit INTEGER DEFAULT 1,
+      source TEXT DEFAULT 'TCMB',
+      created_at TEXT DEFAULT ${process.env.DATABASE_URL ? "NOW()" : "(datetime('now'))"}
     )`
   ];
 
