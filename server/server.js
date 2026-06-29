@@ -356,9 +356,22 @@ app.use('/admin', async (req, res, next) => {
       const ip = getClientIp(req);
       const info = parseDeviceInfo(ua);
       const page = req.path === '/' ? '/admin/' : `/admin${req.path}`;
+      const referrer = req.headers['referer'] || '';
+      let country = '', city = '';
+      try {
+        if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3000);
+          const locRes = await fetch('https://ipinfo.io/' + ip + '/json', { signal: controller.signal });
+          clearTimeout(timeout);
+          const loc = await locRes.json();
+          country = loc.country || '';
+          city = loc.city || '';
+        }
+      } catch (_) {}
       await db.run(
-        'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [0, 'anonymous', `page_visit: ${page}`, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
+        'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os, country, city, page_visited, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [0, 'anonymous', `page_visit: ${page}`, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '', country, city, page, referrer]
       );
     } catch (_) {}
   }

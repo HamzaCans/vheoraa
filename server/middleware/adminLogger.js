@@ -203,15 +203,39 @@ function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.socket?.remoteAddress || '';
 }
 
+const geoCache = new Map();
+const GEOCACHE_TTL = 30 * 60 * 1000;
+
+async function lookupGeo(ip) {
+  if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { country: '', city: '' };
+  const cached = geoCache.get(ip);
+  if (cached && (Date.now() - cached.ts) < GEOCACHE_TTL) return { country: cached.country, city: cached.city };
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch('https://ipinfo.io/' + ip + '/json', { signal: controller.signal });
+    clearTimeout(timeout);
+    const loc = await res.json();
+    const result = { country: loc.country || '', city: loc.city || '' };
+    geoCache.set(ip, { ...result, ts: Date.now() });
+    return result;
+  } catch (_) {
+    return { country: '', city: '' };
+  }
+}
+
 async function logAdminAction(req, action) {
   try {
     const db = await getDb();
     const ua = req.headers['user-agent'] || '';
     const ip = getClientIp(req);
     const info = parseDeviceInfo(ua);
+    const referrer = req.headers['referer'] || '';
+    const page = req.path || '';
+    const geo = await lookupGeo(ip);
     await db.run(
-      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [req.user?.id || 0, req.user?.username || 'admin', action, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
+      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os, country, city, page_visited, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [req.user?.id || 0, req.user?.username || 'admin', action, ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '', geo.country, geo.city, page, referrer]
     );
   } catch (err) {
     console.error('[AdminLogger]', err);

@@ -239,7 +239,11 @@ async function runMigrations(driver) {
     `ALTER TABLE products ADD COLUMN gram TEXT DEFAULT ''`,
     `ALTER TABLE products ADD COLUMN labor_cost INTEGER DEFAULT 2500`,
     `ALTER TABLE products ADD COLUMN images TEXT DEFAULT '[]'`,
-    `ALTER TABLE products ADD COLUMN sort_order INTEGER DEFAULT 0`
+    `ALTER TABLE products ADD COLUMN sort_order INTEGER DEFAULT 0`,
+    `ALTER TABLE admin_logs ADD COLUMN country TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN city TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN page_visited TEXT DEFAULT ''`,
+    `ALTER TABLE admin_logs ADD COLUMN referrer TEXT DEFAULT ''`
   ];
   for (const sql of migrations) {
     try {

@@ -45,9 +45,12 @@
               <th>Kullanıcı</th>
               <th>İşlem</th>
               <th>IP Adresi</th>
+              <th>Konum</th>
               <th>Cihaz Türü</th>
-              <th>Cihaz</th>
+              <th>Tarayıcı</th>
+              <th>İşletim Sistemi</th>
               <th>Model</th>
+              <th>Referrer</th>
             </tr>
           </thead>
           <tbody id="adminLogBody"></tbody>
@@ -235,34 +238,37 @@
         filtered = adminLogs.filter(function(l) { return l.action && l.action.toLowerCase().indexOf(filter) !== -1; });
       }
       if (!filtered.length) {
-        body.innerHTML = '<tr><td colspan="8" class="empty-state"><p>Hen\u00FCz log kayd\u0131 yok.</p></td></tr>';
+        body.innerHTML = '<tr><td colspan="11" class="empty-state"><p>Hen\u00FCz log kayd\u0131 yok.</p></td></tr>';
         return;
       }
       body.innerHTML = filtered.map(function(l) {
-        var deviceType = l.device_type || '-';
-        var cihaz = [l.browser, l.os].filter(Boolean).join(' \u00B7 ') || '-';
+        var loc = [l.country, l.city].filter(Boolean).join(', ') || '-';
+        var ref = l.referrer ? l.referrer.replace(/https?:\/\//,'').split('/')[0] : '-';
         return '<tr>' +
           '<td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">' + formatDateOnly(l.created_at) + '</td>' +
           '<td style="white-space:nowrap;font-size:0.82rem;font-family:JetBrains Mono,monospace;color:var(--text-muted)">' + formatTimeOnly(l.created_at) + '</td>' +
           '<td><span class="badge badge-gold">' + (l.username || '-') + '</span></td>' +
           '<td>' + formatAction(l.action) + '</td>' +
           '<td><span class="ip-address">' + (l.ip_address || '-') + '</span></td>' +
-          '<td><span class="device-chip">' + deviceType + '</span></td>' +
-          '<td><span class="device-chip">' + cihaz + '</span></td>' +
+          '<td style="font-size:0.82rem;color:var(--text-muted)">' + loc + '</td>' +
+          '<td><span class="device-chip">' + (l.device_type || '-') + '</span></td>' +
+          '<td><span class="device-chip">' + (l.browser || '-') + '</span></td>' +
+          '<td><span class="device-chip">' + (l.os || '-') + '</span></td>' +
           '<td><span class="device-chip">' + (l.device_model || '-') + '</span></td>' +
+          '<td style="font-size:0.8rem;color:var(--text-muted)">' + ref + '</td>' +
           '</tr>';
       }).join('');
     }
 
     async function loadAdminLogs() {
-      document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="8" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
+      document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="11" class="loading-spinner">Y\u00FCkleniyor</td></tr>';
       try {
         var logs = await fetchJSON(API + '/api/admin/logs?limit=200', { headers: { 'Authorization': 'Bearer ' + token } });
         if (logs == null) return;
         adminLogs = logs;
         renderAdminLogs('all');
       } catch (err) {
-        document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="8" class="empty-state"><p>Loglar y\u00FCklenemedi.</p></td></tr>';
+        document.getElementById('adminLogBody').innerHTML = '<tr><td colspan="11" class="empty-state"><p>Loglar y\u00FCklenemedi.</p></td></tr>';
       }
     }
 
