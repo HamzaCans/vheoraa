@@ -179,6 +179,15 @@
     }
     var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
     var userTimezone = 'Europe/Istanbul';
+    function parseDate(s) {
+      if (!s) return null;
+      s = String(s).trim();
+      if (!s) return null;
+      if (s.includes('T')) { if (!/[Zz]|[+-]\d{2}:\d{2}$/.test(s)) s += 'Z'; }
+      else { s = s.replace(' ', 'T') + 'Z'; }
+      var d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
     function getToken() {
       var t = localStorage.getItem('vheora_token');
       if (!t) window.location.href = '/admin/';
@@ -286,7 +295,7 @@
         if (messages != null) {
           var recent = (messages || []).slice(0, 5);
           var recentHtml = recent.length ? '<table><thead><tr><th>Tarih</th><th>İsim</th><th>Konu</th><th>Tip</th></tr></thead><tbody>' + recent.map(function(m) {
-            return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + (m.created_at ? new Date(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td></tr>';
+            return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + (m.created_at ? parseDate(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td></tr>';
           }).join('') + '</tbody></table>' : '<p class="empty-state">Henüz mesaj yok</p>';
           document.getElementById('recentMessages').innerHTML = recentHtml;
         }
@@ -333,7 +342,7 @@
         var messages = await res.json();
         var csv = 'Tarih,İsim,E-posta,Telefon,Konu/Ürün,Mesaj,Tip\n';
         csv += messages.map(function(m) {
-          var date = new Date(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone });
+          var date = parseDate(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone });
           var name = ((m.first_name || '') + ' ' + (m.last_name || '')).trim();
           var subject = (m.subject || m.product_name || '').replace(/,/g, ' ');
           var msg = (m.message || '').replace(/,/g, ' ').replace(/\n/g, ' ');
@@ -358,12 +367,12 @@
         if (data && data.current) {
           document.getElementById('goldPriceValue').textContent = data.current.hasAltin ? data.current.hasAltin.toLocaleString('tr-TR') : '—';
           document.getElementById('goldPriceSource').textContent = 'Kaynak: ' + (data.current.source || 'Bilinmiyor');
-          document.getElementById('goldPriceTime').textContent = data.current.timestamp ? new Date(data.current.timestamp).toLocaleString('tr-TR', { timeZone: userTimezone }) : '—';
+          document.getElementById('goldPriceTime').textContent = data.current.timestamp ? parseDate(data.current.timestamp).toLocaleString('tr-TR', { timeZone: userTimezone }) : '—';
         }
         if (data && data.history && data.history.length) {
           var historyCopy = data.history.slice();
           var chartLabels = historyCopy.reverse().map(function(h) {
-            return h.created_at ? new Date(h.created_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
+            return h.created_at ? parseDate(h.created_at).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
           });
           var chartData = historyCopy.map(function(h) { return h.has_altin || 0; });
           if (goldPriceChart) goldPriceChart.destroy();
@@ -400,7 +409,7 @@
           }
           var logsHtml = '<table><thead><tr><th>Tarih</th><th>Saat</th><th>Kaynak</th><th>Fiyat (₺/g)</th></tr></thead><tbody>';
           data.history.forEach(function(h) {
-            var d = h.created_at ? new Date(h.created_at.replace(' ','T')) : null;
+            var d = h.created_at ? parseDate(h.created_at) : null;
             logsHtml += '<tr><td>' + (d ? d.toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (d ? d.toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '-') + '</td><td><span class="badge badge-gold">' + (h.source || 'AKOD') + '</span></td><td style="font-weight:600;color:var(--gold);">' + (h.has_altin ? h.has_altin.toLocaleString('tr-TR') : '-') + '</td></tr>';
           });
           logsHtml += '</tbody></table>';
@@ -421,7 +430,7 @@
         if (!logs.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:12px 0;">Hen\u00FCz kay\u0131t yok.</p>'; return; }
         var actionMap = { login: '\uD83D\uDD11 Giriş', logout: '\uD83D\uDEAA Çıkış', delete_message: '\uD83D\uDDD1\uFE0F Mesaj Silme', delete_testimonial: '\uD83D\uDDD1\uFE0F Yorum Silme', approve_testimonial: '\u2705 Yorum Onay', delete_product: '\uD83D\uDDD1\uFE0F Ürün Silme', update_product: '\uD83D\uDCDD Ürün Düzenleme', create_product: '\u2795 Ürün Ekleme', read_message: '\uD83D\uDCE9 Mesaj Okundu', create_order: '\u2795 Sipari\u015F Olu\u015Fturma', update_order_status: '\uD83D\uDEE1\uFE0F Sipari\u015F Durumu', stock_adjustment: '\uD83D\uDCE6 Stok D\u00FCzenleme' };
         list.innerHTML = logs.map(function(l) {
-          var time = l.created_at ? new Date(l.created_at.replace(' ','T')).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
+          var time = l.created_at ? parseDate(l.created_at).toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit', minute:'2-digit' }) : '';
           return '<div class="widget-item"><div class="widget-item-icon ' + (l.action === 'login' ? 'login' : 'action') + '">' + (l.action === 'login' ? '\uD83D\uDD11' : '\u26A1') + '</div><div class="widget-item-info"><div class="wi-top">' + ((actionMap[l.action] || l.action)) + ' - <strong>' + l.username + '</strong></div><div class="wi-bottom"><span class="security-tag">\uD83D\uDEE1\uFE0F Verified</span><span class="device-tag">\uD83D\uDCBB ' + (l.device_info || 'Unknown Device') + '</span><span class="ip-tag">\uD83C\uDF94 ' + (l.ip_address || '0.0.0.0') + '</span></div></div><div class="widget-item-time">' + time + '</div></div>';
         }).join('');
       } catch(e) {

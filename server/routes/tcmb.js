@@ -57,7 +57,7 @@ function parseXML(xml) {
 async function logCurrencyToDb(data) {
   try {
     const db = await getDb();
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const now = new Date().toISOString().substring(0, 19) + 'Z';
     const isPg = !!process.env.DATABASE_URL;
     const last = await db.get(
       isPg
@@ -65,7 +65,7 @@ async function logCurrencyToDb(data) {
         : 'SELECT id, created_at FROM currency_rates ORDER BY id DESC LIMIT 1'
     );
     if (last && last.created_at) {
-      const lastTime = new Date(last.created_at.replace(' ', 'T') + (last.created_at.includes('Z') ? '' : 'Z')).getTime();
+      const lastTime = new Date(last.created_at.includes('T') ? last.created_at : last.created_at.replace(' ', 'T') + 'Z').getTime();
       if (Date.now() - lastTime < 3 * 60 * 60 * 1000) return;
     }
     const codes = ['USD', 'EUR', 'GBP', 'CHF', 'RUB', 'SAR'];

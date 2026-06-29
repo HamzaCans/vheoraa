@@ -79,13 +79,13 @@ async function logGoldPrice(db, hasAltin, source, raw) {
       "SELECT id, created_at FROM gold_prices ORDER BY id DESC LIMIT 1"
     );
     if (last && last.created_at) {
-      const lastTime = new Date(last.created_at.replace(' ', 'T') + (last.created_at.includes('Z') ? '' : 'Z')).getTime();
+      const lastTime = new Date(last.created_at.includes('T') ? last.created_at : last.created_at.replace(' ', 'T') + 'Z').getTime();
       const now = Date.now();
       if (now - lastTime < LOG_INTERVAL) return;
     }
     await db.run(
       'INSERT INTO gold_prices (source, has_altin, raw_data, created_at) VALUES (?, ?, ?, ?)',
-      [source, hasAltin, raw || '', new Date().toISOString().replace('T', ' ').substring(0, 19)]
+      [source, hasAltin, raw || '', new Date().toISOString().substring(0, 19) + 'Z']
     );
   } catch (e) {
     console.warn('[GoldPrice] Log error:', e.message);
@@ -129,7 +129,7 @@ async function forceLogGoldPrice() {
       const db = await getDb();
       await db.run(
         'INSERT INTO gold_prices (source, has_altin, raw_data, created_at) VALUES (?, ?, ?, ?)',
-        [result.source, result.hasAltin, result.raw || '', new Date().toISOString().replace('T', ' ').substring(0, 19)]
+        [result.source, result.hasAltin, result.raw || '', new Date().toISOString().substring(0, 19) + 'Z']
       );
       cache = { data: { hasAltin: result.hasAltin, source: result.source, timestamp: new Date().toISOString() }, lastFetch: Date.now() };
       return cache.data;

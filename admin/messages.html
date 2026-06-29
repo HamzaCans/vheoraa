@@ -44,7 +44,17 @@
 
   <script>
     var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
+    var userTimezone = 'Europe/Istanbul';
     var currentFilter = 'all';
+    function parseDate(s) {
+      if (!s) return null;
+      s = String(s).trim();
+      if (!s) return null;
+      if (s.includes('T')) { if (!/[Zz]|[+-]\d{2}:\d{2}$/.test(s)) s += 'Z'; }
+      else { s = s.replace(' ', 'T') + 'Z'; }
+      var d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
 
     function getToken() {
       var t = localStorage.getItem('vheora_token');
@@ -174,9 +184,9 @@
         }
         var html = '<table><thead><tr><th>Tarih</th><th>İsim</th><th>İletişim</th><th>Konu</th><th>Detay</th><th>Tip</th><th>Durum</th><th style="text-align:right;">İşlem</th></tr></thead><tbody>';
         messages.forEach(function(m) {
-          var date = new Date(m.created_at);
+          var date = parseDate(m.created_at);
           html += '<tr style="' + (!m.is_read ? 'background:rgba(212,168,83,0.04);' : '') + '">';
-          html += '<td style="color:var(--text-muted);font-size:0.8rem;">' + date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'}) + '</td>';
+          html += '<td style="color:var(--text-muted);font-size:0.8rem;">' + (date ? date.toLocaleDateString('tr-TR', { timeZone: userTimezone }) + ' ' + date.toLocaleTimeString('tr-TR', { timeZone: userTimezone, hour:'2-digit',minute:'2-digit' }) : '-') + '</td>';
           html += '<td style="font-weight:' + (!m.is_read ? '600' : '400') + ';">' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td>';
           html += '<td>' + (m.email || m.phone || '-') + '</td>';
           html += '<td>' + (m.subject || m.product_name || '-') + '</td>';
