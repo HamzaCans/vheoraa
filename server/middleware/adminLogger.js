@@ -194,7 +194,21 @@ function parseDeviceInfo(ua, clientModel) {
   else if (/macintosh|mac os/i.test(ua)) os = 'macOS';
   else if (/linux/i.test(ua)) os = 'Linux';
 
-  let model = (clientModel && clientModel !== 'iPhone' && clientModel !== 'iPad') ? clientModel : detectModel(ua);
+  let model = '';
+  if (clientModel && clientModel !== 'iPhone' && clientModel !== 'iPad') {
+    const cm = clientModel.trim();
+    if (/^(SM-|GT-|SCH-|SGH-|SPH-|SHV-|SC-)/.test(cm)) {
+      model = resolveSamsungModel(cm) || cm;
+    } else if (/^\d{4,}[A-Z]/.test(cm)) {
+      model = resolveXiaomiModel(cm) || cm;
+    } else if (/^(NOH|OCE|JNY|VOG|ANA|ELS|ABR|SNE|PCT|MRS|TAS|FLA)/.test(cm)) {
+      model = resolveHuaweiModel(cm) || cm;
+    } else {
+      model = cm;
+    }
+  } else {
+    model = detectModel(ua);
+  }
 
   return { device_type, browser, os, model, display: device_type + ' · ' + browser + ' · ' + os + (model ? ' · ' + model : '') };
 }
@@ -242,4 +256,4 @@ async function logAdminAction(req, action) {
   }
 }
 
-module.exports = { logAdminAction, getClientIp, parseDeviceInfo };
+module.exports = { logAdminAction, getClientIp, parseDeviceInfo, lookupGeo };

@@ -1,7 +1,7 @@
 const express = require('express');
 const { getDb } = require('../db');
 const { authenticateToken } = require('../middleware/auth');
-const { parseDeviceInfo, getClientIp } = require('../middleware/adminLogger');
+const { parseDeviceInfo, getClientIp, lookupGeo } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
@@ -91,21 +91,11 @@ router.post('/visit', async (req, res) => {
     const referrer = body.referrer || '';
     const timezone = body.timezone || '';
 
-    let country = '';
-    let city = '';
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
-      const locRes = await fetch('https://ipinfo.io/' + ip + '/json', { signal: controller.signal });
-      clearTimeout(timeout);
-      const loc = await locRes.json();
-      country = loc.country || '';
-      city = loc.city || '';
-    } catch (_) {}
+    const geo = await lookupGeo(ip);
 
     await db.run(
       'INSERT INTO visitor_logs (ip_address, user_agent, device_info, browser, os, timezone, page_visited, referrer, country, city, device_model, device_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [ip, ua, info.display, info.browser, info.os, timezone, pageVisited, referrer, country, city, info.model || '', info.device_type || '']
+      [ip, ua, info.display, info.browser, info.os, timezone, pageVisited, referrer, geo.country, geo.city, info.model || '', info.device_type || '']
     );
     res.json({ ok: true });
   } catch (err) {
