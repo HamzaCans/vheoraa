@@ -868,7 +868,8 @@ section[id] {
 .hero-image-wrapper {
   position: relative;
   width: 100%;
-  max-width: 520px;
+  max-width: 650px;
+  aspect-ratio: 4/5;
   padding: 4px;
   background: linear-gradient(145deg, #0D3A35, #276152);
   border-radius: 4px;
@@ -876,9 +877,8 @@ section[id] {
 
 .hero-image-wrapper img {
   width: 100%;
-  height: auto;
-  max-height: 70vh;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   border-radius: 2px;
   position: relative;
   z-index: 2;
