@@ -215,69 +215,72 @@
     async function loadDashboard() {
       var token = getToken();
       var headers = { 'Authorization': 'Bearer ' + token };
-      try {
-        var stats = await fetchJSON(API + '/api/admin/stats', { headers: headers });
-        if (stats != null) {
-          document.getElementById('statProducts').textContent = stats.products ?? 0;
-          document.getElementById('statMessages').textContent = stats.messages ?? 0;
-          document.getElementById('statUnread').textContent = stats.unread_messages ?? 0;
-          document.getElementById('statTestimonials').textContent = stats.testimonials ?? 0;
-          document.getElementById('statApproved').textContent = stats.approved_testimonials ?? 0;
-          var msgLabels = (stats.monthly_messages || []).map(function(m) { return m.month; });
-          var msgData = (stats.monthly_messages || []).map(function(m) { return m.count; });
-          if (messagesChart) messagesChart.destroy();
-          messagesChart = renderChart('messagesChart', msgLabels, msgData, 'Mesaj');
-          var testLabels = (stats.monthly_testimonials || []).map(function(m) { return m.month; });
-          var testData = (stats.monthly_testimonials || []).map(function(m) { return m.count; });
-          if (testimonialsChart) testimonialsChart.destroy();
-          testimonialsChart = renderChart('testimonialsChart', testLabels, testData, 'Yorum', 'rgba(46, 204, 113, 0.3)');
-          if (stats.pending !== undefined && stats.pending !== null) document.getElementById('statPendingOrders').textContent = stats.pending || 0;
+
+      var results = await Promise.allSettled([
+        fetchJSON(API + '/api/admin/stats', { headers: headers }),
+        fetchJSON(API + '/api/admin/messages', { headers: headers }),
+        fetchJSON(API + '/api/admin/visitor-stats', { headers: headers }),
+        fetchJSON(API + '/api/admin/orders/stats', { headers: headers }),
+        fetchJSON(API + '/api/admin/products/low-stock', { headers: headers })
+      ]);
+
+      var stats = results[0].value;
+      if (stats != null) {
+        document.getElementById('statProducts').textContent = stats.products ?? 0;
+        document.getElementById('statMessages').textContent = stats.messages ?? 0;
+        document.getElementById('statUnread').textContent = stats.unread_messages ?? 0;
+        document.getElementById('statTestimonials').textContent = stats.testimonials ?? 0;
+        document.getElementById('statApproved').textContent = stats.approved_testimonials ?? 0;
+        var msgLabels = (stats.monthly_messages || []).map(function(m) { return m.month; });
+        var msgData = (stats.monthly_messages || []).map(function(m) { return m.count; });
+        if (messagesChart) messagesChart.destroy();
+        messagesChart = renderChart('messagesChart', msgLabels, msgData, 'Mesaj');
+        var testLabels = (stats.monthly_testimonials || []).map(function(m) { return m.month; });
+        var testData = (stats.monthly_testimonials || []).map(function(m) { return m.count; });
+        if (testimonialsChart) testimonialsChart.destroy();
+        testimonialsChart = renderChart('testimonialsChart', testLabels, testData, 'Yorum', 'rgba(46, 204, 113, 0.3)');
+        if (stats.pending !== undefined && stats.pending !== null) document.getElementById('statPendingOrders').textContent = stats.pending || 0;
+      }
+
+      var messages = results[1].value;
+      if (messages != null) {
+        var recent = (messages || []).slice(0, 5);
+        var recentHtml = recent.length ? '<table><thead><tr><th>Tarih</th><th>İsim</th><th>Konu</th><th>Tip</th></tr></thead><tbody>' + recent.map(function(m) {
+          return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + (m.created_at ? parseDate(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td></tr>';
+        }).join('') + '</tbody></table>' : '<p class="empty-state">Henüz mesaj yok</p>';
+        document.getElementById('recentMessages').innerHTML = recentHtml;
+      }
+
+      var visitorStats = results[2].value;
+      if (visitorStats) {
+        document.getElementById('statVisitors').textContent = visitorStats.total || 0;
+        document.getElementById('statTodayVisitors').textContent = visitorStats.today || 0;
+        document.getElementById('statUniqueIps').textContent = visitorStats.unique_ips || 0;
+        if (visitorStats.devices && visitorStats.devices.length) {
+          window.devicesChart = renderDoughnut('devicesChart', visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; }), visitorStats.devices.map(function(d) { return parseInt(d.count) || 0; }), window.devicesChart);
         }
-      } catch(e) { console.warn('Stats error:', e); }
-      try {
-        var messages = await fetchJSON(API + '/api/admin/messages', { headers: headers });
-        if (messages != null) {
-          var recent = (messages || []).slice(0, 5);
-          var recentHtml = recent.length ? '<table><thead><tr><th>Tarih</th><th>İsim</th><th>Konu</th><th>Tip</th></tr></thead><tbody>' + recent.map(function(m) {
-            return '<tr><td style="color:var(--text-muted);font-size:0.8rem;">' + (m.created_at ? parseDate(m.created_at).toLocaleDateString('tr-TR', { timeZone: userTimezone }) : '-') + '</td><td>' + (m.first_name || '-') + ' ' + (m.last_name || '') + '</td><td>' + (m.subject || m.product_name || '-') + '</td><td><span class="badge ' + (m.type === 'quote' ? 'badge-gold' : 'badge-green') + '">' + (m.type === 'quote' ? 'Teklif' : 'İletişim') + '</span></td></tr>';
-          }).join('') + '</tbody></table>' : '<p class="empty-state">Henüz mesaj yok</p>';
-          document.getElementById('recentMessages').innerHTML = recentHtml;
+        if (visitorStats.browsers && visitorStats.browsers.length) {
+          window.browsersChart = renderDoughnut('browsersChart', visitorStats.browsers.map(function(b) { return b.browser || 'Diğer'; }), visitorStats.browsers.map(function(b) { return parseInt(b.count) || 0; }), window.browsersChart);
         }
-      } catch(e) { console.warn('Messages error:', e); }
-      try {
-        var visitorStats = await fetchJSON(API + '/api/admin/visitor-stats', { headers: headers });
-        if (visitorStats) {
-          document.getElementById('statVisitors').textContent = visitorStats.total || 0;
-          document.getElementById('statTodayVisitors').textContent = visitorStats.today || 0;
-          document.getElementById('statUniqueIps').textContent = visitorStats.unique_ips || 0;
-          if (visitorStats.devices && visitorStats.devices.length) {
-            window.devicesChart = renderDoughnut('devicesChart', visitorStats.devices.map(function(d) { return d.device_info || 'Bilinmiyor'; }), visitorStats.devices.map(function(d) { return parseInt(d.count) || 0; }), window.devicesChart);
-          }
-          if (visitorStats.browsers && visitorStats.browsers.length) {
-            window.browsersChart = renderDoughnut('browsersChart', visitorStats.browsers.map(function(b) { return b.browser || 'Diğer'; }), visitorStats.browsers.map(function(b) { return parseInt(b.count) || 0; }), window.browsersChart);
-          }
-          if (visitorStats.os && visitorStats.os.length) {
-            window.osChart = renderDoughnut('osChart', visitorStats.os.map(function(o) { return o.os || 'Diğer'; }), visitorStats.os.map(function(o) { return parseInt(o.count) || 0; }), window.osChart);
-          }
-          if (visitorStats.countries && visitorStats.countries.length) {
-            window.countryChart = renderDoughnut('countryChart', visitorStats.countries.map(function(c) { return c.country || 'Bilinmiyor'; }), visitorStats.countries.map(function(c) { return parseInt(c.count) || 0; }), window.countryChart);
-          }
-          if (visitorStats.cities && visitorStats.cities.length) {
-            window.cityChart = renderDoughnut('cityChart', visitorStats.cities.map(function(c) { return c.city || 'Bilinmiyor'; }), visitorStats.cities.map(function(c) { return parseInt(c.count) || 0; }), window.cityChart);
-          }
-          if (visitorStats.models && visitorStats.models.length) {
-            window.modelsChart = renderDoughnut('modelsChart', visitorStats.models.map(function(m) { return m.device_model || 'Bilinmiyor'; }), visitorStats.models.map(function(m) { return parseInt(m.count) || 0; }), window.modelsChart);
-          }
+        if (visitorStats.os && visitorStats.os.length) {
+          window.osChart = renderDoughnut('osChart', visitorStats.os.map(function(o) { return o.os || 'Diğer'; }), visitorStats.os.map(function(o) { return parseInt(o.count) || 0; }), window.osChart);
         }
-      } catch(e) { console.warn('Visitor stats error:', e); }
-      try {
-        var orderStats = await fetchJSON(API + '/api/admin/orders/stats', { headers: headers });
-        if (orderStats) document.getElementById('statPendingOrders').textContent = orderStats.pending || 0;
-      } catch(e) {}
-      try {
-        var lowStock = await fetchJSON(API + '/api/admin/products/low-stock', { headers: headers });
-        if (lowStock) document.getElementById('statLowStockItems').textContent = Array.isArray(lowStock) ? lowStock.length : 0;
-      } catch(e) {}
+        if (visitorStats.countries && visitorStats.countries.length) {
+          window.countryChart = renderDoughnut('countryChart', visitorStats.countries.map(function(c) { return c.country || 'Bilinmiyor'; }), visitorStats.countries.map(function(c) { return parseInt(c.count) || 0; }), window.countryChart);
+        }
+        if (visitorStats.cities && visitorStats.cities.length) {
+          window.cityChart = renderDoughnut('cityChart', visitorStats.cities.map(function(c) { return c.city || 'Bilinmiyor'; }), visitorStats.cities.map(function(c) { return parseInt(c.count) || 0; }), window.cityChart);
+        }
+        if (visitorStats.models && visitorStats.models.length) {
+          window.modelsChart = renderDoughnut('modelsChart', visitorStats.models.map(function(m) { return m.device_model || 'Bilinmiyor'; }), visitorStats.models.map(function(m) { return parseInt(m.count) || 0; }), window.modelsChart);
+        }
+      }
+
+      var orderStats = results[3].value;
+      if (orderStats) document.getElementById('statPendingOrders').textContent = orderStats.pending || 0;
+
+      var lowStock = results[4].value;
+      if (lowStock) document.getElementById('statLowStockItems').textContent = Array.isArray(lowStock) ? lowStock.length : 0;
     }
     async function exportCSV() {
       var token = getToken();

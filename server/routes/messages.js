@@ -312,19 +312,21 @@ router.get('/admin/stats', authenticateToken, async (req, res) => {
     const contactCount = (await db.get("SELECT COUNT(*) as c FROM messages WHERE type = 'contact'")).c;
     const quoteCount = (await db.get("SELECT COUNT(*) as c FROM messages WHERE type = 'quote'")).c;
 
+    const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().substring(0, 19) + 'Z';
+
     const monthlyMessages = await db.all(`
       SELECT ${process.env.DATABASE_URL ? "to_char(created_at::timestamp, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
       FROM messages
-      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "date(created_at) >= date('now', '-6 months')"}
+      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "created_at >= ?"}
       GROUP BY month ORDER BY month
-    `);
+    `, process.env.DATABASE_URL ? undefined : [sixMonthsAgo]);
 
     const monthlyTestimonials = await db.all(`
       SELECT ${process.env.DATABASE_URL ? "to_char(created_at::timestamp, 'YYYY-MM')" : "strftime('%Y-%m', created_at)"} as month, COUNT(*) as count
       FROM testimonials
-      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "date(created_at) >= date('now', '-6 months')"}
+      WHERE ${process.env.DATABASE_URL ? "created_at::timestamp >= NOW() - INTERVAL '6 months'" : "created_at >= ?"}
       GROUP BY month ORDER BY month
-    `);
+    `, process.env.DATABASE_URL ? undefined : [sixMonthsAgo]);
 
     res.json({
       products: parseInt(productCount),

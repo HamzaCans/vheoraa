@@ -25,16 +25,16 @@ router.get('/admin/visitor-stats', authenticateToken, async (req, res) => {
   const result = { total: 0, today: 0, unique_ips: 0, devices: [], pages: [], browsers: [], os: [], countries: [], cities: [], models: [] };
 
   try { const r = await db.get("SELECT COUNT(*) as c FROM visitor_logs"); result.total = r?.c || 0; } catch (_) {}
-  try { const r = await db.get("SELECT COUNT(*) as c FROM visitor_logs WHERE date(created_at) = date('now')"); result.today = r?.c || 0; } catch (_) {}
+  try { const r = await db.get("SELECT COUNT(*) as c FROM visitor_logs WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"); result.today = r?.c || 0; } catch (_) {}
   try { const r = await db.get("SELECT COUNT(DISTINCT ip_address) as c FROM visitor_logs WHERE ip_address != ''"); result.unique_ips = r?.c || 0; } catch (_) {}
   try { result.devices = await db.all("SELECT device_info, COUNT(*) as count FROM visitor_logs WHERE device_info != '' GROUP BY device_info ORDER BY count DESC LIMIT 10"); } catch (_) {}
   try { result.pages = await db.all("SELECT page_visited, COUNT(*) as count FROM visitor_logs WHERE page_visited != '' GROUP BY page_visited ORDER BY count DESC LIMIT 10"); } catch (_) {}
-  try { result.browsers = await db.all("SELECT browser, COUNT(*) as count FROM visitor_logs WHERE browser != '' GROUP BY browser ORDER BY count DESC"); } catch (_) {}
-  try { result.os = await db.all("SELECT os, COUNT(*) as count FROM visitor_logs WHERE os != '' GROUP BY os ORDER BY count DESC"); } catch (_) {}
+  try { result.browsers = await db.all("SELECT browser, COUNT(*) as count FROM visitor_logs WHERE browser != '' GROUP BY browser ORDER BY count DESC LIMIT 10"); } catch (_) {}
+  try { result.os = await db.all("SELECT os, COUNT(*) as count FROM visitor_logs WHERE os != '' GROUP BY os ORDER BY count DESC LIMIT 10"); } catch (_) {}
   try { result.countries = await db.all("SELECT country, COUNT(*) as count FROM visitor_logs WHERE country != '' GROUP BY country ORDER BY count DESC LIMIT 10"); } catch (_) {}
   try { result.cities = await db.all("SELECT city, COUNT(*) as count FROM visitor_logs WHERE city != '' GROUP BY city ORDER BY count DESC LIMIT 10"); } catch (_) {}
   try { result.models = await db.all("SELECT device_model, COUNT(*) as count FROM visitor_logs WHERE device_model != '' GROUP BY device_model ORDER BY count DESC LIMIT 15"); } catch (_) {}
-  try { result.device_types = await db.all("SELECT device_type, COUNT(*) as count FROM visitor_logs WHERE device_type != '' GROUP BY device_type ORDER BY count DESC"); } catch (_) {}
+  try { result.device_types = await db.all("SELECT device_type, COUNT(*) as count FROM visitor_logs WHERE device_type != '' GROUP BY device_type ORDER BY count DESC LIMIT 10"); } catch (_) {}
 
   res.json(result);
 });

@@ -253,6 +253,31 @@ async function runMigrations(driver) {
     }
   }
 
+  const indexMigrations = [
+    `CREATE INDEX IF NOT EXISTS idx_messages_type ON messages(type)`,
+    `CREATE INDEX IF NOT EXISTS idx_messages_is_read ON messages(is_read)`,
+    `CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_testimonials_is_approved ON testimonials(is_approved)`,
+    `CREATE INDEX IF NOT EXISTS idx_testimonials_created_at ON testimonials(created_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_created_at ON visitor_logs(created_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_ip ON visitor_logs(ip_address)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_browser ON visitor_logs(browser)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_os ON visitor_logs(os)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_country ON visitor_logs(country)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_city ON visitor_logs(city)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_device_info ON visitor_logs(device_info)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_device_model ON visitor_logs(device_model)`,
+    `CREATE INDEX IF NOT EXISTS idx_visitor_logs_device_type ON visitor_logs(device_type)`,
+    `CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`
+  ];
+  for (const sql of indexMigrations) {
+    try {
+      await driver.exec(normalizeSql(sql));
+    } catch (e) {
+      // Index may already exist in PostgreSQL — ignore
+    }
+  }
+
   try {
     const gm = await driver.get("SELECT value FROM settings WHERE key = 'gold_margin'");
     if (!gm) {
