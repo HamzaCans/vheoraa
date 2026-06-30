@@ -3198,7 +3198,7 @@ body.menu-open {
   }
 
   .hero-image-wrapper {
-    max-width: 320px;
+    max-width: min(340px, 85vw);
     margin: 0 auto;
   }
 
