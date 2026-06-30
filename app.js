@@ -244,6 +244,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const heroDesc = document.querySelector('.hero-description');
       if (heroDesc) heroDesc.textContent = siteSettings.site_hero_desc;
     }
+    if (siteSettings.site_hero_image) {
+      const heroImg = document.querySelector('.hero-image-wrapper img');
+      if (heroImg) { heroImg.src = siteSettings.site_hero_image; heroImg.removeAttribute('width'); heroImg.removeAttribute('height'); }
+    }
     if (siteSettings.site_about_text_1) {
       const aboutTexts = document.querySelectorAll('.about-text');
       if (aboutTexts[0]) aboutTexts[0].textContent = siteSettings.site_about_text_1;

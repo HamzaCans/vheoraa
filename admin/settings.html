@@ -100,6 +100,21 @@
     <div class="settings-section">
       <h3 class="section-heading">✨ Site İçeriği</h3>
       <p class="section-desc">Ana sayfada görünen dinamik metinleri yönetin. Boş bırakılan alanlar varsayılan metinleri kullanır.</p>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>Ana Sayfa Hero Görseli</label>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">Önerilen boyut: 800x1000px. Maks 2MB. Görsel otomatik olarak optimize edilir.</p>
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div id="heroImagePreview" style="width:160px;height:200px;border-radius:var(--radius-md);overflow:hidden;border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);flex-shrink:0;">
+            <span style="color:var(--text-muted);font-size:0.75rem;text-align:center;">Görsel yok</span>
+          </div>
+          <div style="flex:1;">
+            <input type="file" id="heroImageInput" accept="image/*" style="display:none;" onchange="previewHeroImage(this)">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('heroImageInput').click()">📷 Görsel Seç</button>
+            <button class="btn btn-sm" id="heroImageRemoveBtn" style="display:none;margin-left:8px;" onclick="removeHeroImage()">🗑️ Kaldır</button>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">Değişiklikler "Siteyi Güncelle" butonuyla kaydedilir.</p>
+          </div>
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label for="siteHeroTitle">Hero Başlık (HTML)</label>
@@ -221,6 +236,40 @@
       document.getElementById('maintenanceStatus').textContent = this.checked ? 'Bakım Modu Açık' : 'Bakım Modu Kapalı';
     });
 
+    var heroImageData = null;
+
+    function previewHeroImage(input) {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      if (file.size > 2 * 1024 * 1024) { adminToast('Hata', 'Dosya boyutu 2MB\'dan büyük olamaz', 'error'); return; }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var maxW = 800, maxH = 1000;
+          var w = img.width, h = img.height;
+          if (w > maxW) { h = h * maxW / w; w = maxW; }
+          if (h > maxH) { w = w * maxH / h; h = maxH; }
+          canvas.width = Math.round(w);
+          canvas.height = Math.round(h);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          heroImageData = canvas.toDataURL('image/jpeg', 0.85);
+          document.getElementById('heroImagePreview').innerHTML = '<img src="' + heroImageData + '" style="width:100%;height:100%;object-fit:cover;">';
+          document.getElementById('heroImageRemoveBtn').style.display = 'inline-block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeHeroImage() {
+      heroImageData = '__REMOVE__';
+      document.getElementById('heroImagePreview').innerHTML = '<span style="color:var(--text-muted);font-size:0.75rem;text-align:center;">Görsel yok</span>';
+      document.getElementById('heroImageRemoveBtn').style.display = 'none';
+      document.getElementById('heroImageInput').value = '';
+    }
+
     async function loadSettings() {
       var token = getToken();
       try {
@@ -244,6 +293,15 @@
         document.getElementById('siteContactPhone').value = data.site_contact_phone || '';
         document.getElementById('siteContactHours').value = data.site_contact_hours || '';
         document.getElementById('goldMargin').value = data.gold_margin || '2500';
+        if (data.site_hero_image) {
+          heroImageData = data.site_hero_image;
+          document.getElementById('heroImagePreview').innerHTML = '<img src="' + data.site_hero_image + '" style="width:100%;height:100%;object-fit:cover;">';
+          document.getElementById('heroImageRemoveBtn').style.display = 'inline-block';
+        } else {
+          heroImageData = null;
+          document.getElementById('heroImagePreview').innerHTML = '<img src="images/img_4486.png" style="width:100%;height:100%;object-fit:cover;opacity:0.5;"><span style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:0.65rem;color:var(--text-muted);">Varsayılan</span>';
+          document.getElementById('heroImagePreview').style.position = 'relative';
+        }
         updateTimezonePreview();
         var serverToken = data.maintenance_bypass_token;
         if (serverToken) {
@@ -277,6 +335,7 @@
             site_hero_title: document.getElementById('siteHeroTitle').value,
             site_hero_desc: document.getElementById('siteHeroDesc').value,
             site_badge_text: document.getElementById('siteBadgeText').value,
+            site_hero_image: heroImageData === '__REMOVE__' ? '' : (heroImageData || ''),
             site_about_text_1: document.getElementById('siteAboutText1').value,
             site_about_text_2: document.getElementById('siteAboutText2').value,
             site_stat_country: document.getElementById('siteStatCountry').value,

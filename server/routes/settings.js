@@ -28,7 +28,7 @@ router.put('/admin/settings', authenticateToken, async (req, res) => {
     const keys = Object.keys(updates);
     const allowedKeys = [
       'maintenance_mode', 'maintenance_title', 'maintenance_message', 'timezone',
-      'site_hero_title', 'site_hero_desc', 'site_badge_text',
+      'site_hero_title', 'site_hero_desc', 'site_badge_text', 'site_hero_image',
       'site_about_text_1', 'site_about_text_2',
       'site_stat_country', 'site_stat_customer', 'site_stat_collection',
       'site_contact_address', 'site_contact_email', 'site_contact_phone', 'site_contact_hours',
@@ -36,7 +36,7 @@ router.put('/admin/settings', authenticateToken, async (req, res) => {
     ];
     for (const [key, value] of Object.entries(updates)) {
       if (!allowedKeys.includes(key)) continue;
-      const val = String(value).substring(0, 5000);
+      const val = key === 'site_hero_image' ? String(value).substring(0, 500000) : String(value).substring(0, 5000);
       await db.run(
         'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?',
         [key, val, val]
