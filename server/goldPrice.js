@@ -1,8 +1,10 @@
 const { getDb } = require('./db');
 
 let cache = { data: null, lastFetch: 0 };
-const CACHE_TTL = 60 * 1000;
+const CACHE_TTL = 5 * 60 * 1000;
 const LOG_INTERVAL = 3 * 60 * 60 * 1000;
+let lastForceTime = 0;
+const MIN_FORCE_INTERVAL = 60 * 1000;
 
 function smartParse(str) {
   if (!str) return null;
@@ -123,6 +125,9 @@ async function getGoldPrice() {
 }
 
 async function forceLogGoldPrice() {
+  const now = Date.now();
+  if (now - lastForceTime < MIN_FORCE_INTERVAL) return;
+  lastForceTime = now;
   try {
     const result = await fetchGoldPrice();
     if (result) {

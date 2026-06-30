@@ -18,7 +18,7 @@ router.get('/gold-price', async (req, res) => {
 router.get('/admin/gold-prices', authenticateToken, async (req, res) => {
   try {
     const hours = parseInt(req.query.hours) || 24;
-    await forceLogGoldPrice();
+    forceLogGoldPrice();
     const current = await getGoldPrice();
     const history = await getGoldPriceHistory(hours);
     res.json({ current, history });

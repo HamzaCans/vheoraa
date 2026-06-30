@@ -420,15 +420,29 @@
               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#8a8a9a', callback: function(v) { return v.toLocaleString('tr-TR'); } }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8a8a9a' }, grid: { display: false } } } }
             });
           }
-          document.getElementById('currencyLogs').innerHTML = data.stale
-            ? '<p class="empty-state">Kurlar eski veri ile gösteriliyor, güncelleniyor...</p>'
-            : '<p class="empty-state">Kurlar TCMB\'den canlı çekiliyor. Detaylı loglar sayfada mevcut.</p>';
+          loadCurrencyLogs();
         } else {
           document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Kurlar şu an yüklenemedi. Sayfayı yenileyin.</p>';
         }
       } catch(e) {
         console.warn('Currency error:', e);
         document.getElementById('currencyLogs').innerHTML = '<p class="empty-state">Döviz kurları yüklenemedi.</p>';
+      }
+    }
+
+    async function loadCurrencyLogs() {
+      try {
+        var res = await fetch(API + '/api/admin/currency-logs/stats', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (!res.ok) return;
+        var data = await res.json();
+        var el = document.getElementById('currencyLogs');
+        if (data.totalLogs > 0) {
+          el.innerHTML = '<p style="font-size:0.82rem;color:var(--text-muted);padding:8px 0;">Son ' + data.totalLogs + ' log kaydı mevcut. ' + (data.latest ? 'Son: ' + new Date(data.latest.created_at).toLocaleString('tr-TR', { timeZone: userTimezone }) : '') + '</p>';
+        } else {
+          el.innerHTML = '<p class="empty-state">Henüz log kaydı yok. Kurlar TCMB\'den çekiliyor, ilk log 3 saat sonra oluşacak.</p>';
+        }
+      } catch(e) {
+        console.warn('Currency logs error:', e);
       }
     }
 </script>
