@@ -40,85 +40,11 @@
     </div>
   </div>
 
+  <script src="shared-functions.js"></script>
   <script>
-    var API = window.location.protocol === 'file:' ? 'http://localhost:3001' : '';
-    var userTimezone = 'Europe/Istanbul';
+    initSidebar('testimonials');
     var currentFilter = 'all';
     var allTestimonials = [];
-    function parseDate(s) {
-      if (!s) return null;
-      s = String(s).trim();
-      if (!s) return null;
-      if (s.includes('T')) { if (!/[Zz]|[+-]\d{2}:\d{2}$/.test(s)) s += 'Z'; }
-      else { s = s.replace(' ', 'T') + 'Z'; }
-      var d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    function getToken() {
-      var t = localStorage.getItem('vheora_token');
-      if (!t) { window.location.href = '/admin/'; return null; }
-      return t;
-    }
-
-    async function fetchJSON(url, options, timeoutMs) {
-      timeoutMs = timeoutMs || 15000;
-      var controller = new AbortController();
-      var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
-      try {
-        var res = await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
-        if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(function() { window.location.href = '/admin/'; }, 1500); return null; }
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        return await res.json();
-      } finally { clearTimeout(timeout); }
-    }
-
-    function adminToast(title, msg, type, duration) {
-      type = type || 'success'; duration = duration || 3500;
-      var c = document.getElementById('adminToast'); if (!c) return;
-      var t = document.createElement('div'); t.className = 'admin-toast';
-      var icons = { success: '✅', error: '❌', info: 'ℹ️' };
-      t.innerHTML = '<div class="admin-toast-icon ' + type + '">' + icons[type] + '</div><div class="admin-toast-body"><div class="admin-toast-title">' + title + '</div><div class="admin-toast-msg">' + msg + '</div></div>';
-      c.appendChild(t);
-      setTimeout(function() { t.classList.add('out'); setTimeout(function() { t.remove(); }, 250); }, duration);
-    }
-
-    var confirmResolve = null;
-    function showConfirm(title, text, btnText) {
-      btnText = btnText || 'Sil';
-      return new Promise(function(resolve) {
-        confirmResolve = resolve;
-        document.getElementById('confirmTitle').textContent = title;
-        document.getElementById('confirmText').textContent = text;
-        document.getElementById('confirmBtn').textContent = btnText;
-        document.getElementById('confirmOverlay').classList.add('active');
-      });
-    }
-    function closeConfirm() {
-      document.getElementById('confirmOverlay').classList.remove('active');
-      if (confirmResolve) confirmResolve(false);
-      confirmResolve = null;
-    }
-    document.getElementById('confirmBtn').addEventListener('click', function() {
-      document.getElementById('confirmOverlay').classList.remove('active');
-      if (confirmResolve) confirmResolve(true);
-      confirmResolve = null;
-    });
-
-    document.getElementById('sidebar').innerHTML = '<div class="sidebar-logo">VHEORA</div><div class="sidebar-sub">Admin Panel</div><nav class="sidebar-nav"><div class="sidebar-category">Genel</div><a href="/admin/dashboard.html" class="sidebar-link">📊 Dashboard</a><div class="sidebar-category">İçerik Yönetimi</div><a href="/admin/products.html" class="sidebar-link">💎 Ürünler</a><a href="/admin/inventory.html" class="sidebar-link">📦 Stok</a><a href="/admin/testimonials.html" class="sidebar-link active">⭐ Yorumlar</a><div class="sidebar-category">Sipariş Yönetimi</div><a href="/admin/orders.html" class="sidebar-link">📦 Siparişler</a><div class="sidebar-category">İletişim</div><a href="/admin/messages.html" class="sidebar-link">✉️ Mesajlar</a><div class="sidebar-category">Sistem</div><a href="/admin/settings.html" class="sidebar-link">⚙️ Ayarlar</a><a href="/admin/logs.html" class="sidebar-link">📋 Loglar</a><div style="flex:1"></div><a href="/" class="sidebar-link">🌐 Siteye Git</a></nav><button class="sidebar-logout" onclick="logout()">🚪 Çıkış Yap</button>';
-    document.body.insertAdjacentHTML('afterbegin', '<div class="sidebar-overlay" onclick="closeSidebar()"></div>');
-    document.body.insertAdjacentHTML('afterbegin', '<button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menüyü aç/kapat">☰</button>');
-    function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
-    function closeSidebar() { document.body.classList.remove('sidebar-open'); }
-
-    document.body.insertAdjacentHTML('beforeend', '<nav class="admin-bottombar"><div class="admin-bottombar-inner"><a href="/admin/dashboard.html"><span class="bb-icon">📊</span>Dash</a><a href="/admin/products.html"><span class="bb-icon">💎</span>Ürünler</a><a href="/admin/orders.html"><span class="bb-icon">📦</span>Sipariş</a><a href="/admin/messages.html"><span class="bb-icon">✉️</span>Mesaj</a><a href="/admin/settings.html"><span class="bb-icon">⚙️</span>Ayarlar</a><a href="/admin/logs.html"><span class="bb-icon">📋</span>Loglar</a></div></nav>');
-
-    function logout() {
-      try { fetch(API + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() } }); } catch(e) {}
-      localStorage.removeItem('vheora_token');
-      localStorage.removeItem('vheora_user');
-      window.location.href = '/admin/';
-    }
 
     document.querySelectorAll('#testimonialTabs .tab-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
