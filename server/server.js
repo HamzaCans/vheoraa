@@ -25,19 +25,89 @@ const sitemapRoutes = require('./routes/sitemap');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ===== ENFORCE JWT_SECRET IN PRODUCTION =====
+if (process.env.VERCEL && !process.env.JWT_SECRET) {
+  console.error('[SECURITY] JWT_SECRET environment variable is REQUIRED in production. Set it in Vercel dashboard.');
+}
+if (process.env.VERCEL && !process.env.CSRF_SECRET) {
+  console.warn('[SECURITY] CSRF_SECRET not set. Using fallback. Set CSRF_SECRET env var for better security.');
+}
+
 const csrfSecret = process.env.CSRF_SECRET || crypto.createHash('sha256').update('vheora-csrf-' + (process.env.DATABASE_URL || 'vheora')).digest('hex').substring(0, 32);
-function csrfInit(req, res, next) {
-  if (!req.cookies?.csrf_token) {
-    const token = crypto.randomBytes(32).toString('hex');
-    res.setHeader('Set-Cookie', `csrf_token=${token};Path=/;SameSite=Strict;HttpOnly=false;Secure`);
+
+// ===== MALICIOUS PATTERNS (SQL injection, XSS, path traversal, command injection) =====
+const MALICIOUS_PATTERNS = [
+  /\b(union\s+select|select\s+.*\s+from|insert\s+into|drop\s+table|delete\s+from|update\s+.*\s+set|alter\s+table|create\s+table|truncate\s+table|exec\s*\(|execute\s*\(|xp_cmdshell|sp_executesql)\b/i,
+  /(\b|')\s*(or|and)\s+['"]?\s*\d+\s*['"]?\s*=\s*['"]?\s*\d+/i,
+  /\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e\\/i,
+  /;\s*drop\s|;\s*delete\s|;\s*update\s|;\s*insert\s/i,
+  /\b(rm\s+-rf|cmd\.exe|powershell|wget\s+|curl\s+|eval\s*\(|base64_decode|assert\s*\()/i,
+  /\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|%[0-9a-f]{2}%[0-9a-f]{2}/i,
+  /['"]\s*(?:exec|execute|eval)\s*\(/i,
+];
+
+function isMalicious(input) {
+  if (typeof input !== 'string') return false;
+  for (var i = 0; i < MALICIOUS_PATTERNS.length; i++) {
+    if (MALICIOUS_PATTERNS[i].test(input)) return true;
   }
-  next();
+  return false;
+}
+
+function deepCheck(obj) {
+  if (typeof obj === 'string') return isMalicious(obj);
+  if (obj && typeof obj === 'object') {
+    for (var k in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        if (deepCheck(obj[k])) return true;
+        if (isMalicious(k)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ===== KNOWN MALICIOUS USER-AGENTS / BOT PATTERNS =====
+const BLOCKED_UA_PATTERNS = [
+  /(sqlmap|nikto|dirbuster|gobuster|wfuzz|nessus|openvas|acunetix|netsparker|burpsuite|zap|havij|metasploit|nmap|masscan|hydra|medusa)\.?/i,
+  /(python-requests|python-urllib|python-httpx|go-http-client|java\/|libwww-perl|scrapy|curl\/|wget\/|perl\/|ruby\/)\.?/i,
+  /\b(zgrab|masscan|nmap|nessus|openvas)\.?/i,
+];
+
+function isBlockedUA(ua) {
+  if (!ua || typeof ua !== 'string') return false;
+  for (var i = 0; i < BLOCKED_UA_PATTERNS.length; i++) {
+    if (BLOCKED_UA_PATTERNS[i].test(ua)) return true;
+  }
+  return false;
 }
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
 app.use(compression());
+
+// ===== MALICIOUS REQUEST DETECTION MIDDLEWARE =====
+app.use(function(req, res, next) {
+  var ua = req.headers['user-agent'] || '';
+  if (isBlockedUA(ua)) {
+    console.warn('[SECURITY] Blocked malicious UA:', ua.substring(0, 100));
+    return res.status(403).json({ error: 'Erişim engellendi.' });
+  }
+
+  var url = req.originalUrl || req.url || '';
+  if (isMalicious(url)) {
+    console.warn('[SECURITY] Blocked malicious URL:', url.substring(0, 200));
+    return res.status(403).json({ error: 'Erişim engellendi.' });
+  }
+
+  if (req.query && deepCheck(req.query)) {
+    console.warn('[SECURITY] Blocked malicious query params:', url.substring(0, 200));
+    return res.status(403).json({ error: 'Erişim engellendi.' });
+  }
+
+  next();
+});
 
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
@@ -63,6 +133,8 @@ app.use(helmet({
       baseUri: ["'self'"],
       formAction: ["'self'"],
       upgradeInsecureRequests: [],
+      workerSrc: ["'self'", 'blob:'],
+      manifestSrc: ["'self'"],
     }
   },
   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
@@ -81,11 +153,13 @@ app.use(cors({
       callback(null, false);
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   credentials: true,
   maxAge: 86400
 }));
 
+// ===== RATE LIMITERS =====
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -126,17 +200,34 @@ const visitLimiter = rateLimit({
   message: { error: 'Rate limit aşıldı.' }
 });
 
+const adminApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Çok fazla istek.' }
+});
+
 app.use('/api/', apiLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/admin', strictLimiter);
+app.use('/api/admin/products', adminApiLimiter);
+app.use('/api/admin/settings', adminApiLimiter);
 app.use('/api/contact', formLimiter);
 app.use('/api/quote', formLimiter);
 app.use('/api/testimonial', formLimiter);
 app.use('/api/visit', visitLimiter);
 
+// ===== BODY PARSERS WITH PER-ENDPOINT SIZE LIMITS =====
+app.use('/api/admin/settings', express.json({ limit: '2mb' }));
+app.use('/api/admin/products', express.json({ limit: '5mb' }));
+app.use('/api/contact', express.json({ limit: '100kb' }));
+app.use('/api/quote', express.json({ limit: '100kb' }));
+app.use('/api/testimonial', express.json({ limit: '100kb' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ===== INPUT SANITIZATION =====
 function sanitize(obj) {
   if (typeof obj === 'string') {
     return obj
@@ -177,11 +268,18 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
 });
 
 app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object' && !req._sanitized) {
+    if (deepCheck(req.body)) {
+      console.warn('[SECURITY] Blocked request with malicious body content');
+      return res.status(403).json({ error: 'Erişim engellendi.' });
+    }
     sanitize(req.body);
     req._sanitized = true;
   }
@@ -190,6 +288,46 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+function parseCookies(req) {
+  return (req.headers.cookie || '').split(';').reduce(function(acc, c) {
+    var parts = c.trim().split('=');
+    if (parts[0]) acc[parts[0]] = parts.slice(1).join('=');
+    return acc;
+  }, {});
+}
+
+// ===== CSRF PROTECTION (for state-changing API requests without Bearer token) =====
+function csrfProtection(req, res, next) {
+  const skipMethods = { GET: true, HEAD: true, OPTIONS: true };
+  if (skipMethods[req.method]) return next();
+
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const url = req.originalUrl || req.url || '';
+  if (url.startsWith('/api')) {
+    const headerToken = req.headers['x-csrf-token'];
+    const cookies = parseCookies(req);
+    const cookieToken = cookies['csrf_token'];
+    if (headerToken && cookieToken && headerToken === cookieToken) {
+      return next();
+    }
+    return res.status(403).json({ error: 'CSRF token geçersiz.' });
+  }
+  next();
+}
+
+function csrfInit(req, res, next) {
+  const cookies = parseCookies(req);
+  if (!cookies['csrf_token']) {
+    const token = crypto.randomBytes(32).toString('hex');
+    res.setHeader('Set-Cookie', `csrf_token=${token};Path=/;SameSite=Strict;HttpOnly=true;Secure`);
+  }
+  next();
+}
 
 app.use(csrfInit);
 
@@ -225,6 +363,7 @@ const maintenanceCheck = async (req, res, next) => {
     url.includes('/api/sitemap') ||
     url === '/sw.js' || url === '/manifest.json' ||
     url === '/favicon.png' ||
+    url === '/.well-known/security.txt' ||
     url.match(/\.(css|js|webp|png|jpg|jpeg|svg|ico|woff2|woff|ttf|otf|eot)($|\?)/) && !url.includes('/api/')
   );
 
@@ -294,21 +433,34 @@ const maintenanceCheck = async (req, res, next) => {
 
 app.use(maintenanceCheck);
 
+// ===== SECURITY.TXT =====
+app.get('/.well-known/security.txt', (req, res) => {
+  res.type('text/plain').send(
+    'Contact: mailto:vheora.co@gmail.com\n' +
+    'Expires: 2027-12-31T23:59:00Z\n' +
+    'Preferred-Languages: tr, en\n' +
+    'Canonical: https://vheora.com/.well-known/security.txt\n' +
+    'Policy: https://vheora.com/legal.html\n' +
+    '-----BEGIN PGP SIGNATURE-----\n\n' +
+    '-----END PGP SIGNATURE-----\n'
+  );
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', csrfProtection, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', messageRoutes);
 app.use('/api', logRoutes);
-app.use('/api', settingsRoutes);
+app.use('/api', csrfProtection, settingsRoutes);
 app.use('/api', localizationRoutes);
-app.use('/api/admin', stockRoutes);
-app.use('/api/admin', orderRoutes);
+app.use('/api/admin', csrfProtection, stockRoutes);
+app.use('/api/admin', csrfProtection, orderRoutes);
 app.use('/api', goldPriceRoutes);
 app.use('/api/tcmb-rates', tcmbRoutes);
-app.use('/api/admin/currency-logs', tcmbRoutes);
+app.use('/api/admin/currency-logs', csrfProtection, tcmbRoutes);
 app.use('/api/sitemap', sitemapRoutes);
 
 app.get('/api/health', (req, res) => {
@@ -450,6 +602,12 @@ app.use((err, req, res, next) => {
   }
   if (err.message && err.message.includes('Sadece')) {
     return res.status(400).json({ error: err.message });
+  }
+  if (err.status === 429) {
+    return res.status(429).json({ error: 'Çok fazla istek. Lütfen bekleyin.' });
+  }
+  if (err.name === 'PayloadTooLargeError') {
+    return res.status(413).json({ error: 'Veri boyutu çok büyük.' });
   }
   console.error('[ERROR]', err);
   res.status(err.status || 500).json({ error: 'Bir hata oluştu' });
