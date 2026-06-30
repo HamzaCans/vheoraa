@@ -52,7 +52,7 @@ async function fetchGoldPrice() {
   for (const source of SOURCES) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(new Error('Timeout')), 7000);
       const res = await fetch(source.url, {
         signal: controller.signal,
         headers: {
@@ -100,6 +100,11 @@ async function getGoldPrice() {
     return cache.data;
   }
 
+  if (cache.data) {
+    getGoldPriceBackground();
+    return cache.data;
+  }
+
   const result = await fetchGoldPrice();
   if (result) {
     const priceData = {
@@ -119,9 +124,25 @@ async function getGoldPrice() {
     return priceData;
   }
 
-  if (cache.data) return cache.data;
-
   return { hasAltin: 0, source: 'unavailable', timestamp: new Date().toISOString() };
+}
+
+async function getGoldPriceBackground() {
+  try {
+    const result = await fetchGoldPrice();
+    if (result) {
+      const priceData = {
+        hasAltin: result.hasAltin,
+        source: result.source,
+        timestamp: new Date().toISOString()
+      };
+      cache = { data: priceData, lastFetch: Date.now() };
+      const db = await getDb();
+      await logGoldPrice(db, result.hasAltin, result.source, result.raw);
+    }
+  } catch (e) {
+    console.warn('[GoldPrice] background refresh error:', e.message);
+  }
 }
 
 async function forceLogGoldPrice() {

@@ -363,7 +363,7 @@
         }
       } catch(e) {
         console.warn('Gold price error:', e);
-        document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Altın fiyatı yüklenemedi</p><pre style="color:#ef5350;font-size:11px;white-space:pre-wrap;">' + e.message + '</pre>';
+        document.getElementById('goldPriceLogs').innerHTML = '<p class="empty-state">Altın fiyatı yüklenemedi. Sayfayı yenileyin.</p>';
       }
     }
     async function loadLatestActivity() {

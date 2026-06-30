@@ -41,9 +41,9 @@ async function logout() {
 }
 
 async function fetchJSON(url, options, timeoutMs) {
-  timeoutMs = timeoutMs || 15000;
+  timeoutMs = timeoutMs || 30000;
   var controller = new AbortController();
-  var timeout = setTimeout(function() { controller.abort(); }, timeoutMs);
+  var timeout = setTimeout(function() { controller.abort(new Error('Timeout')); }, timeoutMs);
   try {
     var res = await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
     if (res.status === 401) { localStorage.removeItem('vheora_token'); adminToast('Oturum Süresi Doldu', 'Lütfen tekrar giriş yapın', 'info'); setTimeout(function() { window.location.href = '/admin/'; }, 1500); return null; }
