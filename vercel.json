@@ -6,11 +6,11 @@
   "crons": [
     {
       "path": "/api/tcmb-rates",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/gold-price",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
