@@ -221,21 +221,42 @@ const geoCache = new Map();
 const GEOCACHE_TTL = 30 * 60 * 1000;
 
 async function lookupGeo(ip) {
-  if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { country: '', city: '' };
+  if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') return { country: 'TR', city: 'Yerel' };
   const cached = geoCache.get(ip);
   if (cached && (Date.now() - cached.ts) < GEOCACHE_TTL) return { country: cached.country, city: cached.city };
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
+    const timeout = setTimeout(() => controller.abort(), 5000);
     const res = await fetch('https://ipinfo.io/' + ip + '/json', { signal: controller.signal });
     clearTimeout(timeout);
-    const loc = await res.json();
-    const result = { country: loc.country || '', city: loc.city || '' };
-    geoCache.set(ip, { ...result, ts: Date.now() });
-    return result;
-  } catch (_) {
-    return { country: '', city: '' };
+    if (res.ok) {
+      const loc = await res.json();
+      if (loc.country || loc.city) {
+        const result = { country: loc.country || '', city: loc.city || '' };
+        geoCache.set(ip, { ...result, ts: Date.now() });
+        return result;
+      }
+    }
+  } catch (err) {
+    console.warn('[GeoIP] ipinfo.io failed for', ip, err.message);
   }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch('http://ip-api.com/json/' + ip + '?fields=country,city', { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const loc = await res.json();
+      if (loc.status === 'success') {
+        const result = { country: loc.country || '', city: loc.city || '' };
+        geoCache.set(ip, { ...result, ts: Date.now() });
+        return result;
+      }
+    }
+  } catch (err) {
+    console.warn('[GeoIP] ip-api.com failed for', ip, err.message);
+  }
+  return { country: '', city: '' };
 }
 
 async function logAdminAction(req, action) {

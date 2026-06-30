@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { getDb } = require('../db');
 const { generateToken, generateRefreshToken, authenticateToken, blacklistToken } = require('../middleware/auth');
-const { logAdminAction, getClientIp, parseDeviceInfo } = require('../middleware/adminLogger');
+const { logAdminAction, getClientIp, parseDeviceInfo, lookupGeo } = require('../middleware/adminLogger');
 
 const router = express.Router();
 
@@ -69,9 +69,11 @@ router.post('/login', limiter, async (req, res) => {
     const refreshToken = generateRefreshToken(admin.id, admin.username);
     const ua = req.headers['user-agent'] || '';
     const info = parseDeviceInfo(ua);
+    const referrer = req.headers['referer'] || '';
+    const geo = await lookupGeo(ip);
     await db.run(
-      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [admin.id, admin.username, 'login', ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '']
+      'INSERT INTO admin_logs (user_id, username, action, ip_address, user_agent, device_info, device_model, device_type, browser, os, country, city, page_visited, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [admin.id, admin.username, 'login', ip, ua, info.display, info.model || '', info.device_type || '', info.browser || '', info.os || '', geo.country, geo.city, '/login', referrer]
     );
     return res.json({ token, refreshToken, role: 'admin', username: admin.username });
   } catch (err) {
@@ -111,7 +113,7 @@ router.post('/logout', authenticateToken, async (req, res) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (token) blacklistToken(token);
-    try { await logAdminAction(req, 'logout'); } catch (_) {}
+    try { await logAdminAction(req, 'logout'); } catch (err) { console.error('[LogoutLog]', err); }
     res.json({ message: 'Başarıyla çıkış yapıldı' });
   } catch (err) {
     console.error('[Logout Error]', err);
